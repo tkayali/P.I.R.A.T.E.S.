@@ -9,7 +9,8 @@ class Enemy(Unit):
 	__damage = 0
 	__accuracy = 0
 
-	def __init__ (self, _pos_x, _pos_y, _pos_z, _unit_range, _model):
+	def __init__ (self, _pos_x=0, _pos_y=0, _pos_z=0, _unit_range=0,
+		_model=None):
 		Unit.__init__(self, 10, 2, _pos_x, _pos_y, _pos_z, True, _model,
 		False, _unit_range)
 
