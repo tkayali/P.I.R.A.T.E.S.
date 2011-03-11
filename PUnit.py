@@ -17,8 +17,8 @@ class Unit:
 	_player = False
 	_unit_range = 0
 
-	def __init__ (self, _HP, _AP, _pos_x, _pos_y, _pos_z, _alive,
-	_model, _player, _unit_range):
+	def __init__ (self, _HP=0, _AP=0, _pos_x=0, _pos_y=0, _pos_z=0,
+	_alive=False, _model=None, _player=False, _unit_range=0):
 		self._HP = _HP
 		self._AP = _AP
 		self._pos_x = _pos_x
