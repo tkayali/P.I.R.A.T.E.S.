@@ -31,7 +31,6 @@ class Enemy(Unit):
 			__accuracy = 0
 
 	def move(self):
-		#Let's see if this works!
 		#HOLDER METHODS
 		self._pos_x += 1
 		self._pos_y += 1
