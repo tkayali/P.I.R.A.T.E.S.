@@ -1,6 +1,5 @@
 class Unit:
 	"""
-	THIS IS A TEST STRING
 	This class will act as a generalied Unit template.
 	This class also supports 3 sub-classes:
 		class: Sonatu
