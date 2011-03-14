@@ -1,0 +1,561 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="11.0">
+  <zoom_level>3</zoom_level>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>339</x>
+      <y>264</y>
+      <w>99</w>
+      <h>204</h>
+    </coordinates>
+    <panel_attributes>/Unit/
+--
+-HP
+-AP
+-accuracy
+-damage
+-pos_x
+-pos_y
+-pos_z
+-alive
+-range
+-model
+-player
+--
++&lt;&lt;constructor&gt;&gt; Unit()
++&lt;&lt;constructor&gt;&gt; Unit(HP, AP, accuracy, damage, 
+pos_x, pos_y, pos_z, alive, range, model)
++get_HP()
++get_AP()
++get_accuracy()
++get_damage()
++get_pos_x()
++get_pos_y()
++get_pos_z()
++get_alive()
++get_range()
++get_model()
++get_player()
++set_player()
++set_HP(HP)
++set_AP(AP)
++set_accuracy(accuracy)
++set_damage(damage)
++set_pos_x(pos_x)
++set_pos_y(pos_y)
++set_pos_z(pos_z)
++set_alive(alive)
++set_range(range)
++set_model(model)
+/+move()/
+/+attack()/</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>228</x>
+      <y>486</y>
+      <w>99</w>
+      <h>57</h>
+    </coordinates>
+    <panel_attributes>Sonatu
+--
+-special
+--
++&lt;&lt;constructor&gt;&gt; Sonatu()
++&lt;&lt;constructor&gt;&gt; Sonatu(HP, AP, accuracy, damage, 
+pos_x, pos_y, pos_z, alive, range, model, special)
++get_special()
++set_special(special)
++move()
++attack()
++use_attack()</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>381</x>
+      <y>459</y>
+      <w>14</w>
+      <h>32</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>9;9;9;27</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>267</x>
+      <y>459</y>
+      <w>119</w>
+      <h>32</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>114;9;9;27</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>342</x>
+      <y>486</y>
+      <w>99</w>
+      <h>57</h>
+    </coordinates>
+    <panel_attributes>Enemy
+--
+
+--
++&lt;&lt;constructor&gt;&gt; Enemy()
++&lt;&lt;constructor&gt;&gt; Enemy(HP, AP, accuracy, damage, 
+pos_x, pos_y, pos_z, alive, range, model)
++move()
++attack()</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>453</x>
+      <y>486</y>
+      <w>99</w>
+      <h>57</h>
+    </coordinates>
+    <panel_attributes>Queen
+--
+
+--
++&lt;&lt;constructor&gt;&gt; Queen()
++&lt;&lt;constructor&gt;&gt; Queen(HP, AP, accuracy, damage, 
+pos_x, pos_y, pos_z, alive, range, model)
++move()
++attack()
++use_attack()</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>390</x>
+      <y>459</y>
+      <w>116</w>
+      <h>32</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>9;9;111;27</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>582</x>
+      <y>93</y>
+      <w>114</w>
+      <h>81</h>
+    </coordinates>
+    <panel_attributes>
+/Environment/
+--
+-visual_assets
+-sound_assets
+-dialogue_assets
+--
++&lt;&lt;constructor&gt;&gt; Environment()
++&lt;&lt;constructor&gt;&gt; Environment(visual_assets, sound_assets)
++get_visual_assets()
++set_visual_assets(visual_assets)
++find_visual_asset(key)
++get_sound_assets()
++set_sound_assets(sound_assets)
++find_sound_asset(key)
+/+load_models()/
+/+hide_models()/
+/+load_sounds()/</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Note</type>
+    <coordinates>
+      <x>726</x>
+      <y>72</y>
+      <w>87</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>visual_assets is a list of anything that might
+be parented to render.
+sound_assets is a list of all the sounds
+of the game.
+dialogue_assets is a dictionary of "Dialogue"s
+bg=blue
+fg=black</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>627</x>
+      <y>72</y>
+      <w>104</w>
+      <h>26</h>
+    </coordinates>
+    <panel_attributes>lt=.</panel_attributes>
+    <additional_attributes>9;21;99;9</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>654</x>
+      <y>189</y>
+      <w>99</w>
+      <h>153</h>
+    </coordinates>
+    <panel_attributes>Combat
+--
+-maps
+-combat_id
+-combat_dialogue
+-UI_box
+-player_turn
+-directional_arrow1
+-directional_arrow2
+-directional_arrow3
+-mouse_x
+-mouse_y
+--
+&lt;&lt;constructor&gt;&gt; Combat()
+&lt;&lt;constructor&gt;&gt; Combat(maps, combat_id, UI_box)
++get_maps()
++set_maps(maps)
++get_combat_id()
++set_combat_id(combat_id)
++get_player_turn()
++set_player_turn(player_turn)
++get_UI_box()
++set_UI_box(UI_box)
++play_turn()
++retreat()
++get_next_map()
++display_arrows()
++go_to_limbo()
++load_models()
++hide_models()
++load_sounds()
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>318</x>
+      <y>102</y>
+      <w>123</w>
+      <h>57</h>
+    </coordinates>
+    <panel_attributes>
+/Dialogue/
+--
+-dialogue_box
+-dialogue_text
+--
++&lt;&lt;constructor&gt;&gt; Dialogue()
++&lt;&lt;constructor&gt;&gt; Dialogue(dialogue_box, dialogue_text)
++get_dialogue_box()
++set_dialogue_box(dialogue_box)
++get_dialogue_text()
++set_dialogue_text(dialogue_text)
+/+display_text()/</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>528</x>
+      <y>189</y>
+      <w>99</w>
+      <h>93</h>
+    </coordinates>
+    <panel_attributes>Limbo
+--
+-limbo_id
+-mouse_x
+-mouse_y
+--
++&lt;&lt;constructor&gt;&gt; Limbo()
++&lt;&lt;constructor&gt;&gt; Limbo(limbo_id, limbo_dialogue)
++get_limbo_id()
++set_limbo_id(limbo_id)
++get_clicked_mouse_x()
++get_clicked_mouse_y()
++handle_click()
++go_to_combat()
++exit_game()
++save_load()
++load_models()
++hide_models()
++load_sounds()
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>246</x>
+      <y>174</y>
+      <w>123</w>
+      <h>57</h>
+    </coordinates>
+    <panel_attributes>
+Conversation
+--
+-scroll_button
+--
++&lt;&lt;constructor&gt;&gt; Conversation()
++&lt;&lt;constructor&gt;&gt; Conversation(OnScreenImage, dialogue_text, 
+scroll_button)
++get_scroll_button()
++set_scroll_button(scroll_button)
++display_text()</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>393</x>
+      <y>174</y>
+      <w>123</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>
+Option_Box
+--
+-option_button1
+-option_button2
+--
++&lt;&lt;constructor&gt;&gt; Conversation()
++&lt;&lt;constructor&gt;&gt; Conversation(OnScreenImage, dialogue_text, 
+option_button1, option_button2)
++get_option_button1()
++set_option_button1(direct_button)
++get_option_button2()
++set_option_button2(direct_button)
++display_text()</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>294</x>
+      <y>150</y>
+      <w>83</w>
+      <h>29</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>78;9;9;24</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>381</x>
+      <y>150</y>
+      <w>77</w>
+      <h>29</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>9;9;72;24</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>642</x>
+      <y>165</y>
+      <w>65</w>
+      <h>29</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>9;9;60;24</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>567</x>
+      <y>165</y>
+      <w>71</w>
+      <h>29</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>66;9;9;24</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>600</x>
+      <y>399</y>
+      <w>123</w>
+      <h>75</h>
+    </coordinates>
+    <panel_attributes>
+Map
+--
+-gridspaces
+-enemies
+-finished
+--
++&lt;&lt;constructor&gt;&gt; Map()
++&lt;&lt;constructor&gt;&gt; Map(gridspaces, enemies, finished)
++get_gridspaces()
++set_gridspaces(gridspaces)
++get_enemies()
++set_enemies(enemies)
++get_finished()
++set_finished(finished)
++calculate_path()
++display_map()</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>456</x>
+      <y>360</y>
+      <w>123</w>
+      <h>51</h>
+    </coordinates>
+    <panel_attributes>
+Gridspace
+--
+-occupying_unit
+-occupiable
+--
++&lt;&lt;constructor&gt;&gt; Gridspace()
++&lt;&lt;constructor&gt;&gt; Gridspace(occupying_unit, occupiable)
++get_occupying_unit()
++set_occupying_unit(occupying_unit)
++get_occupiable()
++set_occupiable(occupiable)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>570</x>
+      <y>375</y>
+      <w>35</w>
+      <h>71</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
+    <additional_attributes>30;66;9;9</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Note</type>
+    <coordinates>
+      <x>663</x>
+      <y>366</y>
+      <w>81</w>
+      <h>15</h>
+    </coordinates>
+    <panel_attributes>gridspaces is a 2D list of "Gridspace"s
+enemies is a list of "Enemy"s
+bg=blue</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>651</x>
+      <y>366</y>
+      <w>17</w>
+      <h>38</h>
+    </coordinates>
+    <panel_attributes>lt=.</panel_attributes>
+    <additional_attributes>9;33;12;9</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Note</type>
+    <coordinates>
+      <x>765</x>
+      <y>150</y>
+      <w>54</w>
+      <h>12</h>
+    </coordinates>
+    <panel_attributes>maps is a list of "Map"s
+bg=blue
+fg=black</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>693</x>
+      <y>147</y>
+      <w>77</w>
+      <h>47</h>
+    </coordinates>
+    <panel_attributes>lt=.</panel_attributes>
+    <additional_attributes>9;42;72;9</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>771</x>
+      <y>264</y>
+      <w>120</w>
+      <h>87</h>
+    </coordinates>
+    <panel_attributes>
+CombatUI
+--
+-combat_info_box
+-unit_picture_box
+-combat_info_text
+-unit_name_text
+--
++&lt;&lt;constructor&gt;&gt; CombatUI()
++&lt;&lt;constructor&gt;&gt; CombatUI(combat_info_box, unit_picture_box,
+combat_info_text, unit_name_text)
++get_combat_info_box()
++set_combat_info_box(combat_info_box)
++get_unit_picture_box()
++set_unit_picture_box(unit_picture_box)
++get_combat_info_text()
++set_combat_info_text(combat_info_text)
++get_unit_name_text()
++set_unit_name_text(unit_name_text)
+
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>744</x>
+      <y>234</y>
+      <w>32</w>
+      <h>68</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
+    <additional_attributes>9;9;27;63</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>432</x>
+      <y>108</y>
+      <w>155</w>
+      <h>23</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
+    <additional_attributes>150;18;9;9</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>429</x>
+      <y>336</y>
+      <w>32</w>
+      <h>56</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
+    <additional_attributes>27;51;9;9</additional_attributes>
+  </element>
+</diagram>
