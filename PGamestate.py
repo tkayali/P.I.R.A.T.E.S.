@@ -22,12 +22,8 @@ class PIRATES(ShowBase):
 
 	def __init__(self):
 		ShowBase.__init__(self)
-		self.environ = self.loader.loadModel("/c/Panda3D-1.7.0/models/environment")
-		self.environ.reparentTo(self.render)
-		self.environ.setScale(0.25, 0.25, 0.25)
-		self.environ.setPos(-8, 42, 0)
 		
-		self.taskMgr.add(self.camera_task, "Camera")
+		#self.taskMgr.add(self.camera_task, "Camera")
 
 		#Let's get some water in here!
 		self.water = self.loader.loadModel("square.egg")
@@ -36,12 +32,26 @@ class PIRATES(ShowBase):
 		self.water.setPos(0,0,0)
 		ts = TextureStage('ts')
 		self.water.setTexture(ts,loader.loadTexture("water.png"))
-		self.water.setTexScale(ts,4)
+		self.water.setTexScale(ts,15)
 		self.water.reparentTo(self.render)
+
+		#Sonatu!
+		self.sonatu_model = self.loader.loadModel("sonatu.egg")
+		self.sonatu_model.setSx(.1)
+		self.sonatu_model.setSy(.1)
+		self.sonatu_model.setSz(.1)
+		self.sonatu_model.setPos(0, 50, 50)
+		self.sonatu_model.setTexture(ts, 
+		loader.loadTexture("textures\LightBrown.jpg"))
+		self.sonatu_model.reparentTo(self.render)
+		sonatu = Sonatu(0, 0, 0, self.sonatu_model, 1)
+
+		#Gridspace!
+
 				
 
 	def camera_task(self, task):
-		self.camera.setPos(0, -200, 100)
+		self.camera.setPos(0, -160, 90)
 		self.camera.lookAt(0, 0, 0)
 		return Task.cont
 
