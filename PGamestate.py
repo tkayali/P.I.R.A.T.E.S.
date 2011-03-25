@@ -23,7 +23,7 @@ class PIRATES(ShowBase):
 	def __init__(self):
 		ShowBase.__init__(self)
 		
-		#self.taskMgr.add(self.camera_task, "Camera")
+		self.taskMgr.add(self.camera_task, "Camera")
 
 		#Let's get some water in here!
 		self.water = self.loader.loadModel("square.egg")
@@ -31,18 +31,20 @@ class PIRATES(ShowBase):
 		self.water.setSy(1000)
 		self.water.setPos(0,0,0)
 		ts = TextureStage('ts')
-		self.water.setTexture(ts,loader.loadTexture("water.png"))
-		self.water.setTexScale(ts,15)
+		self.water.setTexture(ts,loader.loadTexture("textures\water.jpg"))
+		self.water.setTexScale(ts,3)
 		self.water.reparentTo(self.render)
 
 		#Sonatu!
-		self.sonatu_model = self.loader.loadModel("sonatu.egg")
-		self.sonatu_model.setSx(.1)
-		self.sonatu_model.setSy(.1)
-		self.sonatu_model.setSz(.1)
-		self.sonatu_model.setPos(0, 50, 50)
-		self.sonatu_model.setTexture(ts, 
-		loader.loadTexture("textures\LightBrown.jpg"))
+		self.sonatu_model =
+		self.loader.loadModel("Models\Sonatu\sonatu.egg")
+		self.sonatu_model.setSx(.02)
+		self.sonatu_model.setSy(.02)
+		self.sonatu_model.setSz(.02)
+		self.sonatu_model.setPos(-30, 0, 10)
+		self.sonatu_model.setHpr(-90, 0, 0)
+		#self.sonatu_model.setTexture(ts, 
+		#loader.loadTexture("textures\LightBrown.jpg"))
 		self.sonatu_model.reparentTo(self.render)
 		sonatu = Sonatu(0, 0, 0, self.sonatu_model, 1)
 
