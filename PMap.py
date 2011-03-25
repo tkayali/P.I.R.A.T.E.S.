@@ -86,7 +86,7 @@ class Map:
                     elif maze[next[0]+1][next[1]-1] == 0:
                         maze[next[0]+1][next[1]-1] = [next[0], next[1]]
                         q.put([next[0]+1,next[1]-1])
-                if next[1] < 12
+		if next[1] < 12:
                     if maze[next[0]+1][next[1]+1] == 3:
                         found = True
                         maze[next[0]+1][next[1]+1] = [next[0], next[1]]
