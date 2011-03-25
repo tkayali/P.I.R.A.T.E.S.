@@ -4,6 +4,7 @@ from PEnemy import Enemy
 from PQueen import Queen
 from PCombatUI import CombatUI
 from PEnvironment import Environment
+from PMap import Map
 
 #print Unit.__doc__
 #print Sonatu.__doc__
@@ -38,8 +39,13 @@ from PEnvironment import Environment
 #queen.move()
 #queen.to_string()
 
-environment = Environment([1,0,0], [0,1,0], [0,0,1])
-environment2 = Environment()
+#environment = Environment([1,0,0], [0,1,0], [0,0,1])
+#environment2 = Environment()
 
-print environment.__doc__
-print environment.to_string()
+#print environment.__doc__
+#print environment.to_string()
+
+map = Map()
+map.get_gridspaces()[5][5].set_occupiable(False)
+print map.calculate_path(5,4,5,6)
+
