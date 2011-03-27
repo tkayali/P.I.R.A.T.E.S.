@@ -65,6 +65,20 @@ class Map:
                     maze[next[0]][next[1]-1] = [next[0], next[1]]
                     q.put([next[0],next[1]-1])
             if next[0] > 0:
+	    	if next[1] > 0 and next[1] % 2 == 0:
+			if maze[next[0]-1][next[1]-1] == 3:
+				found = True
+				maze[next[0]-1][next[1]-1] = [next[0],next[1]]
+			elif maze[next[0]-1][next[1]-1] == 0:
+				maze[next[0]-1][next[1]-1] = [next[0],next[1]]
+				q.put([next[0]-1,next[1]-1])
+		if next[1] < 12 and next[1] % 2 == 0:
+			if maze[next[0]-1][next[1]+1] == 3:
+				found = True
+				maze[next[0]-1][next[1]+1] = [next[0],next[1]]
+			elif maze[next[0]-1][next[1]+1] == 0:
+				maze[next[0]-1][next[1]+1] = [next[0],next[1]]
+				q.put([next[0]-1,next[1]+1])
                 if maze[next[0]-1][next[1]] == 3:
                     found = True
                     maze[next[0]-1][next[1]] = [next[0], next[1]]
@@ -79,14 +93,14 @@ class Map:
                     maze[next[0]][next[1]+1] = [next[0], next[1]]
                     q.put([next[0],next[1]+1])
             if next[0] < 15:
-                if next[1] > 0:
+                if next[1] > 0 and next[1] % 2 == 1:
                     if maze[next[0]+1][next[1]-1] == 3:
                         found = True
                         maze[next[0]+1][next[1]-1] = [next[0], next[1]]
                     elif maze[next[0]+1][next[1]-1] == 0:
                         maze[next[0]+1][next[1]-1] = [next[0], next[1]]
                         q.put([next[0]+1,next[1]-1])
-		if next[1] < 12:
+		if next[1] < 12 and next[1] % 2 == 1:
                     if maze[next[0]+1][next[1]+1] == 3:
                         found = True
                         maze[next[0]+1][next[1]+1] = [next[0], next[1]]
@@ -107,5 +121,12 @@ class Map:
             curr = maze[curr[0]][curr[1]]
             if curr == 2:
                 there = True
-        path.append([pos_x1, pos_y1])
-        return path.reverse()
+        path.reverse()
+	return path
+
+    def to_string(self):
+        data = []
+	for i in range (16):
+	    for j in range (13):
+	        data.append(self.__gridspaces[i][j].get_occupiable())
+	return str(data)
