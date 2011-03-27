@@ -70,6 +70,7 @@ class Gridspace:
 	self.__hex_node.addGeom(self.__hex_geometry)
 
 	nodePath = render.attachNewNode(self.__hex_node)
+	nodePath.hide()
         
     def get_occupying_unit(self):
         return self.__occupying_unit
