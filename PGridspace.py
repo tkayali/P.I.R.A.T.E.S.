@@ -11,6 +11,7 @@ class Gridspace:
     __x = 0
     __z = 0
     __r = 0
+    __tag = 0
     __vdata = None
     __vertex = None
     __normal = None
@@ -20,12 +21,13 @@ class Gridspace:
 
     
     def __init__(self, __occupying_unit = None, __occupiable = True, 
-	x = 0, z = 0, r = 5):
+	x = 0, z = 0, r = 5, tag = 0):
         self.__occupying_unit = __occupying_unit
         self.__occupiable = __occupiable
 	self.__r = r
 	self.__x = x
 	self.__z = z
+	self.__tag = tag
 	
 	#Procedurally creating a hex!
 	geometry_array = GeomVertexArrayFormat()
@@ -70,6 +72,7 @@ class Gridspace:
 	self.__hex_node.addGeom(self.__hex_geometry)
 
 	nodePath = render.attachNewNode(self.__hex_node)
+	nodePath.setTag( "hex" + str(tag), str(tag) )
 	nodePath.hide()
         
     def get_occupying_unit(self):
