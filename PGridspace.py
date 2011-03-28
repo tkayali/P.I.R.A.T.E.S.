@@ -18,7 +18,6 @@ class Gridspace:
     __hex_primitive = None
     __hex_geometry = None
     __hex_node = None
-
     
     def __init__(self, __occupying_unit = None, __occupiable = True, 
 	x = 0, z = 0, r = 5, tag = 0):
@@ -58,7 +57,6 @@ class Gridspace:
 	#Vertex 6
 	self.__vertex.addData3f(self.__x-self.__r*sin(pi/3), self.__z+self.__r*cos(pi/3), 0)
 	self.__normal.addData3f(1, 0, 0)
-	#print str(self.__vertex.getVertexData())
 
 	self.__hex_primitive = GeomTrifans(Geom.UHStatic)
 	self.__hex_primitive.addVertices(5, 4)
@@ -72,9 +70,15 @@ class Gridspace:
 	self.__hex_node.addGeom(self.__hex_geometry)
 
 	nodePath = render.attachNewNode(self.__hex_node)
-	nodePath.setTag( "hex" + str(tag), str(tag) )
+	nodePath.setTag( "hex", str(tag) )
 	nodePath.hide()
-        
+    
+    def get_x_position():
+	return __x
+
+    def get_y_position():
+	return __z
+	
     def get_occupying_unit(self):
         return self.__occupying_unit
     
