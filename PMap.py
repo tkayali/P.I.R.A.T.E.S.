@@ -6,18 +6,25 @@ class Map:
     This class will oversee the state of the current screen
     """
     __gridspaces = []
-    __enemies = None
+    __global_gridspaces = []
     __finished = None
     
-    def __init__(self, __enemies = [], __finished = False):
-        for i in range(16):
-            col=[]
-            for j in range(13):
-                col.append(0)
-            self.__gridspaces.append(col)
-        for i in range(6):
-            self.__gridspaces[15][2*i+1] = 1
-        self.__enemies = __enemies
+    def __init__(self, __global_gridspaces = [], __finished = False):
+        self.__global_gridspaces = __global_gridspaces
+	counter = 0
+	for i in range(16):
+		self.__gridspaces.append([])
+	for j in range(13):
+		for i in range(16):
+			if i == 15 and j%2==1
+				self.__gridspaces[i].append(1)
+			else:
+				if self.global_gridspaces[counter].get_occupiable():
+					self.__gridspaces[i].append(0)
+					counter = counter + 1
+				else:
+					self.__gridspaces[i].append(1)
+					counter = counter + 1
         self.__finished = __finished
         
     def get_gridspaces(self):
