@@ -18,7 +18,7 @@ class Unit:
 	_unit_range = 0
 
 	def __init__ (self, _HP=0, _AP=0, _pos_x=0, _pos_y=0, _pos_z=0,
-	_alive=False, _model=None, _player=False, _unit_range=0):
+	_alive=False, _player=False, _unit_range=0):
 		self._HP = _HP
 		self._AP = _AP
 		self._pos_x = _pos_x
@@ -26,8 +26,37 @@ class Unit:
 		self._pos_z = _pos_z
 		self._alive = _alive
 		self._unit_range = _unit_range
-		self._model = _model
 		self._player = _player
+	
+	def getAP(self):
+		return self._AP
+	
+	def setAP(self, AP):
+		self._AP = AP
+	
+	def getHP(self):
+		return self._HP
+
+	def setHP(self, HP):
+		self._HP = HP
+	
+	def get_alive(self):
+		return self._alive
+	
+	def set_alive(self, alive):
+		self._alive = alive
+	
+	def get_unit_range(self):
+		return _unit_range
+	
+	def set_unit_range(self, unit_range):
+		self._unit_range = unit_range
+	
+	def get_player(self):
+		return self._player
+	
+	def set_player(self, player):
+		self._player = player
 
 	def to_string(self):
 		print "HP: " + str(self._HP) + " AP: " + str(self._AP) + " Model: " + str(self._model) + "\nX Position: " + str(self._pos_x) + " Y Position: " + str(self._pos_y) + " Z Position: " + str(self._pos_z) + "\nIs the unit the player's? " + str(self._player) + "\nIs the unit alive? " + str(self._alive)
