@@ -23,7 +23,7 @@ loadPrcFile("Config/Config.prc")
 class PIRATES(ShowBase):
 	def __init__(self):
 		ShowBase.__init__(self)
-		base.disableMouse()		
+		base.disableMouse()	
 
 		self.limbo()
 		self.combat_collision_detection()
@@ -113,26 +113,16 @@ class PIRATES(ShowBase):
 			self.accept("mouse1", self.move_sonatu )
 		return Task.cont
 
-	def PointAtZ(self, z, point, vec):
-		print point + vec * ((z-point.getZ()) / vec.getZ())
-  		return point + vec * ((z-point.getZ()) / vec.getZ())
-	
 	def move_sonatu(self):
 		if base.mouseWatcherNode.hasMouse():
 			self.mouse_position = base.mouseWatcherNode.getMouse()
 			self.collision_ray.setFromLens(base.camNode, self.mouse_position.getX(), self.mouse_position.getY())
-			self.near_point = render.getRelativePoint(self.camera, self.collision_ray.getOrigin())
-			self.near_vector = render.getRelativeVector(self.camera, self.collision_ray.getDirection())
 			self.traverser.traverse(render)
 			if self.handler.getNumEntries() > 0:
 				self.handler.sortEntries()
 				i = int(self.handler.getEntry(0).getIntoNodePath().getTag("hex"))
-				self.combat_sonatu.setPos( self.gridspace_list[i].get_x_position(), self.gridspace_list[i].get_y_position(), 1)
-				print self.gridspace_list[i].get_x_position()
-				print self.gridspace_list[i].get_y_position()
-
-			#relative_point = self.PointAtZ(.5, self.near_point, self.near_vector)
-			#self.combat_sonatu.setPos(relative_point)
+				if self.gridspace_list[i].get_occupiable:
+					self.combat_sonatu.setPos( self.gridspace_list[i].get_x_position(), self.gridspace_list[i].get_y_position(), 1)
 
 	def combat_camera_task(self, task):
 		self.camera.setPos(20*sin(pi/3)*7.5, 225, 225)
