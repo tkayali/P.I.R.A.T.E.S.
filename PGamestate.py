@@ -21,16 +21,18 @@ loadPrcFile("Config/Config.prc")
 
 ##Now let's begin with some lovely Panda code!
 class PIRATES(ShowBase):
+	__in_combat = True
+
 	def __init__(self):
 		ShowBase.__init__(self)
 		base.disableMouse()	
 
 		self.limbo()
-
+		self.combat_collision_detection()
+		self.mouseTask = taskMgr.add(self.mouse_task, 'mouse_task')
 		self.accept("escape", sys.exit)
 		self.accept("h", self.limbo_hide_all )
 		self.accept("c", self.setup_combat )
-		self.accept("p", self.play_combat_system )
 		self.accept("a", self.combat_hide_all )
 		self.accept("z", self.limbo )
 
@@ -50,21 +52,18 @@ class PIRATES(ShowBase):
 		self.limbo_sonatu = self.loader.loadModel("Models\Sonatu\Sonatu.egg")
 		self.limbo_sonatu.setPos(0, 0, 0)
 		self.limbo_sonatu.setHpr(-90, 0, 0)
-		self.limbo_sonatu.reparentTo(self.render)
 
 		#Set up the characters
 		#Farthing
 		self.farthing = self.loader.loadModel("Models\Characters\Farthing\Farthing.egg")
 		self.farthing.setPos(-310.762, -3.750, -24.114)
-		self.farthing.setHpr(0, 0, 0)
+		self.farthing.setHpr(self.camera, 0, 0, 0)
 		self.farthing.reparentTo(self.render)
+		self.limbo_sonatu.reparentTo(self.render)
 		
 	def setup_combat(self):
-		#Set up camera for combat screen
+		#Set up the camera for the Combat Menu
 		self.taskMgr.add(self.combat_camera_task, "Combat Camera")
-
-		#Set up collision detection for combat
-		self.combat_collision_detection()
 
 		#Combat water
 		self.water = self.loader.loadModel("square.egg")
@@ -126,24 +125,6 @@ class PIRATES(ShowBase):
 		self.map_grid.setTransparency(TransparencyAttrib.MAlpha)
 		self.map_grid.reparentTo(self.render)				
 	
-	def play_combat_system(self):
-		combat_in_play = True
-		player_turn = True
-		if player_turn:
-			self.mouseTask = taskMgr.add(self.combat_mouse_task, 'combat_mouse_task')
-			#Add in ability to finish turn with remaining AP
-			if self.sonatu.getAP() is 0: 
-				player_turn = False
-		else:
-			self.mouseTask = taskMgr.removeTask('combat_mouse_task')
-			player_turn = True
-			self.melee_monster.setHpr(melee_monster, -90, 0, 0)
-			combat_in_play = False
-
-		return True
-		
-
-
 	def limbo_hide_all(self):
 		self.limbo_sonatu.hide()
 		self.farthing.hide()
@@ -154,15 +135,20 @@ class PIRATES(ShowBase):
 		self.combat_sonatu.hide()
 		self.melee_monster.hide()
 
-	def combat_mouse_task(self, task):
+	def mouse_task(self, task):
 		if base.mouseWatcherNode.hasMouse():
-			self.accept("mouse1", self.move_sonatu )
+			if self.__in_combat:
+				self.accept("mouse1", self.combat_mouse_task )
+			else:
+				self.accept("mouse1", self.limbo_mouse_task )
 		return Task.cont
 
-	def move_sonatu(self):
-		self.sonatu.setAP(self.sonatu.getAP()-1)
-		print self.sonatu.getAP()
+	def combat_mouse_task(self):
+		while self.sonatu.getAP() > 0:
+			self.move_sonatu()
+			self.sonatu.setAP(self.sonatu.getAP()-1)
 
+	def move_sonatu(self):
 		if base.mouseWatcherNode.hasMouse():
 			self.mouse_position = base.mouseWatcherNode.getMouse()
 			self.collision_ray.setFromLens(base.camNode, self.mouse_position.getX(), self.mouse_position.getY())
@@ -193,7 +179,6 @@ class PIRATES(ShowBase):
 		self.collision_ray = CollisionRay()
 		self.collision_node.addSolid(self.collision_ray)
 		self.traverser.addCollider(self.collision_camera, self.handler)
-		#self.traverser.showCollisions(render)
 
 game = PIRATES()
 game.run()
