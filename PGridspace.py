@@ -72,9 +72,7 @@ class Gridspace:
 
 	nodePath = render.attachNewNode(self.__hex_node)
 	nodePath.setTag( "hex", str(tag) )
-	print str(tag)
 	nodePath.node().setIntoCollideMask(BitMask32.bit(1))
-	#nodePath.hide()
     
     def get_x_position(self):
 	return self.__x
