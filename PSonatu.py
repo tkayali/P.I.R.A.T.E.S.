@@ -21,13 +21,6 @@ class Sonatu(Unit):
 	def set_special(self, special):
 		self.__special = special
 
-	def move(self):
-		#HOLDER METHODS
-		self._pos_x += 1
-		self._pos_y += 1
-		self._pos_z += 1
-		self._AP -= 1
-	
 	def attack(self, range):
 		if range == 1:
 			damage = 10
