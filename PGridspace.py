@@ -1,4 +1,5 @@
 from panda3d.core import GeomVertexWriter, GeomVertexData, GeomVertexFormat, GeomPrimitive, Geom, GeomNode, GeomVertexArrayFormat, InternalName, GeomLines, GeomPoints, GeomTristrips, GeomLinestrips, GeomTrifans
+from pandac.PandaModules import *
 
 from math import cos, sin, pi
 
@@ -71,13 +72,15 @@ class Gridspace:
 
 	nodePath = render.attachNewNode(self.__hex_node)
 	nodePath.setTag( "hex", str(tag) )
-	nodePath.hide()
+	print str(tag)
+	nodePath.node().setIntoCollideMask(BitMask32.bit(1))
+	#nodePath.hide()
     
-    def get_x_position():
-	return __x
+    def get_x_position(self):
+	return self.__x
 
-    def get_y_position():
-	return __z
+    def get_y_position(self):
+	return self.__z
 	
     def get_occupying_unit(self):
         return self.__occupying_unit
