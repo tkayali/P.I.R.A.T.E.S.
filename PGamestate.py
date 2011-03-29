@@ -1,16 +1,10 @@
-#This is the gamestate .py file
-#Here goes all the config variables that Tarif will fill in later
-
-#First we need the config variables. We'll ignore these for now.
-
-#Second we need all the import statements for our lovely classes to work.
+#First we need all the import statements for our lovely classes to work.
 from PUnit import Unit
 from PEnemy import Enemy
 from PQueen import Queen
 from PSonatu import Sonatu
 from PCombatUI import CombatUI
 from PGridspace import Gridspace
-#from PLimbo import Limbo
 
 from math import pi, sin, cos
 import random, sys, os
@@ -21,7 +15,8 @@ from direct.task import Task
 from pandac.PandaModules import TextureStage, TransparencyAttrib
 from pandac.PandaModules import *
 from panda3d.core import loadPrcFile, ConfigVariableString
- 
+
+#Second we need the config variables. We'll ignore these for now.
 loadPrcFile("Config/Config.prc")
 
 ##Now let's begin with some lovely Panda code!
@@ -38,8 +33,8 @@ class PIRATES(ShowBase):
 		self.accept("h", self.limbo_hide_all )
 		self.accept("c", self.combat )
 		self.accept("l", self.combat_hide_all )
+		self.accept("z", self.limbo )
 
-		
 	def limbo(self):
 		#Set up the Limbo Sonatu
 		self.limbo_sonatu = self.loader.loadModel("Models\Sonatu\Sonatu.egg")
@@ -79,18 +74,18 @@ class PIRATES(ShowBase):
 			x_counter1 = 0
 			x_counter2 = 10*sin(pi/3)
 			for i in range(16):
-				self.gridspace_list.append(Gridspace(None, True, x_counter1, y_counter, hex_radius, j*i+i))
+				self.gridspace_list.append(Gridspace(None, True, x_counter1, y_counter, hex_radius, j*31+i))
 				x_counter1 = x_counter1 + 2*hex_radius*sin(pi/3)
 			
 			y_counter = y_counter - 3/2.0*hex_radius
 			for i in range(15):
-				self.gridspace_list.append(Gridspace(None, True, x_counter2, y_counter, hex_radius, j*i+i+16))
+				self.gridspace_list.append(Gridspace(None, True, x_counter2, y_counter, hex_radius, j*31+i+16))
 				x_counter2 = x_counter2 + 2*hex_radius*sin(pi/3)
 			y_counter = y_counter - 3/2.0*hex_radius
 			if j == 5: 
 				x_counter1 = 0
 				for i in range (16):
-					self.gridspace_list.append(Gridspace(None, True, x_counter1, y_counter, hex_radius, (j+1)*i+i))
+					self.gridspace_list.append(Gridspace(None, True, x_counter1, y_counter, hex_radius, 31*6+i))
 					x_counter1 = x_counter1 + 2*hex_radius*sin(pi/3)		
 
 		#Add a hex grid texture
@@ -131,9 +126,10 @@ class PIRATES(ShowBase):
 			self.traverser.traverse(render)
 			if self.handler.getNumEntries() > 0:
 				self.handler.sortEntries()
-				hex = self.handler.getEntry(0).getIntoNodePath()
-				hex = hex.findNetTag("hex");
-				self.combat_sonatu.setPos( hex.get_x_position, hex.get_y_position, 1)
+				i = int(self.handler.getEntry(0).getIntoNodePath().getTag("hex"))
+				self.combat_sonatu.setPos( self.gridspace_list[i].get_x_position(), self.gridspace_list[i].get_y_position(), 1)
+				print self.gridspace_list[i].get_x_position()
+				print self.gridspace_list[i].get_y_position()
 
 			#relative_point = self.PointAtZ(.5, self.near_point, self.near_vector)
 			#self.combat_sonatu.setPos(relative_point)
@@ -158,7 +154,7 @@ class PIRATES(ShowBase):
 		self.collision_ray = CollisionRay()
 		self.collision_node.addSolid(self.collision_ray)
 		self.traverser.addCollider(self.collision_camera, self.handler)
-		#self.traverser.showCollisions(render)
+		self.traverser.showCollisions(render)
 
 game = PIRATES()
 game.run()
