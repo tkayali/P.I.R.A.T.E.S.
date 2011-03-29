@@ -1,6 +1,4 @@
-from panda3d.core import GeomVertexWriter, GeomVertexData, GeomVertexFormat, GeomPrimitive, Geom, GeomNode, GeomVertexArrayFormat, InternalName, GeomLines, GeomPoints, GeomTristrips, GeomLinestrips, GeomTrifans
-from pandac.PandaModules import *
-
+from panda3d.core import GeomVertexWriter, GeomVertexData, GeomVertexFormat, GeomPrimitive, Geom, GeomNode, GeomVertexArrayFormat, InternalName, GeomTrifans, BitMask32
 from math import cos, sin, pi
 
 class Gridspace:
