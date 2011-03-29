@@ -45,6 +45,9 @@ class PIRATES(ShowBase):
 
 
 	def limbo(self):
+		#Change attributes
+		self.__in_combat = False
+
 		#Set up the camera for the Limbo Menu
 		self.taskMgr.add(self.limbo_camera_task, "Limbo Camera")
 
@@ -57,7 +60,7 @@ class PIRATES(ShowBase):
 		#Farthing
 		self.farthing = self.loader.loadModel("Models\Characters\Farthing\Farthing.egg")
 		self.farthing.setPos(-310.762, -3.750, -24.114)
-		self.farthing.setHpr(self.camera, 0, 0, 0)
+		self.farthing.setHpr(0, 0, 0)
 		self.farthing.reparentTo(self.render)
 		self.limbo_sonatu.reparentTo(self.render)
 		
@@ -147,6 +150,9 @@ class PIRATES(ShowBase):
 		while self.sonatu.getAP() > 0:
 			self.move_sonatu()
 			self.sonatu.setAP(self.sonatu.getAP()-1)
+	
+	def limbo_mouse_task(self):
+		print "Limbo"
 
 	def move_sonatu(self):
 		if base.mouseWatcherNode.hasMouse():
