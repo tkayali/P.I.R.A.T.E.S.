@@ -26,7 +26,7 @@ class PIRATES(ShowBase):
 	def __init__(self):
 		ShowBase.__init__(self)
 		base.disableMouse()	
-
+		
 		self.limbo()
 		self.combat_collision_detection()
 		self.mouseTask = taskMgr.add(self.mouse_task, 'mouse_task')
@@ -65,6 +65,9 @@ class PIRATES(ShowBase):
 		self.limbo_sonatu.reparentTo(self.render)
 		
 	def setup_combat(self):
+		#Set up attributes
+		self.__in_combat = True
+
 		#Set up the camera for the Combat Menu
 		self.taskMgr.add(self.combat_camera_task, "Combat Camera")
 
@@ -147,7 +150,7 @@ class PIRATES(ShowBase):
 		return Task.cont
 
 	def combat_mouse_task(self):
-		while self.sonatu.getAP() > 0:
+		if self.sonatu.getAP() > 0:
 			self.move_sonatu()
 			self.sonatu.setAP(self.sonatu.getAP()-1)
 	
