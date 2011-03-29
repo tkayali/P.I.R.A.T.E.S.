@@ -45,7 +45,7 @@ from PMap import Map
 #print environment.__doc__
 #print environment.to_string()
 
-#map = Map()
-#map.get_gridspaces()[5][5].set_occupiable(False)
-#print map.calculate_path(5,4,5,6)
+map = Map()
+map.get_gridspaces()[5][5]=1
+print map.calculate_path(5,4,5,6)
 

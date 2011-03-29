@@ -13,10 +13,10 @@ class Map:
         for i in range(16):
             col=[]
             for j in range(13):
-                col.append(Gridspace())
+                col.append(0)
             self.__gridspaces.append(col)
         for i in range(6):
-            self.__gridspaces[15][2*i+1].set_occupiable(False)
+            self.__gridspaces[15][2*i+1] = 1
         self.__enemies = __enemies
         self.__finished = __finished
         
@@ -45,7 +45,7 @@ class Map:
         for i in range(16):
             col=[]
             for j in range(13):
-                if self.__gridspaces[i][j].get_occupiable():
+                if self.__gridspaces[i][j] == 0:
                     col.append(0)
                 else:
                     col.append(1)
