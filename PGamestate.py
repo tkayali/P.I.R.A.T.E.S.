@@ -5,7 +5,7 @@ from PQueen import Queen
 from PSonatu import Sonatu
 from PCombatUI import CombatUI
 from PGridspace import Gridspace
-#from PMap import Map
+from PMap import Map
 
 from math import pi, sin, cos
 import random, sys, os
@@ -113,7 +113,7 @@ class PIRATES(ShowBase):
 		self.combat_sonatu.setPos(242.487, -90, 1)
 		self.combat_sonatu.lookAt(-1000, 0, 0)
 		self.combat_sonatu.reparentTo(self.render)
-		self.sonatu = Sonatu(242.487, -90, 1, 2)
+		self.sonatu = Sonatu(94, 0)
 
 		#Monster - Melee
 		self.melee_monster = self.loader.loadModel("Models\Monsters\octopus.egg")
@@ -144,11 +144,9 @@ class PIRATES(ShowBase):
 				x_counter1 = 0
 				for i in range (16):
 					self.gridspace_list.append(Gridspace(None, True, x_counter1, y_counter, hex_radius, 31*6+i))
-					x_counter1 = x_counter1 + 2*hex_radius*sin(pi/3)		
-
+					x_counter1 = x_counter1 + 2*hex_radius*sin(pi/3)
 		#Create map to hold the gridspaces
-		#self.combat_map = Map(gridspace_list, False)
-		#self.path_to_move = self.combat_map.calculate_path(self
+		self.combat_map = Map(self.gridspace_list, False)
 
 		#Add a hex grid texture
 		self.map_grid = self.loader.loadModel("square.egg")
@@ -161,7 +159,9 @@ class PIRATES(ShowBase):
 	
 	def limbo_hide_all(self):
 		self.limbo_sonatu.hide()
+		self.sky.hide()
 		self.farthing.hide()
+		self.checkers.hide()
 	
 	def combat_hide_all(self):
 		self.map_grid.hide()
@@ -189,15 +189,20 @@ class PIRATES(ShowBase):
 		print "Limbo"
 
 	def move_sonatu(self):
+		starting_gridspace = self.sonatu.get_gridspace()
+		ending_gridspace = 0
+		
 		if base.mouseWatcherNode.hasMouse():
 			self.mouse_position = base.mouseWatcherNode.getMouse()
 			self.collision_ray.setFromLens(base.camNode, self.mouse_position.getX(), self.mouse_position.getY())
 			self.traverser.traverse(render)
 			if self.handler.getNumEntries() > 0:
 				self.handler.sortEntries()
-				i = int(self.handler.getEntry(0).getIntoNodePath().getTag("hex"))
-				if self.gridspace_list[i].get_occupiable:
-					self.combat_sonatu.setPos( self.gridspace_list[i].get_x_position(), self.gridspace_list[i].get_y_position(), 1)
+				ending_gridspace = int(self.handler.getEntry(0).getIntoNodePath().getTag("hex"))
+				if self.gridspace_list[ending_gridspace].get_occupiable:
+					path = self.combat_map.calculate_path(starting_gridspace, ending_gridspace)
+					if len(path) <= self.sonatu.getAP()+1:
+						self.combat_sonatu.setPos( self.gridspace_list[ending_gridspace].get_x_position(), self.gridspace_list[ending_gridspace].get_y_position(), 1)
 
 	def combat_camera_task(self, task):
 		self.camera.setPos(20*sin(pi/3)*7.5, 225, 225)
