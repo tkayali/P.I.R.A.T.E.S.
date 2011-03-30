@@ -87,6 +87,15 @@ class PIRATES(ShowBase):
 		self.checkers.setSy(.85)
 		self.checkers.setSz(.85)
 		self.checkers.reparentTo(self.render)
+
+		#Ivan
+		self.ivan = self.loader.loadModel("Models\Characters\Farthing\Farthing.egg")
+		self.ivan.setPos(-150, 20, -70)
+		self.ivan.setHpr(-45, 0, 0)
+		self.ivan.setSx(.85)
+		self.ivan.setSy(.85)
+		self.ivan.setSz(.85)
+		self.ivan.reparentTo(self.render)
 		
 	def setup_combat(self):
 		#Set up attributes
@@ -113,7 +122,7 @@ class PIRATES(ShowBase):
 		self.combat_sonatu.setPos(242.487, -90, 1)
 		self.combat_sonatu.lookAt(-1000, 0, 0)
 		self.combat_sonatu.reparentTo(self.render)
-		self.sonatu = Sonatu(94, 0)
+		self.sonatu = Sonatu(107, 0)
 
 		#Monster - Melee
 		self.melee_monster = self.loader.loadModel("Models\Monsters\octopus.egg")
@@ -180,7 +189,6 @@ class PIRATES(ShowBase):
 	def combat_mouse_task(self):
 		if self.__player_turn:
 			self.move_sonatu()
-			self.sonatu.setAP(self.sonatu.getAP()-1)
 			if self.sonatu.getAP < 1:
 				__player_turn = False
 				self.sonatu.end_turn()
@@ -190,7 +198,6 @@ class PIRATES(ShowBase):
 
 	def move_sonatu(self):
 		starting_gridspace = self.sonatu.get_gridspace()
-		ending_gridspace = 0
 		
 		if base.mouseWatcherNode.hasMouse():
 			self.mouse_position = base.mouseWatcherNode.getMouse()
@@ -199,10 +206,16 @@ class PIRATES(ShowBase):
 			if self.handler.getNumEntries() > 0:
 				self.handler.sortEntries()
 				ending_gridspace = int(self.handler.getEntry(0).getIntoNodePath().getTag("hex"))
-				if self.gridspace_list[ending_gridspace].get_occupiable:
+				if self.gridspace_list[ending_gridspace].get_occupiable and starting_gridspace is not ending_gridspace:
+					print "Starting: " + str(starting_gridspace)
+					print "Ending: " + str(ending_gridspace)
 					path = self.combat_map.calculate_path(starting_gridspace, ending_gridspace)
+					print "Path: " + str(path)
+					print "Distance in hexes: " + str(len(path))
 					if len(path) <= self.sonatu.getAP()+1:
 						self.combat_sonatu.setPos( self.gridspace_list[ending_gridspace].get_x_position(), self.gridspace_list[ending_gridspace].get_y_position(), 1)
+						self.sonatu.set_gridspace(ending_gridspace)
+						self.sonatu.setAP(self.sonatu.getAP()-len(path)+1)
 
 	def combat_camera_task(self, task):
 		self.camera.setPos(20*sin(pi/3)*7.5, 225, 225)
