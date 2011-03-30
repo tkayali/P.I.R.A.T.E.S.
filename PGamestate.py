@@ -5,6 +5,7 @@ from PQueen import Queen
 from PSonatu import Sonatu
 from PCombatUI import CombatUI
 from PGridspace import Gridspace
+#from PMap import Map
 
 from math import pi, sin, cos
 import random, sys, os
@@ -22,6 +23,7 @@ loadPrcFile("Config/Config.prc")
 ##Now let's begin with some lovely Panda code!
 class PIRATES(ShowBase):
 	__in_combat = True
+	__player_turn = True
 
 	def __init__(self):
 		ShowBase.__init__(self)
@@ -35,7 +37,6 @@ class PIRATES(ShowBase):
 		self.accept("c", self.setup_combat )
 		self.accept("a", self.combat_hide_all )
 		self.accept("z", self.limbo )
-
 		self.accept("g", self.printCamera )
 		
 	def printCamera(self):	
@@ -55,14 +56,37 @@ class PIRATES(ShowBase):
 		self.limbo_sonatu = self.loader.loadModel("Models\Sonatu\Sonatu.egg")
 		self.limbo_sonatu.setPos(0, 0, 0)
 		self.limbo_sonatu.setHpr(-90, 0, 0)
+		self.limbo_sonatu.reparentTo(self.render)
+
+		#Set up the background sky
+		self.sky = self.loader.loadModel("square.egg")
+		self.sky.setSx(1000)
+		self.sky.setSy(600)
+		self.sky.setPos(-607.695, 436.47, 15.257)
+		self.sky.setHpr(self.camera, 0, 90, 0)
+		ts = TextureStage('ts')
+		self.sky.setTexture(ts,loader.loadTexture("Textures\Sky.png"))
+		self.sky.setTexRotate(ts, 180)
+		self.sky.reparentTo(self.render)
 
 		#Set up the characters
 		#Farthing
 		self.farthing = self.loader.loadModel("Models\Characters\Farthing\Farthing.egg")
 		self.farthing.setPos(-310.762, -3.750, -24.114)
 		self.farthing.setHpr(0, 0, 0)
+		self.farthing.setSx(.85)
+		self.farthing.setSy(.85)
+		self.farthing.setSz(.85)
 		self.farthing.reparentTo(self.render)
-		self.limbo_sonatu.reparentTo(self.render)
+
+		#Checkers
+		self.checkers = self.loader.loadModel("Models\Characters\Farthing\Farthing.egg")
+		self.checkers.setPos(-210.892, 35.105, -41.475)
+		self.checkers.setHpr(-45, 0, 0)
+		self.checkers.setSx(.85)
+		self.checkers.setSy(.85)
+		self.checkers.setSz(.85)
+		self.checkers.reparentTo(self.render)
 		
 	def setup_combat(self):
 		#Set up attributes
@@ -122,6 +146,10 @@ class PIRATES(ShowBase):
 					self.gridspace_list.append(Gridspace(None, True, x_counter1, y_counter, hex_radius, 31*6+i))
 					x_counter1 = x_counter1 + 2*hex_radius*sin(pi/3)		
 
+		#Create map to hold the gridspaces
+		#self.combat_map = Map(gridspace_list, False)
+		#self.path_to_move = self.combat_map.calculate_path(self
+
 		#Add a hex grid texture
 		self.map_grid = self.loader.loadModel("square.egg")
 		self.map_grid.setTexture(ts, loader.loadTexture("textures\HexGrid.png"))	
@@ -150,9 +178,12 @@ class PIRATES(ShowBase):
 		return Task.cont
 
 	def combat_mouse_task(self):
-		if self.sonatu.getAP() > 0:
+		if self.__player_turn:
 			self.move_sonatu()
 			self.sonatu.setAP(self.sonatu.getAP()-1)
+			if self.sonatu.getAP < 1:
+				__player_turn = False
+				self.sonatu.end_turn()
 	
 	def limbo_mouse_task(self):
 		print "Limbo"
