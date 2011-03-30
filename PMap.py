@@ -16,7 +16,7 @@ class Map:
 		self.__gridspaces.append([])
 	for j in range(13):
 		for i in range(16):
-			if i == 15 and j%2==1
+			if i == 15 and j%2==1:
 				self.__gridspaces[i].append(1)
 			else:
 				if self.global_gridspaces[counter].get_occupiable():
@@ -129,7 +129,11 @@ class Map:
             if curr == 2:
                 there = True
         path.reverse()
-	return path
+	path_length = len(path)
+	true_path = []
+	for i in range(path_length):
+		true_path.append(path[i][1] * 16 + path[i][0] - path[i][1] / 2)
+	return true_path
 
     def to_string(self):
         data = []
