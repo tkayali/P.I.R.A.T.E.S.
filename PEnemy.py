@@ -8,11 +8,11 @@ class Enemy(Unit):
 	
 	__damage = 0
 	__accuracy = 0
+	__gridspace = None
 
-	def __init__ (self, _pos_x=0, _pos_y=0, _pos_z=0, _unit_range=0,
-		_model=None):
-		Unit.__init__(self, 10, 2, _pos_x, _pos_y, _pos_z, True, _model,
-		False, _unit_range)
+	def __init__ (self, gridspace=94, _unit_range=0):
+		Unit.__init__(self, 10, 2, gridspace, True, False, _unit_range)
+		self.__gridspace = gridspace
 
 		if range == 1:
 			__damage = 8
@@ -29,16 +29,12 @@ class Enemy(Unit):
 		else:
 			__damage = 0
 			__accuracy = 0
-
-	def move(self):
-		#HOLDER METHODS
-		self._pos_x += 1
-		self._pos_y += 1
-		self._pos_z += 1
-		self._AP -= 1
-
+	
+	def begin_enemy_turn(self):
+		print "HI"
+	
+	def end_turn(self):
+		Unit.setAP(self, 2)
+	
 	def to_string(self):
 		Unit.to_string(self)
-
-
-
