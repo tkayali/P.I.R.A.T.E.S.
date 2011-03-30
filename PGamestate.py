@@ -132,6 +132,7 @@ class PIRATES(ShowBase):
 		self.melee_monster.lookAt(-1000, 0, 0)
 		self.melee_monster.setPos(17.321, -90, 1)
 		self.melee_monster.reparentTo(self.render)
+		self.melee = Enemy(94, 1)
 
 		#Create the hex grid
 		self.gridspace_list = []
@@ -171,6 +172,7 @@ class PIRATES(ShowBase):
 		self.sky.hide()
 		self.farthing.hide()
 		self.checkers.hide()
+		self.ivan.hide()
 	
 	def combat_hide_all(self):
 		self.map_grid.hide()
@@ -181,17 +183,28 @@ class PIRATES(ShowBase):
 	def mouse_task(self, task):
 		if base.mouseWatcherNode.hasMouse():
 			if self.__in_combat:
-				self.accept("mouse1", self.combat_mouse_task )
+				self.accept("mouse1", self.combat_mouse_task)
 			else:
-				self.accept("mouse1", self.limbo_mouse_task )
+				self.accept("mouse1", self.limbo_mouse_task)
 		return Task.cont
 
 	def combat_mouse_task(self):
 		if self.__player_turn:
 			self.move_sonatu()
-			if self.sonatu.getAP < 1:
-				__player_turn = False
+			print "Player turn begins"
+			print self.sonatu.getAP()
+			if self.sonatu.getAP() < 1:
+				self.__player_turn = False
 				self.sonatu.end_turn()
+				print "Player turn ends"
+		else:
+			print "Enemy begins"
+			self.move_enemy()
+			print self.melee.getAP()
+			if self.melee.getAP() < 1:
+				self.__player_turn = True
+				self.melee.end_turn()
+				print "Enemy ends"
 	
 	def limbo_mouse_task(self):
 		print "Limbo"
@@ -216,6 +229,27 @@ class PIRATES(ShowBase):
 						self.combat_sonatu.setPos( self.gridspace_list[ending_gridspace].get_x_position(), self.gridspace_list[ending_gridspace].get_y_position(), 1)
 						self.sonatu.set_gridspace(ending_gridspace)
 						self.sonatu.setAP(self.sonatu.getAP()-len(path)+1)
+
+	def move_enemy(self):		
+		starting_gridspace = self.melee.get_gridspace()
+		
+		if base.mouseWatcherNode.hasMouse():
+			self.mouse_position = base.mouseWatcherNode.getMouse()
+			self.collision_ray.setFromLens(base.camNode, self.mouse_position.getX(), self.mouse_position.getY())
+			self.traverser.traverse(render)
+			if self.handler.getNumEntries() > 0:
+				self.handler.sortEntries()
+				ending_gridspace = int(self.handler.getEntry(0).getIntoNodePath().getTag("hex"))
+				if self.gridspace_list[ending_gridspace].get_occupiable and starting_gridspace is not ending_gridspace:
+					print "Starting: " + str(starting_gridspace)
+					print "Ending: " + str(ending_gridspace)
+					path = self.combat_map.calculate_path(starting_gridspace, ending_gridspace)
+					print "Path: " + str(path)
+					print "Distance in hexes: " + str(len(path))
+					if len(path) <= self.melee.getAP()+1:
+						self.melee_monster.setPos( self.gridspace_list[ending_gridspace].get_x_position(), self.gridspace_list[ending_gridspace].get_y_position(), 1)
+						self.melee.set_gridspace(ending_gridspace)
+						self.melee.setAP(self.melee.getAP()-len(path)+1)
 
 	def combat_camera_task(self, task):
 		self.camera.setPos(20*sin(pi/3)*7.5, 225, 225)
