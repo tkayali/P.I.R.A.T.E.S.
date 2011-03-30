@@ -10,7 +10,7 @@ class Sonatu(Unit):
 	damage = 0
 	accuracy = 0
 
-	def __init__ (self, gridspace, special=0):
+	def __init__ (self, gridspace=94, special=0):
 		Unit.__init__(self, 30, 3, gridspace, True, True, 4)
 		self.__special = special
 
@@ -22,28 +22,28 @@ class Sonatu(Unit):
 
 	def attack(self, range):
 		if range == 1:
-			damage = 10
-			accuracy = .9
+			self.damage = 10
+			self.accuracy = .9
 
 		elif range == 2:
-			damage = 6
-			accuracy = .85
+			self.damage = 6
+			self.accuracy = .85
 
 		elif range < 5:
-			damage = 4
-			accuracy = .8
+			self.damage = 4
+			self.accuracy = .8
 
 		else:
 			#Do absolutely nothing
 			return 1
 
-		self._AP -= 2
+		#Subtract 2 from AP
 
 		print "Damage: " + str(damage) + " Accuracy: " + str(accuracy)
 		return 0
 		
-	def end_turn():
-		self.AP = 3
+	def end_turn(self):
+		Unit.setAP(self, 3)
 
 	def to_string(self):
 		Unit.to_string(self)
