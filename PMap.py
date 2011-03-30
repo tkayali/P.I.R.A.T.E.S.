@@ -19,7 +19,7 @@ class Map:
 			if i == 15 and j%2==1:
 				self.__gridspaces[i].append(1)
 			else:
-				if self.global_gridspaces[counter].get_occupiable():
+				if self.__global_gridspaces[counter].get_occupiable():
 					self.__gridspaces[i].append(0)
 					counter = counter + 1
 				else:
