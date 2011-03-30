@@ -9,21 +9,15 @@ class Unit:
 
 	_HP = 0
 	_AP = 0
-	_pos_x = 0
-	_pos_y = 0
-	_pos_z = 0
+	__gridspace = None
 	_alive = False
-	_model = None
 	_player = False
 	_unit_range = 0
 
-	def __init__ (self, _HP=0, _AP=0, _pos_x=0, _pos_y=0, _pos_z=0,
-	_alive=False, _player=False, _unit_range=0):
+	def __init__ (self, _HP=0, _AP=0, gridspace=None, _alive=False, _player=False, _unit_range=0):
 		self._HP = _HP
 		self._AP = _AP
-		self._pos_x = _pos_x
-		self._pos_y = _pos_y
-		self._pos_z = _pos_z
+		self.__gridspace = gridspace
 		self._alive = _alive
 		self._unit_range = _unit_range
 		self._player = _player
@@ -57,6 +51,12 @@ class Unit:
 	
 	def set_player(self, player):
 		self._player = player
+	
+	def get_gridspace(self):
+		return self.__gridspace
+
+	def set_gridspace(self, gridspace):
+		self.__gridspace = gridspace
 
 	def to_string(self):
 		print "HP: " + str(self._HP) + " AP: " + str(self._AP) + " Model: " + str(self._model) + "\nX Position: " + str(self._pos_x) + " Y Position: " + str(self._pos_y) + " Z Position: " + str(self._pos_z) + "\nIs the unit the player's? " + str(self._player) + "\nIs the unit alive? " + str(self._alive)
