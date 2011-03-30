@@ -45,10 +45,14 @@ class Map:
     def set_finished(self, __finished):
         self.__finished = __finished
         
-    #calculates path from gridspace(x1,y1) to gridspace(x2,y2)
-    #returns a list of index pairs
-    def calculate_path(self, pos_x1, pos_y1, pos_x2, pos_y2):
-        maze = []
+    #calculates path from gridspace1 to gridspace2
+    #returns a list of indexes
+    def calculate_path(self, gridspace1, gridspace2):
+        pos_x1 = (gridspace1 % 31) % 16
+	pos_y1 = (gridspace1/31)*2+(gridspace1 % 31)/16
+        pos_x2 = (gridspace2 % 31) % 16
+	pos_y2 = (gridspace2/31)*2+(gridspace2 % 31)/16
+	maze = []
         for i in range(16):
             col=[]
             for j in range(13):
