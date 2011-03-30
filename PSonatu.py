@@ -10,9 +10,8 @@ class Sonatu(Unit):
 	damage = 0
 	accuracy = 0
 
-	def __init__ (self, _x_pos=0, _y_pos=0, _z_pos=0, special=0):
-		Unit.__init__(self, 30, 3, _x_pos, _y_pos, _z_pos, 
-		True, True, 4)
+	def __init__ (self, gridspace, special=0):
+		Unit.__init__(self, 30, 3, gridspace, True, True, 4)
 		self.__special = special
 
 	def get_special(self):
