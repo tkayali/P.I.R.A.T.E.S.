@@ -10,6 +10,7 @@ from PMap import Map
 from math import pi, sin, cos
 import random, sys, os
 
+from direct.gui.OnscreenImage import OnscreenImage
 from direct.showbase.ShowBase import ShowBase
 from direct.showbase.DirectObject import DirectObject
 from direct.task import Task
@@ -30,7 +31,6 @@ class PIRATES(ShowBase):
 		base.disableMouse()	
 		
 		self.limbo()
-		self.combat_collision_detection()
 		self.mouseTask = taskMgr.add(self.mouse_task, 'mouse_task')
 		self.accept("escape", sys.exit)
 		self.accept("h", self.limbo_hide_all )
@@ -104,13 +104,21 @@ class PIRATES(ShowBase):
 		#Set up the camera for the Combat Menu
 		self.taskMgr.add(self.combat_camera_task, "Combat Camera")
 
+		#Set up CombatUI
+		self.combatHUD = OnscreenImage( image = 'Textures\hud.png', pos = (0, 0, -0.8))		
+		self.combatHUD.setSz(.2)
+		self.combatHUD.reparentTo(render2d)
+
+		#Set up collision detection
+		self.combat_collision_detection()
+
 		#Combat water
 		self.water = self.loader.loadModel("square.egg")
 		self.water.setSx(1000)
 		self.water.setSy(1000)
 		self.water.setPos(0,0,-1)
 		ts = TextureStage('ts')
-		self.water.setTexture(ts,loader.loadTexture("textures\Water.jpg"))
+		self.water.setTexture(ts,loader.loadTexture("Textures\Water.jpg"))
 		self.water.setTexScale(ts,4)
 		self.water.reparentTo(self.render)
 
@@ -192,26 +200,19 @@ class PIRATES(ShowBase):
 		if self.__player_turn:
 			self.move_sonatu()
 			print "Player turn begins"
-			print self.sonatu.getAP()
+			print "Sonatu's AP is .... : " + str(self.sonatu.getAP() )
 			if self.sonatu.getAP() < 1:
 				self.__player_turn = False
 				self.sonatu.end_turn()
 				print "Player turn ends"
-		else:
-			print "Enemy begins"
-			self.move_enemy()
-			print self.melee.getAP()
-			if self.melee.getAP() < 1:
-				self.__player_turn = True
-				self.melee.end_turn()
-				print "Enemy ends"
-	
+				print "After the end of Sonatu's turn, the AP is now ... : " + str(self.sonatu.getAP())
+				self.begin_enemy_turn()
+		
 	def limbo_mouse_task(self):
 		print "Limbo"
 
 	def move_sonatu(self):
 		starting_gridspace = self.sonatu.get_gridspace()
-		
 		if base.mouseWatcherNode.hasMouse():
 			self.mouse_position = base.mouseWatcherNode.getMouse()
 			self.collision_ray.setFromLens(base.camNode, self.mouse_position.getX(), self.mouse_position.getY())
@@ -232,24 +233,46 @@ class PIRATES(ShowBase):
 
 	def move_enemy(self):		
 		starting_gridspace = self.melee.get_gridspace()
+		sonatu_position = self.sonatu.get_gridspace()
+		path = self.combat_map.calculate_path(starting_gridspace, sonatu_position)
+		distance = len(path) - 1
+		print "Starting: " + str(starting_gridspace)
+		print "Sonatu's position: " + str(sonatu_position)
+		print "Path: " + str(path)
+		print "Distance in hexes: " + str(len(path))
+		print "Unit range: " + str(self.melee.get_unit_range())
+		print "AP Before: " + str(self.melee.getAP())
 		
-		if base.mouseWatcherNode.hasMouse():
-			self.mouse_position = base.mouseWatcherNode.getMouse()
-			self.collision_ray.setFromLens(base.camNode, self.mouse_position.getX(), self.mouse_position.getY())
-			self.traverser.traverse(render)
-			if self.handler.getNumEntries() > 0:
-				self.handler.sortEntries()
-				ending_gridspace = int(self.handler.getEntry(0).getIntoNodePath().getTag("hex"))
-				if self.gridspace_list[ending_gridspace].get_occupiable and starting_gridspace is not ending_gridspace:
-					print "Starting: " + str(starting_gridspace)
-					print "Ending: " + str(ending_gridspace)
-					path = self.combat_map.calculate_path(starting_gridspace, ending_gridspace)
-					print "Path: " + str(path)
-					print "Distance in hexes: " + str(len(path))
-					if len(path) <= self.melee.getAP()+1:
-						self.melee_monster.setPos( self.gridspace_list[ending_gridspace].get_x_position(), self.gridspace_list[ending_gridspace].get_y_position(), 1)
-						self.melee.set_gridspace(ending_gridspace)
-						self.melee.setAP(self.melee.getAP()-len(path)+1)
+		if distance == self.melee.get_unit_range():
+			print "Attack"
+			print "Attack"
+			self.melee.setAP(0)
+
+		elif distance == self.melee.get_unit_range() + 1:
+			self.melee_monster.setPos( self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1)
+			#print "Ending: " + str(path[1])
+			#print "Ending: " + str(self.gridspace_list[path[1]])
+			self.melee.set_gridspace(path[1])
+			self.melee.setAP(0)
+		else:
+			self.melee_monster.setPos( self.gridspace_list[path[2]].get_x_position(), self.gridspace_list[path[2]].get_y_position(), 1)
+			#print "Ending: " + str(path[2])
+			#print "Ending: " + str(path[2])
+			self.melee.setAP(0)
+			self.melee.set_gridspace(path[2])
+
+		print "AP After: " + str(self.melee.getAP())
+	
+	def begin_enemy_turn(self):
+		print "Enemy begins"
+		self.move_enemy()
+		if self.melee.getAP() < 1:
+			print "Entered here"
+			self.__player_turn = True
+			self.melee.end_turn()
+			print "After the end of the turn the melee's AP is ... : " + str(self.melee.getAP())
+			print "Enemy ends"
+	
 
 	def combat_camera_task(self, task):
 		self.camera.setPos(20*sin(pi/3)*7.5, 225, 225)
