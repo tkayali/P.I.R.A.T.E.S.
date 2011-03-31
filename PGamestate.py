@@ -10,6 +10,7 @@ from PMap import Map
 from math import pi, sin, cos
 import random, sys, os
 
+from direct.gui.OnscreenText import OnscreenText
 from direct.gui.OnscreenImage import OnscreenImage
 from direct.showbase.ShowBase import ShowBase
 from direct.showbase.DirectObject import DirectObject
@@ -174,6 +175,9 @@ class PIRATES(ShowBase):
 		self.map_grid.setSy(13.5*15+4)
 		self.map_grid.setTransparency(TransparencyAttrib.MAlpha)
 		self.map_grid.reparentTo(self.render)				
+
+		#Set up all text
+		self.setup_text()
 	
 	def limbo_hide_all(self):
 		self.limbo_sonatu.hide()
@@ -199,6 +203,7 @@ class PIRATES(ShowBase):
 	def combat_mouse_task(self):
 		if self.__player_turn:
 			self.move_sonatu()
+			self.update_text( self.__player_turn )
 			print "Player turn begins"
 			print "Sonatu's AP is .... : " + str(self.sonatu.getAP() )
 			if self.sonatu.getAP() < 1:
@@ -265,6 +270,7 @@ class PIRATES(ShowBase):
 	
 	def begin_enemy_turn(self):
 		print "Enemy begins"
+		self.update_text( self.__player_turn )
 		self.move_enemy()
 		if self.melee.getAP() < 1:
 			print "Entered here"
@@ -272,7 +278,26 @@ class PIRATES(ShowBase):
 			self.melee.end_turn()
 			print "After the end of the turn the melee's AP is ... : " + str(self.melee.getAP())
 			print "Enemy ends"
+
+			#Don't add the code below until timed events have been figured out
+			#self.turn_text.setText("Your turn!")
 	
+	def setup_text(self):
+		self.turn_text = OnscreenText( text = "Your turn!", pos = (0, .9, 0), scale = 0.065, fg = (1, 1, 1, 1) ) 
+		self.sonatu_health_text = OnscreenText( text= "HP: " + str(self.sonatu.getHP()), pos = (-.5, -.9, 0), scale = 0.05, fg = (1, 1, 1, 1) )
+		self.sonatu_ap_text = OnscreenText( text= "AP: " + str(self.sonatu.getAP()), pos = (-.5, -.8, 0), scale = 0.05, fg = (1, 1, 1, 1) )
+		self.turn_text.reparentTo(render2d)
+		self.sonatu_health_text.reparentTo(render2d)
+		self.sonatu_ap_text.reparentTo(render2d)
+
+	def update_text(self, player_turn):
+		if player_turn:
+			self.turn_text.setText("Your turn!")
+		else:
+			self.turn_text.setText("Enemy turn!")
+
+		self.sonatu_health_text.setText( "HP: " + str(self.sonatu.getHP()) )
+		self.sonatu_ap_text.setText("AP: " + str(self.sonatu.getAP()) )
 
 	def combat_camera_task(self, task):
 		self.camera.setPos(20*sin(pi/3)*7.5, 225, 225)
