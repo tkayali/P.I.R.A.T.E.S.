@@ -9,32 +9,36 @@ class Enemy(Unit):
 	__damage = 0
 	__accuracy = 0
 	__gridspace = None
+	__name = None
 
-	def __init__ (self, gridspace=94, _unit_range=0):
+	def __init__ (self, gridspace=0, _unit_range=0):
 		Unit.__init__(self, 10, 2, gridspace, True, False, _unit_range)
 		self.__gridspace = gridspace
 
-		if range == 1:
-			__damage = 8
-			__accuracy = .90
+		if _unit_range == 1:
+			self.__damage = 8
+			self.__accuracy = .90
+			self.__name = "Melee"
 
-		elif range == 2:
-			__damage = 5
-			__accuracy = .85
+		elif _unit_range == 2:
+			self.__damage = 5
+			self.__accuracy = .85
+			self.__name = "Short"
 
-		elif range < 5:
-			__damage = 3
-			__accuracy = .80
+		elif _unit_range == 3:
+			self.__damage = 3
+			self.__accuracy = .80
+			self.__name = "Long"
 
 		else:
-			__damage = 0
-			__accuracy = 0
-	
-	def begin_enemy_turn(self):
-		print "HI"
+			print "WHAT THE HECK ARE YOU DOING?!"
+			print "THIS IS TOTES AN INVALID RANGE!!"
 	
 	def end_turn(self):
 		Unit.setAP(self, 2)
+
+	def get_name(self):
+		return self.__name
 	
 	def to_string(self):
 		Unit.to_string(self)
