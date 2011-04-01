@@ -283,7 +283,7 @@ class PIRATES(ShowBase):
 			if self.handler.getNumEntries() > 0:
 				self.handler.sortEntries()
 				ending_gridspace = int(self.handler.getEntry(0).getIntoNodePath().getTag("hex"))
-				if self.gridspace_list[ending_gridspace].get_occupiable and starting_gridspace is not ending_gridspace:
+				if self.gridspace_list[ending_gridspace].get_occupiable() and starting_gridspace is not ending_gridspace:
 					#print "Starting: " + str(starting_gridspace)
 					#print "Ending: " + str(ending_gridspace)
 					#print "Ending X: " + str(self.gridspace_list[ending_gridspace].get_x_position())
