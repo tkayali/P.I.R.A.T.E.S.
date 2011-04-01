@@ -15,7 +15,7 @@ from direct.gui.OnscreenImage import OnscreenImage
 from direct.showbase.ShowBase import ShowBase
 from direct.showbase.DirectObject import DirectObject
 from direct.task import Task
-from pandac.PandaModules import TextureStage, TransparencyAttrib
+from pandac.PandaModules import TextureStage, TransparencyAttrib, DirectionalLight
 from pandac.PandaModules import *
 from panda3d.core import loadPrcFile, ConfigVariableString
 
@@ -50,10 +50,11 @@ class PIRATES(ShowBase):
 		#Change attributes
 		self.__in_combat = False
 
-		#Set up the camera for the Limbo Menu
+		#Set up the camera
 		self.taskMgr.add(self.limbo_camera_task, "Limbo Camera")
 
 		#Set up the Limbo Sonatu
+		#self.limbo_sonatu = self.loader.loadModel("Models\Limbo\Limbo.egg")
 		self.limbo_sonatu = self.loader.loadModel("Models\Sonatu\Sonatu.egg")
 		self.limbo_sonatu.setPos(0, 0, 0)
 		self.limbo_sonatu.setHpr(-90, 0, 0)
@@ -69,6 +70,19 @@ class PIRATES(ShowBase):
 		self.sky.setTexture(ts,loader.loadTexture("Textures\Sky.png"))
 		self.sky.setTexRotate(ts, 180)
 		self.sky.reparentTo(self.render)
+
+		#Set up a lights
+		self.sunlight = DirectionalLight('limbo_sunlight')
+		self.sunlight.setColor(VBase4(0.8, 0.8, 0.5, 1))
+		self.sunlight_nodepath = render.attachNewNode(self.sunlight)
+		self.sunlight_nodepath.setPos(937, -1386, 242) #1063, -1050, 555 || -12, -1625, 62
+		self.sunlight_nodepath.lookAt(self.limbo_sonatu)
+		render.setLight(self.sunlight_nodepath)
+
+		self.ambientlight = AmbientLight("limbo_ambient")
+		self.ambientlight.setColor(VBase4(0.2, 0.2, 0.2, 1))
+		self.ambientlight_nodepath = render.attachNewNode(self.ambientlight)
+		render.setLight(self.ambientlight_nodepath)
 
 		#Set up the characters
 		#Farthing
@@ -143,6 +157,26 @@ class PIRATES(ShowBase):
 		self.melee_monster.reparentTo(self.render)
 		self.melee = Enemy(94, 1)
 
+		#Monster - Short
+		self.short_monster = self.loader.loadModel("Models\Monsters\conch.egg")
+		self.short_monster.setSx(0.35)
+		self.short_monster.setSy(0.35)
+		self.short_monster.setSz(0.35)
+		self.short_monster.lookAt(-1000, 0, 0)
+		self.short_monster.setPos(17.321, -120, 0)
+		self.short_monster.reparentTo(self.render)
+		self.short = Enemy(125, 2)
+
+		#Monster - Long
+		self.long_monster = self.loader.loadModel("Models\Monsters\serpent.egg")
+		self.long_monster.setSx(0.35)
+		self.long_monster.setSy(0.35)
+		self.long_monster.setSz(0.35)
+		self.long_monster.lookAt(1000, 0, 0)
+		self.long_monster.setPos(17.321, -60, 0)
+		self.long_monster.reparentTo(self.render)
+		self.long = Enemy(63, 3)
+		
 		#Create the hex grid
 		self.gridspace_list = []
 		y_counter = 0
@@ -164,6 +198,7 @@ class PIRATES(ShowBase):
 				for i in range (16):
 					self.gridspace_list.append(Gridspace(None, True, x_counter1, y_counter, hex_radius, 31*6+i))
 					x_counter1 = x_counter1 + 2*hex_radius*sin(pi/3)
+
 		#Create map to hold the gridspaces
 		self.combat_map = Map(self.gridspace_list, False)
 
@@ -178,19 +213,46 @@ class PIRATES(ShowBase):
 
 		#Set up all text
 		self.setup_text()
-	
+
+		#Set up combat lighting
+		render.clearLight(self.sunlight_nodepath)
+		render.clearLight(self.ambientlight_nodepath)
+
+		self.sunlight = DirectionalLight('combat_sunlight')
+		self.sunlight.setColor(VBase4(0.8, 0.8, 0.5, 1))
+		self.sunlight_nodepath = render.attachNewNode(self.sunlight)
+		self.sunlight_nodepath.setPos(129, -75, 2)
+		self.sunlight_nodepath.lookAt(129, -75, 1)
+		self.melee_monster.setLight(self.sunlight_nodepath)
+		self.short_monster.setLight(self.sunlight_nodepath)
+		self.long_monster.setLight(self.sunlight_nodepath)
+		self.combat_sonatu.setLight(self.sunlight_nodepath)
+
+		self.ambientlight = AmbientLight("combat_ambient")
+		self.ambientlight.setColor(VBase4(0.2, 0.2, 0.2, 1))
+		self.ambientlight_nodepath = render.attachNewNode(self.ambientlight)
+		self.melee_monster.setLight(self.ambientlight_nodepath)
+		self.short_monster.setLight(self.ambientlight_nodepath)
+		self.long_monster.setLight(self.ambientlight_nodepath)
+		self.combat_sonatu.setLight(self.ambientlight_nodepath)
+
 	def limbo_hide_all(self):
 		self.limbo_sonatu.hide()
 		self.sky.hide()
 		self.farthing.hide()
 		self.checkers.hide()
 		self.ivan.hide()
+		render.clearLight(self.sunlight_nodepath)
+		render.clearLight(self.ambientlight_nodepath)
+
 	
 	def combat_hide_all(self):
 		self.map_grid.hide()
 		self.water.hide()
 		self.combat_sonatu.hide()
 		self.melee_monster.hide()
+		render.clearLight(self.sunlight_nodepath)
+		render.clearLight(self.ambientlight_nodepath)
 
 	def mouse_task(self, task):
 		if base.mouseWatcherNode.hasMouse():
@@ -204,13 +266,13 @@ class PIRATES(ShowBase):
 		if self.__player_turn:
 			self.move_sonatu()
 			self.update_text( self.__player_turn )
-			print "Player turn begins"
-			print "Sonatu's AP is .... : " + str(self.sonatu.getAP() )
+			#print "Player turn begins"
+			#print "Sonatu's AP is .... : " + str(self.sonatu.getAP() )
 			if self.sonatu.getAP() < 1:
 				self.__player_turn = False
 				self.sonatu.end_turn()
-				print "Player turn ends"
-				print "After the end of Sonatu's turn, the AP is now ... : " + str(self.sonatu.getAP())
+				#print "Player turn ends"
+				#print "After the end of Sonatu's turn, the AP is now ... : " + str(self.sonatu.getAP())
 				self.begin_enemy_turn()
 		
 	def limbo_mouse_task(self):
@@ -226,58 +288,86 @@ class PIRATES(ShowBase):
 				self.handler.sortEntries()
 				ending_gridspace = int(self.handler.getEntry(0).getIntoNodePath().getTag("hex"))
 				if self.gridspace_list[ending_gridspace].get_occupiable and starting_gridspace is not ending_gridspace:
-					print "Starting: " + str(starting_gridspace)
-					print "Ending: " + str(ending_gridspace)
+					#print "Starting: " + str(starting_gridspace)
+					#print "Ending: " + str(ending_gridspace)
+					#print "Ending X: " + str(self.gridspace_list[ending_gridspace].get_x_position())
+					#print "Ending Y: " + str(self.gridspace_list[ending_gridspace].get_y_position())
 					path = self.combat_map.calculate_path(starting_gridspace, ending_gridspace)
-					print "Path: " + str(path)
-					print "Distance in hexes: " + str(len(path))
+					#print "Path: " + str(path)
+					#print "Distance in hexes: " + str(len(path))
 					if len(path) <= self.sonatu.getAP()+1:
 						self.combat_sonatu.setPos( self.gridspace_list[ending_gridspace].get_x_position(), self.gridspace_list[ending_gridspace].get_y_position(), 1)
 						self.sonatu.set_gridspace(ending_gridspace)
+						self.gridspace_list[ending_gridspace].set_occupiable(False)
+						self.gridspace_list[starting_gridspace].set_occupiable(True)
 						self.sonatu.setAP(self.sonatu.getAP()-len(path)+1)
 
-	def move_enemy(self):		
-		starting_gridspace = self.melee.get_gridspace()
+	def move_enemy(self, enemy):		
+		starting_gridspace = enemy.get_gridspace()
 		sonatu_position = self.sonatu.get_gridspace()
 		path = self.combat_map.calculate_path(starting_gridspace, sonatu_position)
 		distance = len(path) - 1
-		print "Starting: " + str(starting_gridspace)
-		print "Sonatu's position: " + str(sonatu_position)
-		print "Path: " + str(path)
-		print "Distance in hexes: " + str(len(path))
-		print "Unit range: " + str(self.melee.get_unit_range())
-		print "AP Before: " + str(self.melee.getAP())
+		#print "Starting: " + str(starting_gridspace)
+		#print "Sonatu's position: " + str(sonatu_position)
+		#print "Path: " + str(path)
+		#print "Distance in hexes: " + str(len(path))
+		#print "Unit range: " + str(enemy.get_unit_range())
+		#print "AP Before: " + str(enemy.getAP())
 		
-		if distance == self.melee.get_unit_range():
-			print "Attack"
-			print "Attack"
-			self.melee.setAP(0)
+		if distance == enemy.get_unit_range():
+			#print "Attack"
+			#print "Attack"
+			enemy.setAP(0)
+			return True
 
-		elif distance == self.melee.get_unit_range() + 1:
-			self.melee_monster.setPos( self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1)
+		elif distance == enemy.get_unit_range() + 1:
+			if enemy.get_name() == "Melee":
+				self.melee_monster.setPos( self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1)
+			elif enemy.get_name() == "Short":
+				self.short_monster.setPos( self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1)
+			elif enemy.get_name() == "Long":
+				self.long_monster.setPos( self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1)
+
 			#print "Ending: " + str(path[1])
 			#print "Ending: " + str(self.gridspace_list[path[1]])
-			self.melee.set_gridspace(path[1])
-			self.melee.setAP(0)
+			self.gridspace_list[starting_gridspace].set_occupiable(True)
+			self.gridspace_list[path[1]].set_occupiable(False)
+			enemy.set_gridspace(path[1])
+			enemy.setAP(0)
+			return True
 		else:
-			self.melee_monster.setPos( self.gridspace_list[path[2]].get_x_position(), self.gridspace_list[path[2]].get_y_position(), 1)
-			#print "Ending: " + str(path[2])
-			#print "Ending: " + str(path[2])
-			self.melee.setAP(0)
-			self.melee.set_gridspace(path[2])
+			if enemy.get_name() == "Melee":
+				self.melee_monster.setPos( self.gridspace_list[path[2]].get_x_position(), self.gridspace_list[path[2]].get_y_position(), 1)
+			elif enemy.get_name() == "Short":
+				self.short_monster.setPos( self.gridspace_list[path[2]].get_x_position(), self.gridspace_list[path[2]].get_y_position(), 1)
+			elif enemy.get_name() == "Long":
+				self.long_monster.setPos( self.gridspace_list[path[2]].get_x_position(), self.gridspace_list[path[2]].get_y_position(), 1)
 
-		print "AP After: " + str(self.melee.getAP())
+			#self.melee_monster.setPos( self.gridspace_list[path[2]].get_x_position(), self.gridspace_list[path[2]].get_y_position(), 1)
+			#print "Ending: " + str(path[2])
+			#print "Ending: " + str(path[2])
+			self.gridspace_list[starting_gridspace].set_occupiable(True)
+			self.gridspace_list[path[2]].set_occupiable(False)
+			enemy.setAP(0)
+			enemy.set_gridspace(path[2])
+			return True
+
+		#print "AP After: " + str(enemy.getAP())
 	
 	def begin_enemy_turn(self):
-		print "Enemy begins"
+		#print "Enemy begins"
 		self.update_text( self.__player_turn )
-		self.move_enemy()
-		if self.melee.getAP() < 1:
-			print "Entered here"
+		melee_check = self.move_enemy(self.melee)
+		short_check = self.move_enemy(self.short)
+		long_check = self.move_enemy(self.long)
+		if melee_check and short_check and long_check:
+			#print "Entered here"
 			self.__player_turn = True
 			self.melee.end_turn()
-			print "After the end of the turn the melee's AP is ... : " + str(self.melee.getAP())
-			print "Enemy ends"
+			self.short.end_turn()
+			self.long.end_turn()
+			#print "After the end of the turn the melee's AP is ... : " + str(self.melee.getAP())
+			#print "Enemy ends"
 
 			#Don't add the code below until timed events have been figured out
 			#self.turn_text.setText("Your turn!")
