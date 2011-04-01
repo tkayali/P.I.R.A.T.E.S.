@@ -15,8 +15,7 @@ from direct.gui.OnscreenImage import OnscreenImage
 from direct.showbase.ShowBase import ShowBase
 from direct.showbase.DirectObject import DirectObject
 from direct.task import Task
-from pandac.PandaModules import TextureStage, TransparencyAttrib, DirectionalLight
-from pandac.PandaModules import *
+from pandac.PandaModules import TextureStage, TransparencyAttrib, DirectionalLight, AmbientLight, VBase4, CollisionTraverser, CollisionHandlerQueue, CollisionNode, BitMask32, CollisionRay
 from panda3d.core import loadPrcFile, ConfigVariableString
 
 #Second we need the config variables. We'll ignore these for now.
