@@ -42,7 +42,6 @@ class PIRATES(ShowBase):
 		print self.camera.getY()
 		print self.camera.getZ()
 
-
 	def limbo(self):
 		#Change attributes
 		self.__in_combat = False
@@ -311,7 +310,7 @@ class PIRATES(ShowBase):
 		#print "Unit range: " + str(enemy.get_unit_range())
 		#print "AP Before: " + str(enemy.getAP())
 		
-		if distance == enemy.get_unit_range():
+		if distance <= enemy.get_unit_range():
 			#print "Attack"
 			#print "Attack"
 			enemy.setAP(0)
