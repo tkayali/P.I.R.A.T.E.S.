@@ -1,9 +1,7 @@
 #First we need all the import statements for our lovely classes to work.
 from PUnit import Unit
 from PEnemy import Enemy
-from PQueen import Queen
 from PSonatu import Sonatu
-from PCombatUI import CombatUI
 from PGridspace import Gridspace
 from PMap import Map
 
