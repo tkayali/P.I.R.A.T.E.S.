@@ -48,6 +48,21 @@ class Map:
     #calculates path from gridspace1 to gridspace2
     #returns a list of indexes
     def calculate_path(self, gridspace1, gridspace2):
+	counter = 201
+	self.__gridspaces = []
+	for i in range(16):
+		self.__gridspaces.append([])
+	for j in range(13):
+		for i in range(16):
+			if i == 15 and j%2==1:
+				self.__gridspaces[i].append(1)
+			else:
+				if self.__global_gridspaces[counter].get_occupiable():
+					self.__gridspaces[i].append(0)
+					counter = counter - 1
+				else:
+					self.__gridspaces[i].append(1)
+					counter = counter - 1
     	gridspace1 = 201 - gridspace1
 	gridspace2 = 201 - gridspace2
         pos_x1 = (gridspace1 % 31) % 16
