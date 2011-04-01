@@ -41,7 +41,7 @@ class Unit:
 		self._alive = alive
 	
 	def get_unit_range(self):
-		return _unit_range
+		return self._unit_range
 	
 	def set_unit_range(self, unit_range):
 		self._unit_range = unit_range
