@@ -13,8 +13,8 @@ from direct.gui.OnscreenImage import OnscreenImage
 from direct.showbase.ShowBase import ShowBase
 from direct.showbase.DirectObject import DirectObject
 from direct.task import Task
-from pandac.PandaModules import TextureStage, TransparencyAttrib, DirectionalLight, AmbientLight, VBase4, CollisionTraverser, CollisionHandlerQueue, CollisionNode, BitMask32, CollisionRay
-from panda3d.core import loadPrcFile, ConfigVariableString
+from pandac.PandaModules import TextureStage, TransparencyAttrib, DirectionalLight, AmbientLight, VBase4, CollisionTraverser, CollisionHandlerQueue, CollisionNode, BitMask32, CollisionRay, NodePath
+from panda3d.core import loadPrcFile, ConfigVariableString, TextNode
 
 #Second we need the config variables. We'll ignore these for now.
 loadPrcFile("Config/Config.prc")
@@ -23,6 +23,7 @@ loadPrcFile("Config/Config.prc")
 class PIRATES(ShowBase):
 	__in_combat = True
 	__player_turn = True
+	__number_enemies_alive = 0
 
 	def __init__(self):
 		ShowBase.__init__(self)
@@ -111,6 +112,7 @@ class PIRATES(ShowBase):
 	def setup_combat(self):
 		#Set up attributes
 		self.__in_combat = True
+		self.__number_enemies_alive = 3
 
 		#Set up the camera for the Combat Menu
 		self.taskMgr.add(self.combat_camera_task, "Combat Camera")
@@ -142,6 +144,11 @@ class PIRATES(ShowBase):
 		self.combat_sonatu.lookAt(-1000, 0, 0)
 		self.combat_sonatu.reparentTo(self.render)
 		self.sonatu = Sonatu(107, 0)
+		
+		#Our lovely lists
+		self.monster_list = []
+		self.monster_model_list = []
+		self.gridspace_list = []
 
 		#Monster - Melee
 		self.melee_monster = self.loader.loadModel("Models\Monsters\octopus.egg")
@@ -152,6 +159,8 @@ class PIRATES(ShowBase):
 		self.melee_monster.setPos(17.321, -90, 1)
 		self.melee_monster.reparentTo(self.render)
 		self.melee = Enemy(94, 1)
+		self.monster_list.append(self.melee)
+		self.monster_model_list.append(self.melee_monster)
 
 		#Monster - Short
 		self.short_monster = self.loader.loadModel("Models\Monsters\conch.egg")
@@ -162,6 +171,8 @@ class PIRATES(ShowBase):
 		self.short_monster.setPos(17.321, -120, 0)
 		self.short_monster.reparentTo(self.render)
 		self.short = Enemy(125, 2)
+		self.monster_list.append(self.short)
+		self.monster_model_list.append(self.short_monster)
 
 		#Monster - Long
 		self.long_monster = self.loader.loadModel("Models\Monsters\serpent.egg")
@@ -171,10 +182,11 @@ class PIRATES(ShowBase):
 		self.long_monster.lookAt(1000, 0, 0)
 		self.long_monster.setPos(17.321, -60, 0)
 		self.long_monster.reparentTo(self.render)
-		self.long = Enemy(63, 3)
+		self.long = Enemy(63, 4)
+		self.monster_list.append(self.long)
+		self.monster_model_list.append(self.long_monster)
 		
 		#Create the hex grid
-		self.gridspace_list = []
 		y_counter = 0
 		hex_radius = 10
 		for j in range(6):
@@ -260,21 +272,21 @@ class PIRATES(ShowBase):
 
 	def combat_mouse_task(self):
 		if self.__player_turn:
-			self.move_sonatu()
-			self.update_text( self.__player_turn )
-			#print "Player turn begins"
-			#print "Sonatu's AP is .... : " + str(self.sonatu.getAP() )
-			if self.sonatu.getAP() < 1:
-				self.__player_turn = False
-				self.sonatu.end_turn()
-				#print "Player turn ends"
-				#print "After the end of Sonatu's turn, the AP is now ... : " + str(self.sonatu.getAP())
-				self.begin_enemy_turn()
-		
+			if self.__number_enemies_alive > 0:
+				self.sonatu_turn()
+				self.update_text( self.__player_turn )
+				if self.__number_enemies_alive < 1:
+					self.game_win_text.setText("YOU WIN!!! REJOICE!")
+
+				elif self.sonatu.getAP() < 1:
+					self.__player_turn = False
+					self.sonatu.end_turn()
+					self.begin_enemy_turn()
+				
 	def limbo_mouse_task(self):
 		print "Limbo"
 
-	def move_sonatu(self):
+	def sonatu_turn(self):
 		starting_gridspace = self.sonatu.get_gridspace()
 		if base.mouseWatcherNode.hasMouse():
 			self.mouse_position = base.mouseWatcherNode.getMouse()
@@ -283,15 +295,10 @@ class PIRATES(ShowBase):
 			if self.handler.getNumEntries() > 0:
 				self.handler.sortEntries()
 				ending_gridspace = int(self.handler.getEntry(0).getIntoNodePath().getTag("hex"))
+
 				#Check to see if empty hex is clicked
 				if self.gridspace_list[ending_gridspace].get_occupiable() and starting_gridspace is not ending_gridspace:
-					#print "Starting: " + str(starting_gridspace)
-					#print "Ending: " + str(ending_gridspace)
-					#print "Ending X: " + str(self.gridspace_list[ending_gridspace].get_x_position())
-					#print "Ending Y: " + str(self.gridspace_list[ending_gridspace].get_y_position())
 					path = self.combat_map.calculate_path(starting_gridspace, ending_gridspace)
-					#print "Path: " + str(path)
-					#print "Distance in hexes: " + str(len(path))
 					if len(path) <= self.sonatu.getAP()+1:
 						self.combat_sonatu.setPos( self.gridspace_list[ending_gridspace].get_x_position(), self.gridspace_list[ending_gridspace].get_y_position(), 1)
 						self.sonatu.set_gridspace(ending_gridspace)
@@ -300,35 +307,50 @@ class PIRATES(ShowBase):
 						self.gridspace_list[starting_gridspace].set_occupying_unit(None)
 						self.gridspace_list[ending_gridspace].set_occupying_unit(self.sonatu)
 						self.sonatu.setAP(self.sonatu.getAP()-len(path)+1)
+
 				#Check to see if enemy is clicked
 				elif self.gridspace_list[ending_gridspace].get_occupying_unit() is not None and starting_gridspace is not ending_gridspace:
 					distance = len(self.combat_map.calculate_crow_path(starting_gridspace, ending_gridspace))-1
 					if self.sonatu.getAP() > 1:
-						if distance == 1:
-							print "Attack with melee!"
-						elif distance == 2:
-							print "Attack with short!"
-						elif distance <=4:
-							print "Attack with long!"
-						else:
-							return
-						self.sonatu.setAP(self.sonatu.getAP()-2)
+						unit_attacked = self.gridspace_list[ending_gridspace].get_occupying_unit()
 
-	def move_enemy(self, enemy):		
+						if distance == 1:
+							self.attack_type_text.setText("Attack with melee!")
+							unit_attacked.setHP(unit_attacked.getHP() - 10)
+
+						elif distance == 2:
+							self.attack_type_text.setText("Attack with short!")
+							unit_attacked.setHP(unit_attacked.getHP() - 6 )
+
+						elif distance <=4:
+							self.attack_type_text.setText("Attack with long!")
+							unit_attacked.setHP(unit_attacked.getHP() - 4 )
+						else:
+							return	
+						
+						self.sonatu.setAP(self.sonatu.getAP()-2)
+						if unit_attacked.getHP() <= 0:
+							if unit_attacked.get_name() == "Melee":
+								self.melee_monster.removeNode()
+							elif unit_attacked.get_name() == "Short":
+								self.short_monster.removeNode()
+							elif unit_attacked.get_name() == "Long":
+								self.long_monster.removeNode()
+							
+							self.gridspace_list[ending_gridspace].set_occupying_unit(None)
+							self.gridspace_list[ending_gridspace].set_occupiable(True)
+							unit_attacked.set_alive(False)
+							self.__number_enemies_alive -= 1
+
+	def enemy_turn(self, enemy):		
 		starting_gridspace = enemy.get_gridspace()
 		sonatu_position = self.sonatu.get_gridspace()
 		path = self.combat_map.calculate_path(starting_gridspace, sonatu_position)
 		distance = len(path) - 1
-		#print "Starting: " + str(starting_gridspace)
-		#print "Sonatu's position: " + str(sonatu_position)
-		#print "Path: " + str(path)
-		#print "Distance in hexes: " + str(len(path))
-		#print "Unit range: " + str(enemy.get_unit_range())
-		#print "AP Before: " + str(enemy.getAP())
 		
 		if distance <= enemy.get_unit_range():
-			#print "Attack"
-			#print "Attack"
+			self.sonatu.setHP(self.sonatu.getHP() - enemy.get_damage()*2)
+			self.sonatu_health_text.setText( "HP: " + str(self.sonatu.getHP()))
 			enemy.setAP(0)
 			return True
 
@@ -340,8 +362,9 @@ class PIRATES(ShowBase):
 			elif enemy.get_name() == "Long":
 				self.long_monster.setPos( self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1)
 
-			#print "Ending: " + str(path[1])
-			#print "Ending: " + str(self.gridspace_list[path[1]])
+			self.sonatu.setHP(self.sonatu.getHP() - enemy.get_damage())
+			self.sonatu_health_text.setText( "HP: " + str(self.sonatu.getHP()))
+
 			self.gridspace_list[starting_gridspace].set_occupiable(True)
 			self.gridspace_list[starting_gridspace].set_occupying_unit(None)
 			self.gridspace_list[path[1]].set_occupiable(False)
@@ -357,9 +380,6 @@ class PIRATES(ShowBase):
 			elif enemy.get_name() == "Long":
 				self.long_monster.setPos( self.gridspace_list[path[2]].get_x_position(), self.gridspace_list[path[2]].get_y_position(), 1)
 
-			#self.melee_monster.setPos( self.gridspace_list[path[2]].get_x_position(), self.gridspace_list[path[2]].get_y_position(), 1)
-			#print "Ending: " + str(path[2])
-			#print "Ending: " + str(path[2])
 			self.gridspace_list[starting_gridspace].set_occupiable(True)
 			self.gridspace_list[starting_gridspace].set_occupying_unit(None)
 			self.gridspace_list[path[2]].set_occupiable(False)
@@ -368,33 +388,33 @@ class PIRATES(ShowBase):
 			enemy.set_gridspace(path[2])
 			return True
 
-		#print "AP After: " + str(enemy.getAP())
-	
 	def begin_enemy_turn(self):
-		#print "Enemy begins"
 		self.update_text( self.__player_turn )
-		melee_check = self.move_enemy(self.melee)
-		short_check = self.move_enemy(self.short)
-		long_check = self.move_enemy(self.long)
-		if melee_check and short_check and long_check:
-			#print "Entered here"
-			self.__player_turn = True
-			self.melee.end_turn()
-			self.short.end_turn()
-			self.long.end_turn()
-			#print "After the end of the turn the melee's AP is ... : " + str(self.melee.getAP())
-			#print "Enemy ends"
+		
+		for monster in self.monster_list:
+			if monster.get_alive():
+				self.enemy_turn(monster)
+				monster.end_turn()
 
-			#Don't add the code below until timed events have been figured out
-			#self.turn_text.setText("Your turn!")
-	
+		if self.sonatu.getHP() < 0:
+			self.game_over_text.setText("GAME OVER! DEAL WITH IT!")
+		
+		else:
+			self.__player_turn = True
+
 	def setup_text(self):
 		self.turn_text = OnscreenText( text = "Your turn!", pos = (0, .9, 0), scale = 0.065, fg = (1, 1, 1, 1) ) 
 		self.sonatu_health_text = OnscreenText( text= "HP: " + str(self.sonatu.getHP()), pos = (-.5, -.9, 0), scale = 0.05, fg = (1, 1, 1, 1) )
 		self.sonatu_ap_text = OnscreenText( text= "AP: " + str(self.sonatu.getAP()), pos = (-.5, -.8, 0), scale = 0.05, fg = (1, 1, 1, 1) )
+		self.attack_type_text = OnscreenText( text= "", pos = (0, .8, 0), scale = 0.06, fg = (1, 1, 1, 1) )
+		self.game_over_text = OnscreenText( text= "", pos = (0, 0, 0), scale = 0.1, fg = (1, 1, 1, 1), align = TextNode.ACenter )
+		self.game_win_text = OnscreenText( scale = 0.1, fg = (1, 1, 1, 1), align = TextNode.ACenter)
 		self.turn_text.reparentTo(render2d)
 		self.sonatu_health_text.reparentTo(render2d)
 		self.sonatu_ap_text.reparentTo(render2d)
+		self.attack_type_text.reparentTo(render2d)
+		self.game_over_text.reparentTo(render2d)
+		self.game_win_text.reparentTo(render2d)
 
 	def update_text(self, player_turn):
 		if player_turn:
