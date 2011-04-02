@@ -156,6 +156,98 @@ class Map:
 		true_path.append(201-(path[i][1] * 16 + path[i][0] - path[i][1] / 2))
 	return true_path
 
+    #Calculate true distance between gridspaces, as the crow flies
+    def calculate_crow_path(self, gridspace1, gridspace2):
+    	gridspace1 = 201 - gridspace1
+	gridspace2 = 201 - gridspace2
+        pos_x1 = (gridspace1 % 31) % 16
+	pos_y1 = (gridspace1/31)*2+(gridspace1 % 31)/16
+        pos_x2 = (gridspace2 % 31) % 16
+	pos_y2 = (gridspace2/31)*2+(gridspace2 % 31)/16
+	maze = []
+        for i in range(16):
+            col=[]
+            for j in range(13):
+                col.append(0)
+            maze.append(col)
+        q = Queue.Queue()
+        q.put([pos_x1,pos_y1])
+        maze[pos_x1][pos_y1] = 2
+        maze[pos_x2][pos_y2] = 3
+        found = False
+        while not(found):
+            next = q.get()
+            if next[1] > 0:
+                if maze[next[0]][next[1]-1] == 3:
+                    found = True
+                    maze[next[0]][next[1]-1] = [next[0], next[1]]
+                elif maze[next[0]][next[1]-1] == 0:
+                    maze[next[0]][next[1]-1] = [next[0], next[1]]
+                    q.put([next[0],next[1]-1])
+            if next[0] > 0:
+	    	if next[1] > 0 and next[1] % 2 == 0:
+			if maze[next[0]-1][next[1]-1] == 3:
+				found = True
+				maze[next[0]-1][next[1]-1] = [next[0],next[1]]
+			elif maze[next[0]-1][next[1]-1] == 0:
+				maze[next[0]-1][next[1]-1] = [next[0],next[1]]
+				q.put([next[0]-1,next[1]-1])
+		if next[1] < 12 and next[1] % 2 == 0:
+			if maze[next[0]-1][next[1]+1] == 3:
+				found = True
+				maze[next[0]-1][next[1]+1] = [next[0],next[1]]
+			elif maze[next[0]-1][next[1]+1] == 0:
+				maze[next[0]-1][next[1]+1] = [next[0],next[1]]
+				q.put([next[0]-1,next[1]+1])
+                if maze[next[0]-1][next[1]] == 3:
+                    found = True
+                    maze[next[0]-1][next[1]] = [next[0], next[1]]
+                elif maze[next[0]-1][next[1]] == 0:
+                    maze[next[0]-1][next[1]] = [next[0], next[1]]
+                    q.put([next[0]-1,next[1]])
+            if next[1] < 12:
+                if maze[next[0]][next[1]+1] == 3:
+                    found = True
+                    maze[next[0]][next[1]+1] = [next[0], next[1]]
+                elif maze[next[0]][next[1]+1] == 0:
+                    maze[next[0]][next[1]+1] = [next[0], next[1]]
+                    q.put([next[0],next[1]+1])
+            if next[0] < 15:
+                if next[1] > 0 and next[1] % 2 == 1:
+                    if maze[next[0]+1][next[1]-1] == 3:
+                        found = True
+                        maze[next[0]+1][next[1]-1] = [next[0], next[1]]
+                    elif maze[next[0]+1][next[1]-1] == 0:
+                        maze[next[0]+1][next[1]-1] = [next[0], next[1]]
+                        q.put([next[0]+1,next[1]-1])
+		if next[1] < 12 and next[1] % 2 == 1:
+                    if maze[next[0]+1][next[1]+1] == 3:
+                        found = True
+                        maze[next[0]+1][next[1]+1] = [next[0], next[1]]
+                    elif maze[next[0]+1][next[1]+1] == 0:
+                        maze[next[0]+1][next[1]+1] = [next[0], next[1]]
+                        q.put([next[0]+1,next[1]+1])
+                if maze[next[0]+1][next[1]] == 3:
+                    found = True
+                    maze[next[0]+1][next[1]] = [next[0], next[1]]
+                elif maze[next[0]+1][next[1]] == 0:
+                    maze[next[0]+1][next[1]] = [next[0], next[1]]
+                    q.put([next[0]+1,next[1]])
+        there = False
+        curr = [pos_x2,pos_y2]
+        path = []
+        while not(there):
+            path.append(curr)
+            curr = maze[curr[0]][curr[1]]
+            if curr == 2:
+                there = True
+        path.reverse()
+	path_length = len(path)
+	true_path = []
+	for i in range(path_length):
+		true_path.append(201-(path[i][1] * 16 + path[i][0] - path[i][1] / 2))
+	return true_path
+
     def to_string(self):
         data = []
 	for i in range (16):

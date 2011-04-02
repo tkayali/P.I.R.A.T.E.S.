@@ -283,6 +283,7 @@ class PIRATES(ShowBase):
 			if self.handler.getNumEntries() > 0:
 				self.handler.sortEntries()
 				ending_gridspace = int(self.handler.getEntry(0).getIntoNodePath().getTag("hex"))
+				#Check to see if empty hex is clicked
 				if self.gridspace_list[ending_gridspace].get_occupiable() and starting_gridspace is not ending_gridspace:
 					#print "Starting: " + str(starting_gridspace)
 					#print "Ending: " + str(ending_gridspace)
@@ -296,7 +297,22 @@ class PIRATES(ShowBase):
 						self.sonatu.set_gridspace(ending_gridspace)
 						self.gridspace_list[ending_gridspace].set_occupiable(False)
 						self.gridspace_list[starting_gridspace].set_occupiable(True)
+						self.gridspace_list[starting_gridspace].set_occupying_unit(None)
+						self.gridspace_list[ending_gridspace].set_occupying_unit(self.sonatu)
 						self.sonatu.setAP(self.sonatu.getAP()-len(path)+1)
+				#Check to see if enemy is clicked
+				elif self.gridspace_list[ending_gridspace].get_occupying_unit() is not None and starting_gridspace is not ending_gridspace:
+					distance = len(self.combat_map.calculate_crow_path(starting_gridspace, ending_gridspace))-1
+					if self.sonatu.getAP() > 1:
+						if distance == 1:
+							print "Attack with melee!"
+						elif distance == 2:
+							print "Attack with short!"
+						elif distance <=4:
+							print "Attack with long!"
+						else:
+							return
+						self.sonatu.setAP(self.sonatu.getAP()-2)
 
 	def move_enemy(self, enemy):		
 		starting_gridspace = enemy.get_gridspace()
@@ -327,7 +343,9 @@ class PIRATES(ShowBase):
 			#print "Ending: " + str(path[1])
 			#print "Ending: " + str(self.gridspace_list[path[1]])
 			self.gridspace_list[starting_gridspace].set_occupiable(True)
+			self.gridspace_list[starting_gridspace].set_occupying_unit(None)
 			self.gridspace_list[path[1]].set_occupiable(False)
+			self.gridspace_list[path[1]].set_occupying_unit(enemy)
 			enemy.set_gridspace(path[1])
 			enemy.setAP(0)
 			return True
@@ -343,7 +361,9 @@ class PIRATES(ShowBase):
 			#print "Ending: " + str(path[2])
 			#print "Ending: " + str(path[2])
 			self.gridspace_list[starting_gridspace].set_occupiable(True)
+			self.gridspace_list[starting_gridspace].set_occupying_unit(None)
 			self.gridspace_list[path[2]].set_occupiable(False)
+			self.gridspace_list[path[2]].set_occupying_unit(enemy)
 			enemy.setAP(0)
 			enemy.set_gridspace(path[2])
 			return True
