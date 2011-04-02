@@ -25,7 +25,7 @@ class Enemy(Unit):
 			self.__accuracy = .85
 			self.__name = "Short"
 
-		elif _unit_range == 3:
+		elif _unit_range == 4:
 			self.__damage = 3
 			self.__accuracy = .80
 			self.__name = "Long"
@@ -39,6 +39,9 @@ class Enemy(Unit):
 
 	def get_name(self):
 		return self.__name
+	
+	def get_damage(self):
+		return self.__damage
 	
 	def to_string(self):
 		Unit.to_string(self)
