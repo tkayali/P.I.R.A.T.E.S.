@@ -27,7 +27,7 @@ class PIRATES(ShowBase):
 
 	def __init__(self):
 		ShowBase.__init__(self)
-		base.disableMouse()	
+		#base.disableMouse()	
 		
 		self.limbo()
 		self.mouseTask = taskMgr.add(self.mouse_task, 'mouse_task')
@@ -48,7 +48,7 @@ class PIRATES(ShowBase):
 		self.__in_combat = False
 
 		#Set up the camera
-		self.taskMgr.add(self.limbo_camera_task, "Limbo Camera")
+		#self.taskMgr.add(self.limbo_camera_task, "Limbo Camera")
 
 		#Set up the Limbo Sonatu
 		#self.limbo_sonatu = self.loader.loadModel("Models\Limbo\Limbo.egg")
@@ -83,8 +83,8 @@ class PIRATES(ShowBase):
 
 		#Set up the characters
 		#Farthing
-		self.farthing = self.loader.loadModel("Models\Characters\Farthing\Farthing.egg")
-		self.farthing.setPos(-310.762, -3.750, -24.114)
+		self.farthing = self.loader.loadModel("Models\Characters\Farthing.egg")
+		self.farthing.setPos(-31, 60, -34)
 		self.farthing.setHpr(0, 0, 0)
 		self.farthing.setSx(.85)
 		self.farthing.setSy(.85)
@@ -92,8 +92,8 @@ class PIRATES(ShowBase):
 		self.farthing.reparentTo(self.render)
 
 		#Checkers
-		self.checkers = self.loader.loadModel("Models\Characters\Farthing\Farthing.egg")
-		self.checkers.setPos(-210.892, 35.105, -41.475)
+		self.checkers = self.loader.loadModel("Models\Characters\Checkers.egg")
+		self.checkers.setPos(-36, -62, 3)
 		self.checkers.setHpr(-45, 0, 0)
 		self.checkers.setSx(.85)
 		self.checkers.setSy(.85)
@@ -101,9 +101,9 @@ class PIRATES(ShowBase):
 		self.checkers.reparentTo(self.render)
 
 		#Ivan
-		self.ivan = self.loader.loadModel("Models\Characters\Farthing\Farthing.egg")
-		self.ivan.setPos(-150, 20, -70)
-		self.ivan.setHpr(-45, 0, 0)
+		self.ivan = self.loader.loadModel("Models\Characters\Ivan.egg")
+		self.ivan.setPos(-54, -113, -10)
+		self.ivan.setHpr(0, 0, 0)
 		self.ivan.setSx(.85)
 		self.ivan.setSy(.85)
 		self.ivan.setSz(.85)
@@ -252,7 +252,6 @@ class PIRATES(ShowBase):
 		self.ivan.hide()
 		render.clearLight(self.sunlight_nodepath)
 		render.clearLight(self.ambientlight_nodepath)
-
 	
 	def combat_hide_all(self):
 		self.map_grid.hide()
@@ -316,15 +315,24 @@ class PIRATES(ShowBase):
 
 						if distance == 1:
 							self.attack_type_text.setText("Attack with melee!")
-							unit_attacked.setHP(unit_attacked.getHP() - 10)
+							if random.randint(1, 100) <= 90:
+								unit_attacked.setHP(unit_attacked.getHP() - 10)
+							else:
+								self.attack_type_text.setText("Attack missed! DOH")
 
 						elif distance == 2:
 							self.attack_type_text.setText("Attack with short!")
-							unit_attacked.setHP(unit_attacked.getHP() - 6 )
+							if random.randint(1, 100) <= 85:
+								unit_attacked.setHP(unit_attacked.getHP() - 6 )
+							else:
+								self.attack_type_text.setText("Attack missed! DOH")
 
 						elif distance <=4:
 							self.attack_type_text.setText("Attack with long!")
-							unit_attacked.setHP(unit_attacked.getHP() - 4 )
+							if random.randint(1, 100) <= 80:
+								unit_attacked.setHP(unit_attacked.getHP() - 4 )
+							else:
+								self.attack_type_text.setText("Attack missed! DOH")
 						else:
 							return	
 						
@@ -349,8 +357,14 @@ class PIRATES(ShowBase):
 		distance = len(path) - 1
 		
 		if distance <= enemy.get_unit_range():
-			self.sonatu.setHP(self.sonatu.getHP() - enemy.get_damage()*2)
-			self.sonatu_health_text.setText( "HP: " + str(self.sonatu.getHP()))
+			if random.randint(1, 100) <= enemy.get_accuracy():
+				self.sonatu.setHP(self.sonatu.getHP() - enemy.get_damage())
+				self.sonatu_health_text.setText( "HP: " + str(self.sonatu.getHP()))
+
+			if random.randint(1, 100) <= enemy.get_accuracy():
+				self.sonatu.setHP(self.sonatu.getHP() - enemy.get_damage())
+				self.sonatu_health_text.setText( "HP: " + str(self.sonatu.getHP()))
+
 			enemy.setAP(0)
 			return True
 
@@ -362,8 +376,9 @@ class PIRATES(ShowBase):
 			elif enemy.get_name() == "Long":
 				self.long_monster.setPos( self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1)
 
-			self.sonatu.setHP(self.sonatu.getHP() - enemy.get_damage())
-			self.sonatu_health_text.setText( "HP: " + str(self.sonatu.getHP()))
+			if random.randint(1, 100) <= enemy.get_accuracy():
+				self.sonatu.setHP(self.sonatu.getHP() - enemy.get_damage())
+				self.sonatu_health_text.setText( "HP: " + str(self.sonatu.getHP()))
 
 			self.gridspace_list[starting_gridspace].set_occupiable(True)
 			self.gridspace_list[starting_gridspace].set_occupying_unit(None)
@@ -396,7 +411,7 @@ class PIRATES(ShowBase):
 				self.enemy_turn(monster)
 				monster.end_turn()
 
-		if self.sonatu.getHP() < 0:
+		if self.sonatu.getHP() <= 0:
 			self.game_over_text.setText("GAME OVER! DEAL WITH IT!")
 		
 		else:
