@@ -40,8 +40,20 @@ class Enemy(Unit):
 	def get_name(self):
 		return self.__name
 	
+	def set_name(self, name):
+		self.__name = name
+	
 	def get_damage(self):
 		return self.__damage
+
+	def set_damage(self, damage):
+		self.__damage = damage
+
+	def get_accuracy(self):
+		return self.__accuracy
+	
+	def set_accuracy(self, accuracy):
+		self.__accuracy = accuracy
 	
 	def to_string(self):
 		Unit.to_string(self)
