@@ -81,6 +81,7 @@ audio-library-name p3openal_audio
 # Enable the use of the new movietexture class.
 
 use-movietexture #t
+textures-auto-power-2 #t
 
 # The new version of panda supports hardware vertex animation, but it's not quite ready
 
