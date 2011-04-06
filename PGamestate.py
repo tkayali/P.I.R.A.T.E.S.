@@ -179,16 +179,16 @@ class PIRATES(ShowBase):
 
 		#Combat water
 		self.water = self.loader.loadModel("square.egg")
-		self.water.setSx(1000)
-		self.water.setSy(1000)
-		self.water.setPos(0,0,-1)
+		self.water.setSx(600)
+		self.water.setSy(600)
+		self.water.setPos(150, -150, -1)
 		ts = TextureStage('ts')
 		#self.waterTexture = loader.loadTexture("Textures\Water.jpg")
-		self.waterTexture = loader.loadTexture("Models\Limbo\Sea5.mpg")
+		self.waterTexture = loader.loadTexture("Textures\Sea.mpg")
 		self.waterTexture.setLoop(True)
-		#self.waterTexture.setPlayRate()
+		#self.waterTexture.setPlayRate(2)
 		#self.water.setTexture(ts, self.waterTexture)
-		#self.water.setTexScale(ts, 4)
+		#self.water.setTexScale(ts, 1.5)
 		self.water.setTexture(self.waterTexture)
 		self.water.reparentTo(self.render)
 
@@ -292,6 +292,7 @@ class PIRATES(ShowBase):
 		self.short_monster.setLight(self.sunlight_nodepath)
 		self.long_monster.setLight(self.sunlight_nodepath)
 		self.combat_sonatu.setLight(self.sunlight_nodepath)
+		self.water.setLight(self.sunlight_nodepath)
 
 		self.ambientlight = AmbientLight("combat_ambient")
 		self.ambientlight.setColor(VBase4(0.2, 0.2, 0.2, 1))
@@ -300,6 +301,7 @@ class PIRATES(ShowBase):
 		self.short_monster.setLight(self.ambientlight_nodepath)
 		self.long_monster.setLight(self.ambientlight_nodepath)
 		self.combat_sonatu.setLight(self.ambientlight_nodepath)
+		self.water.setLight(self.ambientlight_nodepath)
 
 	def limbo_hide_all(self):
 		self.limbo_sonatu.hide()
@@ -311,12 +313,13 @@ class PIRATES(ShowBase):
 		render.clearLight(self.ambientlight_nodepath)
 	
 	def combat_hide_all(self):
+		for i in range(len(self.monster_list)):
+			if self.monster_list[i].get_alive():
+				self.monster_model_list[i].hide()
+
 		self.map_grid.hide()
 		self.water.hide()
 		self.combat_sonatu.hide()
-		self.melee_monster.hide()
-		self.short_monster.hide()
-		self.long_monster.hide()
 		render.clearLight(self.sunlight_nodepath)
 		render.clearLight(self.ambientlight_nodepath)
 		self.turn_text.hide()
@@ -466,11 +469,17 @@ class PIRATES(ShowBase):
 
 		elif distance == enemy.get_unit_range() + 1:
 			if enemy.get_name() == "Melee":
-				self.melee_monster.setPos( self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1)
+				self.melee_interval1 = self.melee_monster.posInterval(1, Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), Point3(self.melee_monster.getX(), self.melee_monster.getY(), 1), "meleeMove1")
+				self.melee_monster_sequence = Sequence(	self.delay, self.melee_interval1 )
+				self.melee_monster_sequence.start()
 			elif enemy.get_name() == "Short":
-				self.short_monster.setPos( self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1)
+				self.short_interval1 = self.short_monster.posInterval(1, Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), Point3(self.short_monster.getX(), self.short_monster.getY(), 1), "shortMove1")
+				self.short_monster_sequence = Sequence(	self.delay, self.short_interval1 )
+				self.short_monster_sequence.start()
 			elif enemy.get_name() == "Long":
-				self.long_monster.setPos( self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1)
+				self.long_interval1 = self.long_monster.posInterval(1, Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), Point3(self.long_monster.getX(), self.long_monster.getY(), 1), "shortMove1")
+				self.long_monster_sequence = Sequence(	self.delay, self.long_interval1 )
+				self.long_monster_sequence.start()
 
 			if random.randint(1, 100) <= enemy.get_accuracy():
 				self.sonatu.setHP(self.sonatu.getHP() - enemy.get_damage())
