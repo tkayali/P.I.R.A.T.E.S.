@@ -13,8 +13,11 @@ from direct.gui.OnscreenImage import OnscreenImage
 from direct.showbase.ShowBase import ShowBase
 from direct.showbase.DirectObject import DirectObject
 from direct.task import Task
-from pandac.PandaModules import TextureStage, TransparencyAttrib, DirectionalLight, AmbientLight, VBase4, CollisionTraverser, CollisionHandlerQueue, CollisionNode, BitMask32, CollisionRay, NodePath
-from panda3d.core import loadPrcFile, ConfigVariableString, TextNode
+from pandac.PandaModules import TextureStage, TransparencyAttrib, DirectionalLight, AmbientLight, VBase4, CollisionTraverser, CollisionHandlerQueue, CollisionNode, BitMask32, CollisionRay, NodePath, CollisionSphere, MovieTexture
+from panda3d.core import loadPrcFile, ConfigVariableString, TextNode, Point3
+from direct.interval.MetaInterval import Sequence
+from direct.interval.FunctionInterval import Wait
+from pandac.PandaModules import CInterval
 
 #Second we need the config variables. We'll ignore these for now.
 loadPrcFile("Config/Config.prc")
@@ -27,8 +30,8 @@ class PIRATES(ShowBase):
 
 	def __init__(self):
 		ShowBase.__init__(self)
-		#base.disableMouse()	
-		
+		base.disableMouse()	
+		self.collision_detection()
 		self.limbo()
 		self.mouseTask = taskMgr.add(self.mouse_task, 'mouse_task')
 		self.accept("escape", sys.exit)
@@ -37,7 +40,7 @@ class PIRATES(ShowBase):
 		self.accept("a", self.combat_hide_all )
 		self.accept("z", self.limbo )
 		self.accept("g", self.printCamera )
-		
+
 	def printCamera(self):	
 		print self.camera.getX()
 		print self.camera.getY()
@@ -48,23 +51,23 @@ class PIRATES(ShowBase):
 		self.__in_combat = False
 
 		#Set up the camera
-		#self.taskMgr.add(self.limbo_camera_task, "Limbo Camera")
+		self.taskMgr.add(self.limbo_camera_task, "Limbo Camera")
 
 		#Set up the Limbo Sonatu
-		#self.limbo_sonatu = self.loader.loadModel("Models\Limbo\Limbo.egg")
-		self.limbo_sonatu = self.loader.loadModel("Models\Sonatu\Sonatu.egg")
+		self.limbo_sonatu = self.loader.loadModel("Models\Limbo\Limbo.egg")
+		#self.limbo_sonatu = self.loader.loadModel("Models\Sonatu\Sonatu.egg")
 		self.limbo_sonatu.setPos(0, 0, 0)
 		self.limbo_sonatu.setHpr(-90, 0, 0)
 		self.limbo_sonatu.reparentTo(self.render)
 
 		#Set up the background sky
 		self.sky = self.loader.loadModel("square.egg")
-		self.sky.setSx(1000)
-		self.sky.setSy(600)
-		self.sky.setPos(-607.695, 436.47, 15.257)
-		self.sky.setHpr(self.camera, 0, 90, 0)
+		self.sky.setSx(1200)
+		self.sky.setSy(400)
+		self.sky.setPos(-350, 470, 150)
+		self.sky.setHpr(45, 90, 0)
 		ts = TextureStage('ts')
-		self.sky.setTexture(ts,loader.loadTexture("Textures\Sky.png"))
+		self.sky.setTexture(ts,loader.loadTexture("Models\Limbo\Sky.jpg"))
 		self.sky.setTexRotate(ts, 180)
 		self.sky.reparentTo(self.render)
 
@@ -83,31 +86,75 @@ class PIRATES(ShowBase):
 
 		#Set up the characters
 		#Farthing
-		self.farthing = self.loader.loadModel("Models\Characters\Farthing.egg")
-		self.farthing.setPos(-31, 60, -34)
-		self.farthing.setHpr(0, 0, 0)
-		self.farthing.setSx(.85)
-		self.farthing.setSy(.85)
-		self.farthing.setSz(.85)
-		self.farthing.reparentTo(self.render)
+		self.farthing = self.limbo_sonatu.find("**/Farthing1")
+		self.farthing_csphere = CollisionSphere(-70, -130, 125, 15)
+		self.farthing_node = self.farthing.attachNewNode(CollisionNode("farthing"))
+		self.farthing_node.node().addSolid(self.farthing_csphere)
+		#self.farthing_node.show()
+		self.farthing_node.setTag("name", "Farthing")
 
 		#Checkers
-		self.checkers = self.loader.loadModel("Models\Characters\Checkers.egg")
-		self.checkers.setPos(-36, -62, 3)
-		self.checkers.setHpr(-45, 0, 0)
-		self.checkers.setSx(.85)
-		self.checkers.setSy(.85)
-		self.checkers.setSz(.85)
-		self.checkers.reparentTo(self.render)
+		self.checkers = self.limbo_sonatu.find("**/Checkers")
+		self.checkers_csphere = CollisionSphere(5, -100, 95, 15)
+		self.checkers_node = self.checkers.attachNewNode(CollisionNode("checkers"))
+		self.checkers_node.node().addSolid(self.checkers_csphere)
+		#self.checkers_node.show()
+		self.checkers_node.setTag("name", "Checkers")
+		
+		#Ivan
+		self.ivan = self.limbo_sonatu.find("**/Ironhide1")
+		self.ivan_csphere = CollisionSphere(-45, -42, 95, 15)
+		self.ivan_node = self.ivan.attachNewNode(CollisionNode("checkers"))
+		self.ivan_node.node().addSolid(self.ivan_csphere)
+		#self.ivan_node.show()
+		self.ivan_node.setTag("name", "Ivan")
+
+		#Michael
+		self.michael = self.limbo_sonatu.find("**/Michael1")
+		self.michael_csphere = CollisionSphere(18, 10, 95, 15)
+		self.michael_node = self.michael.attachNewNode(CollisionNode("checkers"))
+		self.michael_node.node().addSolid(self.michael_csphere)
+		#self.michael_node.show()
+		self.michael_node.setTag("name", "Michael")
+
+		#Farthing
+		#self.farthing = self.loader.loadModel("Models\Characters\Farthing.egg")
+		#self.farthing.setPos(-31, 60, -34)
+		#self.farthing.setHpr(0, 0, 0)
+		#self.farthing.setSx(.85)
+		#self.farthing.setSy(.85)
+		#self.farthing.setSz(.85)
+		#self.farthing.setTag("name", "Farthing")
+		#self.farthing.reparentTo(self.render)
+
+		#Checkers
+		#self.checkers = self.loader.loadModel("Models\Characters\Checkers.egg")
+		#self.checkers.setPos(-36, -62, 3)
+		#self.checkers.setHpr(-45, 0, 0)
+		#self.checkers.setSx(.85)
+		#self.checkers.setSy(.85)
+		#self.checkers.setSz(.85)
+		#self.checkers.setTag("name", "Checkers")
+		#self.checkers.reparentTo(self.render)
 
 		#Ivan
-		self.ivan = self.loader.loadModel("Models\Characters\Ivan.egg")
-		self.ivan.setPos(-54, -113, -10)
-		self.ivan.setHpr(0, 0, 0)
-		self.ivan.setSx(.85)
-		self.ivan.setSy(.85)
-		self.ivan.setSz(.85)
-		self.ivan.reparentTo(self.render)
+		#self.ivan = self.loader.loadModel("Models\Characters\Ivan.egg")
+		#self.ivan.setPos(-54, -113, -10)
+		#self.ivan.setHpr(0, 0, 0)
+		#self.ivan.setSx(.85)
+		#self.ivan.setSy(.85)
+		#self.ivan.setSz(.85)
+		#self.ivan.setTag("name", "Ivan")
+		#self.ivan.reparentTo(self.render)
+
+		#Michael
+
+	def reset_combat(self):
+		#Reset up attributes
+		self.__player_turn = True
+
+		self.combat_hide_all()
+		self.setup_combat()
 		
 	def setup_combat(self):
 		#Set up attributes
@@ -123,7 +170,12 @@ class PIRATES(ShowBase):
 		self.combatHUD.reparentTo(render2d)
 
 		#Set up collision detection
-		self.combat_collision_detection()
+		#self.combat_collision_detection()
+
+		#Set up sequences
+		self.melee_monster_sequence = Sequence()
+		self.short_monster_sequence = Sequence()
+		self.long_monster_sequence = Sequence()
 
 		#Combat water
 		self.water = self.loader.loadModel("square.egg")
@@ -131,8 +183,13 @@ class PIRATES(ShowBase):
 		self.water.setSy(1000)
 		self.water.setPos(0,0,-1)
 		ts = TextureStage('ts')
-		self.water.setTexture(ts,loader.loadTexture("Textures\Water.jpg"))
-		self.water.setTexScale(ts,4)
+		#self.waterTexture = loader.loadTexture("Textures\Water.jpg")
+		self.waterTexture = loader.loadTexture("Models\Limbo\Sea5.mpg")
+		self.waterTexture.setLoop(True)
+		#self.waterTexture.setPlayRate()
+		#self.water.setTexture(ts, self.waterTexture)
+		#self.water.setTexScale(ts, 4)
+		self.water.setTexture(self.waterTexture)
 		self.water.reparentTo(self.render)
 
 		#Combat Sonatu
@@ -258,8 +315,17 @@ class PIRATES(ShowBase):
 		self.water.hide()
 		self.combat_sonatu.hide()
 		self.melee_monster.hide()
+		self.short_monster.hide()
+		self.long_monster.hide()
 		render.clearLight(self.sunlight_nodepath)
 		render.clearLight(self.ambientlight_nodepath)
+		self.turn_text.hide()
+		self.sonatu_health_text.hide()
+		self.sonatu_ap_text.hide()
+		self.attack_type_text.hide()
+		self.game_over_text.hide()
+		self.game_win_text.hide()
+		self.combatHUD.hide()
 
 	def mouse_task(self, task):
 		if base.mouseWatcherNode.hasMouse():
@@ -268,7 +334,7 @@ class PIRATES(ShowBase):
 			else:
 				self.accept("mouse1", self.limbo_mouse_task)
 		return Task.cont
-
+	
 	def combat_mouse_task(self):
 		if self.__player_turn:
 			if self.__number_enemies_alive > 0:
@@ -283,11 +349,18 @@ class PIRATES(ShowBase):
 					self.begin_enemy_turn()
 				
 	def limbo_mouse_task(self):
-		print "Limbo"
+		if base.mouseWatcherNode.hasMouse():
+			self.mouse_position = base.mouseWatcherNode.getMouse()
+			self.collision_ray.setFromLens(base.camNode, self.mouse_position.getX(), self.mouse_position.getY())
+			self.traverser.traverse(render)
+			if self.handler.getNumEntries() > 0:
+				self.handler.sortEntries()
+				self.begin_dialogue(self.handler.getEntry(0).getIntoNodePath().getTag("name"))
+				
 
 	def sonatu_turn(self):
 		starting_gridspace = self.sonatu.get_gridspace()
-		if base.mouseWatcherNode.hasMouse():
+		if base.mouseWatcherNode.hasMouse() and not self.melee_monster_sequence.isPlaying() and not self.short_monster_sequence.isPlaying() and not self.long_monster_sequence.isPlaying():
 			self.mouse_position = base.mouseWatcherNode.getMouse()
 			self.collision_ray.setFromLens(base.camNode, self.mouse_position.getX(), self.mouse_position.getY())
 			self.traverser.traverse(render)
@@ -350,6 +423,29 @@ class PIRATES(ShowBase):
 							unit_attacked.set_alive(False)
 							self.__number_enemies_alive -= 1
 
+	def begin_dialogue(self, character):
+		self.taskMgr.remove("Limbo Camera")
+		if character == "Farthing":
+			self.dialogue_box = OnscreenImage(image = 'Textures\DialogueBox.png', pos = (0, 0, .5), scale = (0.3, 1, .25), parent = self.farthing_node)			       #DO WE REALLY WANT TO DO THE BOX LIKE THAT?! I'D PREFER IT IF THERE WAS ONE BOX FOR ALL OF THEM!!
+			self.dialogue_box.reparentTo(render2d)
+			print "Farthing speaks!"
+			self.taskMgr.add(self.limbo_camera_task_farthing, "Michal Camera")
+			return
+		elif character == "Ivan":
+			print "Ivan speaks!"
+			self.taskMgr.add(self.limbo_camera_task_ivan, "Michal Camera")
+			return
+		elif character == "Checkers":
+			print "Checkers speaks!"
+			self.taskMgr.add(self.limbo_camera_task_checkers, "Michal Camera")
+			return
+		elif character == "Michael":
+			print "Michael speaks!"
+			self.taskMgr.add(self.limbo_camera_task_michael, "Michal Camera")
+
+			#self.limbo_hide_all()
+			#self.setup_combat()
+
 	def enemy_turn(self, enemy):		
 		starting_gridspace = enemy.get_gridspace()
 		sonatu_position = self.sonatu.get_gridspace()
@@ -388,12 +484,24 @@ class PIRATES(ShowBase):
 			enemy.setAP(0)
 			return True
 		else:
+			self.delay = Wait(1)
 			if enemy.get_name() == "Melee":
-				self.melee_monster.setPos( self.gridspace_list[path[2]].get_x_position(), self.gridspace_list[path[2]].get_y_position(), 1)
+				self.melee_interval1 = self.melee_monster.posInterval(1, Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), Point3(self.melee_monster.getX(), self.melee_monster.getY(), 1), "meleeMove1")
+				self.melee_interval2 = self.melee_monster.posInterval( 1, Point3(self.gridspace_list[path[2]].get_x_position(), self.gridspace_list[path[2]].get_y_position(), 1), Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), "meleeMove2")
+				self.melee_monster_sequence = Sequence(	self.delay, self.melee_interval1, self.melee_interval2	)
+				self.melee_monster_sequence.start()
+
 			elif enemy.get_name() == "Short":
-				self.short_monster.setPos( self.gridspace_list[path[2]].get_x_position(), self.gridspace_list[path[2]].get_y_position(), 1)
+				self.short_interval1 = self.short_monster.posInterval(1, Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), Point3(self.short_monster.getX(), self.short_monster.getY(), 1), "shortMove1")
+				self.short_interval2 = self.short_monster.posInterval( 1, Point3(self.gridspace_list[path[2]].get_x_position(), self.gridspace_list[path[2]].get_y_position(), 1), Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), "shortMove2")
+				self.short_monster_sequence = Sequence(	self.delay, self.short_interval1, self.short_interval2	)
+				self.short_monster_sequence.start()
+
 			elif enemy.get_name() == "Long":
-				self.long_monster.setPos( self.gridspace_list[path[2]].get_x_position(), self.gridspace_list[path[2]].get_y_position(), 1)
+				self.long_interval1 = self.long_monster.posInterval(1, Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), Point3(self.long_monster.getX(), self.long_monster.getY(), 1), "longMove1")
+				self.long_interval2 = self.long_monster.posInterval( 1, Point3(self.gridspace_list[path[2]].get_x_position(), self.gridspace_list[path[2]].get_y_position(), 1), Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), "longMove2")
+				self.long_monster_sequence = Sequence( self.delay, self.long_interval1, self.long_interval2 )
+				self.long_monster_sequence.start()
 
 			self.gridspace_list[starting_gridspace].set_occupiable(True)
 			self.gridspace_list[starting_gridspace].set_occupying_unit(None)
@@ -413,6 +521,7 @@ class PIRATES(ShowBase):
 
 		if self.sonatu.getHP() <= 0:
 			self.game_over_text.setText("GAME OVER! DEAL WITH IT!")
+			self.reset_combat()
 		
 		else:
 			self.__player_turn = True
@@ -447,11 +556,27 @@ class PIRATES(ShowBase):
 		return Task.cont
 
 	def limbo_camera_task(self, task):
-		self.camera.setPos(-71.832, -170.0494, -14.609)
-		self.camera.setHpr(32.399, 0.875, -0.152)
+		self.camera.setPos(50.732, -130.826, 112.665)
+		self.camera.setHpr(32.99, 0.875, -0.152)
 		return Task.cont
 
-	def combat_collision_detection(self):
+	def limbo_camera_task_michael(self, task):
+		self.camera.setPos(41.752, -60.644, 103.902)
+		return Task.cont
+
+	def limbo_camera_task_farthing(self, task):
+		self.camera.setPos(-96.343, 44.415, 134.102)
+		return Task.cont
+	
+	def limbo_camera_task_ivan(self, task):
+		self.camera.setPos(3.764, -30.557, 92.994)
+		return Task.cont
+
+	def limbo_camera_task_checkers(self, task):
+		self.camera.setPos(-68.949, -49.766, 100.538)
+		return Task.cont
+
+	def collision_detection(self):
 		self.traverser = CollisionTraverser()
 		self.handler = CollisionHandlerQueue()
 		self.collision_node = CollisionNode( "mouse_ray")
