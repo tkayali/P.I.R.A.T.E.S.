@@ -14,10 +14,11 @@ from direct.showbase.ShowBase import ShowBase
 from direct.showbase.DirectObject import DirectObject
 from direct.task import Task
 from pandac.PandaModules import TextureStage, TransparencyAttrib, DirectionalLight, AmbientLight, VBase4, CollisionTraverser, CollisionHandlerQueue, CollisionNode, BitMask32, CollisionRay, NodePath, CollisionSphere, MovieTexture
-from panda3d.core import loadPrcFile, ConfigVariableString, TextNode, Point3
+from panda3d.core import loadPrcFile, ConfigVariableString, TextNode, Point3, PandaNode, LightRampAttrib
 from direct.interval.MetaInterval import Sequence
 from direct.interval.FunctionInterval import Wait
 from pandac.PandaModules import CInterval
+from direct.filter.CommonFilters import CommonFilters
 
 #Second we need the config variables. We'll ignore these for now.
 loadPrcFile("Config/Config.prc")
@@ -62,14 +63,28 @@ class PIRATES(ShowBase):
 
 		#Set up the background sky
 		self.sky = self.loader.loadModel("square.egg")
-		self.sky.setSx(1200)
-		self.sky.setSy(400)
-		self.sky.setPos(-350, 470, 150)
+		self.sky.setSx(4800)
+		self.sky.setSy(2400)
+		self.sky.setPos(-800, 1400, 80)
 		self.sky.setHpr(45, 90, 0)
 		ts = TextureStage('ts')
 		self.sky.setTexture(ts,loader.loadTexture("Models\Limbo\Sky.jpg"))
 		self.sky.setTexRotate(ts, 180)
 		self.sky.reparentTo(self.render)
+
+		self.water_limbo = self.loader.loadModel("square.egg")
+		self.water_limbo.setSx(2400)
+		self.water_limbo.setSy(2400)
+		self.water_limbo.setPos(self.limbo_sonatu, 0, 0, 50)
+		#ts = TextureStage('ts')
+		#self.waterTexture = loader.loadTexture("Textures\Water.jpg")
+		self.waterTexture2 = loader.loadTexture("Textures\Sea.mpg")
+		self.waterTexture2.setLoop(True)
+		self.waterTexture2.setPlayRate(2)
+		#self.water.setTexture(ts, self.waterTexture)
+		#self.water_limbo.setTexScale(ts, 4)
+		self.water_limbo.setTexture(self.waterTexture2)
+		self.water_limbo.reparentTo(self.render)
 
 		#Set up a lights
 		self.sunlight = DirectionalLight('limbo_sunlight')
@@ -77,12 +92,21 @@ class PIRATES(ShowBase):
 		self.sunlight_nodepath = render.attachNewNode(self.sunlight)
 		self.sunlight_nodepath.setPos(937, -1386, 242) #1063, -1050, 555 || -12, -1625, 62
 		self.sunlight_nodepath.lookAt(self.limbo_sonatu)
-		render.setLight(self.sunlight_nodepath)
+		self.render.setLight(self.sunlight_nodepath)
 
 		self.ambientlight = AmbientLight("limbo_ambient")
 		self.ambientlight.setColor(VBase4(0.2, 0.2, 0.2, 1))
 		self.ambientlight_nodepath = render.attachNewNode(self.ambientlight)
-		render.setLight(self.ambientlight_nodepath)
+		self.render.setLight(self.ambientlight_nodepath)
+
+		#Set up shadows
+		#tempnode = NodePath(PandaNode("temp node"))
+        	#tempnode.setAttrib(LightRampAttrib.makeDoubleThreshold(0.3, 0.7, 0.4, 0.8)) #np.setAttrib(LightRampAttrib.makeDoubleThreshold(t0, l0, t1, l1)
+        	#tempnode.setShaderAuto()
+        	#base.cam.node().setInitialState(tempnode.getState())	
+        	self.filters = CommonFilters(base.win, base.cam)
+        	self.blur_sharpen = self.filters.setBlurSharpen(.8)
+		self.cartoon_ink = self.filters.setCartoonInk(.8)
 
 		#Set up the characters
 		#Farthing
@@ -284,7 +308,7 @@ class PIRATES(ShowBase):
 		render.clearLight(self.ambientlight_nodepath)
 
 		self.sunlight = DirectionalLight('combat_sunlight')
-		self.sunlight.setColor(VBase4(0.8, 0.8, 0.5, 1))
+		self.sunlight.setColor(VBase4(1, 1, 1, 1)) #.8, .8, .5, 1
 		self.sunlight_nodepath = render.attachNewNode(self.sunlight)
 		self.sunlight_nodepath.setPos(129, -75, 2)
 		self.sunlight_nodepath.lookAt(129, -75, 1)
@@ -309,6 +333,7 @@ class PIRATES(ShowBase):
 		self.farthing.hide()
 		self.checkers.hide()
 		self.ivan.hide()
+		self.water_limbo.hide()
 		render.clearLight(self.sunlight_nodepath)
 		render.clearLight(self.ambientlight_nodepath)
 	
@@ -375,7 +400,13 @@ class PIRATES(ShowBase):
 				if self.gridspace_list[ending_gridspace].get_occupiable() and starting_gridspace is not ending_gridspace:
 					path = self.combat_map.calculate_path(starting_gridspace, ending_gridspace)
 					if len(path) <= self.sonatu.getAP()+1:
-						self.combat_sonatu.setPos( self.gridspace_list[ending_gridspace].get_x_position(), self.gridspace_list[ending_gridspace].get_y_position(), 1)
+						#switch statement goes here
+						#must account for 1 hex away, 2 hexes away, 3 hexes away
+						self.sonatu_interval1 = self.combat_sonatu.posInterval(1, Point3(self.gridspace_list[ending_gridspace].get_x_position(), self.gridspace_list[ending_gridspace].get_y_position(), 1), Point3(self.gridspace_list[starting_gridspace].get_x_position(), self.gridspace_list[starting_gridspace].get_y_position(), 1), "sonatuMove1")
+						self.sonatu_sequence = Sequence( self.sonatu_interval1 )
+						self.sonatu_sequence.start()
+
+						#self.combat_sonatu.setPos( self.gridspace_list[ending_gridspace].get_x_position(), self.gridspace_list[ending_gridspace].get_y_position(), 1)
 						self.sonatu.set_gridspace(ending_gridspace)
 						self.gridspace_list[ending_gridspace].set_occupiable(False)
 						self.gridspace_list[starting_gridspace].set_occupiable(True)
@@ -429,8 +460,6 @@ class PIRATES(ShowBase):
 	def begin_dialogue(self, character):
 		self.taskMgr.remove("Limbo Camera")
 		if character == "Farthing":
-			self.dialogue_box = OnscreenImage(image = 'Textures\DialogueBox.png', pos = (0, 0, .5), scale = (0.3, 1, .25), parent = self.farthing_node)			       #DO WE REALLY WANT TO DO THE BOX LIKE THAT?! I'D PREFER IT IF THERE WAS ONE BOX FOR ALL OF THEM!!
-			self.dialogue_box.reparentTo(render2d)
 			print "Farthing speaks!"
 			self.taskMgr.add(self.limbo_camera_task_farthing, "Michal Camera")
 			return
