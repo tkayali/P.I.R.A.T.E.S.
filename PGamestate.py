@@ -402,8 +402,14 @@ class PIRATES(ShowBase):
 					if len(path) <= self.sonatu.getAP()+1:
 						#switch statement goes here
 						#must account for 1 hex away, 2 hexes away, 3 hexes away
-						self.sonatu_interval1 = self.combat_sonatu.posInterval(1, Point3(self.gridspace_list[ending_gridspace].get_x_position(), self.gridspace_list[ending_gridspace].get_y_position(), 1), Point3(self.gridspace_list[starting_gridspace].get_x_position(), self.gridspace_list[starting_gridspace].get_y_position(), 1), "sonatuMove1")
+						self.sonatu_interval1 = self.combat_sonatu.posInterval(1, Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), Point3(self.gridspace_list[starting_gridspace].get_x_position(), self.gridspace_list[starting_gridspace].get_y_position(), 1), "sonatuMove1")
 						self.sonatu_sequence = Sequence( self.sonatu_interval1 )
+						if len(path) > 2:
+							self.sonatu_interval2 = self.combat_sonatu.posInterval(1, Point3(self.gridspace_list[path[2]].get_x_position(), self.gridspace_list[path[2]].get_y_position(), 1), Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), "sonatuMove1")
+							self.sonatu_sequence.append( self.sonatu_interval2 )
+						if len(path) > 3:
+							self.sonatu_interval3 = self.combat_sonatu.posInterval(1, Point3(self.gridspace_list[path[3]].get_x_position(), self.gridspace_list[path[3]].get_y_position(), 1), Point3(self.gridspace_list[path[2]].get_x_position(), self.gridspace_list[path[2]].get_y_position(), 1), "sonatuMove1")
+							self.sonatu_sequence.append( self.sonatu_interval2 )
 						self.sonatu_sequence.start()
 
 						#self.combat_sonatu.setPos( self.gridspace_list[ending_gridspace].get_x_position(), self.gridspace_list[ending_gridspace].get_y_position(), 1)
