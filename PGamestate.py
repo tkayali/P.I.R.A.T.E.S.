@@ -29,6 +29,7 @@ class PIRATES(ShowBase):
 	__in_combat = True
 	__player_turn = True
 	__number_enemies_alive = 0
+	sonatu_end_turn = False
 
 	def __init__(self):
 		ShowBase.__init__(self)
@@ -36,7 +37,10 @@ class PIRATES(ShowBase):
 
 		self.collision_detection()
 		self.limbo()
-		self.mouseTask = taskMgr.add(self.mouse_task, 'mouse_task')
+
+		mouseTask = taskMgr.add(self.mouse_task, 'mouse_task')
+		taskMgr.add(self.end_turn_task, "end_turn")
+
 		self.accept("escape", sys.exit)
 		self.accept("h", self.limbo_hide_all )
 		self.accept("c", self.setup_combat )
@@ -179,7 +183,7 @@ class PIRATES(ShowBase):
 		self.combatHUD = OnscreenImage( image = 'Textures\hud.png', pos = (0, 0, -0.8))		
 		self.combatHUD.setSz(.2)
 		self.combatHUD.reparentTo(render2d)
-		self.end_turn_button = DirectButton( text = ( "END TURN"), text_scale = 0.2, pos = Vec3(1.0, 0, -0.8), text_align=TextNode.ACenter, scale = 0.4, pressEffect = 1, textMayChange = 1, state = DGG.NORMAL , command = sys.exit, relief = DGG.RIDGE, frameColor = (.6235, .4353, .2471, 1))
+		self.end_turn_button = DirectButton( text = ( "END TURN"), text_scale = 0.2, pos = Vec3(1.0, 0, -0.8), text_align=TextNode.ACenter, scale = 0.4, pressEffect = 1, textMayChange = 1, state = DGG.NORMAL , command = self.set_sonatu_end_turn, extraArgs = [True], relief = DGG.RIDGE, frameColor = (.6235, .4353, .2471, 1))
 
 		#Set up collision detection
 		#self.combat_collision_detection()
@@ -361,11 +365,6 @@ class PIRATES(ShowBase):
 				self.update_text( self.__player_turn )
 				if self.__number_enemies_alive < 1:
 					self.game_win_text.setText("YOU WIN!!! REJOICE!")
-
-				elif self.sonatu.getAP() < 1 and not self.sonatu_sequence.isPlaying():
-					self.__player_turn = False
-					self.sonatu.end_turn()
-					self.begin_enemy_turn()
 
 	def limbo_mouse_task(self):
 		if base.mouseWatcherNode.hasMouse():
@@ -629,6 +628,19 @@ class PIRATES(ShowBase):
 		self.collision_ray = CollisionRay()
 		self.collision_node.addSolid(self.collision_ray)
 		self.traverser.addCollider(self.collision_camera, self.handler)
+	
+	def set_sonatu_end_turn(self, turn):
+		self.sonatu_end_turn = turn
+	
+	def end_turn_task(self, task):
+		if self.sonatu_end_turn:
+			self.sonatu_end_turn = False
+               	        self.sonatu.end_turn()
+			self.begin_enemy_turn()
+		        #elf.__player_turn = False
+		       
+		return Task.cont
+	
 
 game = PIRATES()
 game.run()
