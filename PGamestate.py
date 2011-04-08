@@ -30,6 +30,30 @@ class PIRATES(ShowBase):
 	__player_turn = True
 	__number_enemies_alive = 0
 	sonatu_end_turn = False
+        
+        #Dialogue!!!
+        self.dialogue_checkers_l_crew = open('Config\checkers_l_1.txt').readlines()
+        self.dialogue_checkers_l_how_are_we_doing = open('Config\checkers_l_2.txt').readlines()
+        self.dialogue_checkers_l_for_fun = open('Config\checkers_l_3.txt').readlines()
+        self.dialogue_checkers_l_future = open('Config\checkers_l_4.txt').readlines()
+        self.dialogue_checkers_l_situation = open('Config\checkers_l_s.txt').readlines()
+        self.dialogue_farthing_l_exploration = open('Config\farthing_l_1.txt').readlines()
+        self.dialogue_farthing_l_why_are_you_here = open('Config\farthing_l_2.txt').readlines()
+        self.dialogue_farthing_l_your_past = open('Config\farthing_l_3.txt').readlines()
+        self.dialogue_farthing_l_how_are_you_doing = open('Config\farthing_l_4.txt').readlines()
+        self.dialogue_farthing_l_situation = open('Config\farthing_l_s.txt').readlines()
+        self.dialogue_ivan_l_how_am_i_doing = open('Config\ivan_l_1.txt').readlines()
+        self.dialogue_ivan_l_how_are_we_doing = open('Config\ivan_l_2.txt').readlines()
+        self.dialogue_ivan_l_your_past = open('Config\ivan_l_3.txt').readlines()
+        self.dialogue_ivan_l_pirates = open('Config\ivan_l_4.txt').readlines()
+        self.dialogue_ivan_l_situation = open('Config\ivan_l_s.txt').readlines()
+        self.dialogue_michael = open('Config\michael.txt').readlines()
+        self.dialogue_mission_1 = open('Config\mission_1.txt').readlines()
+        self.dialogue_mission_2 = open('Config\mission_2.txt').readlines()
+        self.dialogue_mission_3 = open('Config\mission_3.txt').readlines()
+        self.dialogue_mission_4 = open('Config\mission_4.txt').readlines()
+        self.dialogue_mission_5 = open('Config\mission_5.txt').readlines()
+        self.dialogue_mission_6 = open('Config\mission_6.txt').readlines()
 
 	def __init__(self):
 		ShowBase.__init__(self)
