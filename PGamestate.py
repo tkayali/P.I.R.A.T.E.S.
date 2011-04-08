@@ -63,28 +63,14 @@ class PIRATES(ShowBase):
 
 		#Set up the background sky
 		self.sky = self.loader.loadModel("square.egg")
-		self.sky.setSx(4800)
-		self.sky.setSy(2400)
-		self.sky.setPos(-800, 1400, 80)
+		self.sky.setSx(1200)
+		self.sky.setSy(400)
+		self.sky.setPos(-350, 470, 150)
 		self.sky.setHpr(45, 90, 0)
 		ts = TextureStage('ts')
 		self.sky.setTexture(ts,loader.loadTexture("Models\Limbo\Sky.jpg"))
 		self.sky.setTexRotate(ts, 180)
 		self.sky.reparentTo(self.render)
-
-		self.water_limbo = self.loader.loadModel("square.egg")
-		self.water_limbo.setSx(2400)
-		self.water_limbo.setSy(2400)
-		self.water_limbo.setPos(self.limbo_sonatu, 0, 0, 50)
-		#ts = TextureStage('ts')
-		#self.waterTexture = loader.loadTexture("Textures\Water.jpg")
-		self.waterTexture2 = loader.loadTexture("Textures\Sea.mpg")
-		self.waterTexture2.setLoop(True)
-		self.waterTexture2.setPlayRate(2)
-		#self.water.setTexture(ts, self.waterTexture)
-		#self.water_limbo.setTexScale(ts, 4)
-		self.water_limbo.setTexture(self.waterTexture2)
-		self.water_limbo.reparentTo(self.render)
 
 		#Set up a lights
 		self.sunlight = DirectionalLight('limbo_sunlight')
@@ -92,13 +78,13 @@ class PIRATES(ShowBase):
 		self.sunlight_nodepath = render.attachNewNode(self.sunlight)
 		self.sunlight_nodepath.setPos(937, -1386, 242) #1063, -1050, 555 || -12, -1625, 62
 		self.sunlight_nodepath.lookAt(self.limbo_sonatu)
-		self.render.setLight(self.sunlight_nodepath)
+		render.setLight(self.sunlight_nodepath)
 
 		self.ambientlight = AmbientLight("limbo_ambient")
 		self.ambientlight.setColor(VBase4(0.2, 0.2, 0.2, 1))
 		self.ambientlight_nodepath = render.attachNewNode(self.ambientlight)
-		self.render.setLight(self.ambientlight_nodepath)
-
+		render.setLight(self.ambientlight_nodepath)
+		
 		#Set up shadows
 		#tempnode = NodePath(PandaNode("temp node"))
         	#tempnode.setAttrib(LightRampAttrib.makeDoubleThreshold(0.3, 0.7, 0.4, 0.8)) #np.setAttrib(LightRampAttrib.makeDoubleThreshold(t0, l0, t1, l1)
@@ -106,23 +92,23 @@ class PIRATES(ShowBase):
         	#base.cam.node().setInitialState(tempnode.getState())	
         	self.filters = CommonFilters(base.win, base.cam)
         	self.blur_sharpen = self.filters.setBlurSharpen(.8)
-		self.cartoon_ink = self.filters.setCartoonInk(.8)
+		self.cartoon_ink = self.filters.setCartoonInk(0.5)
 
 		#Set up the characters
 		#Farthing
 		self.farthing = self.limbo_sonatu.find("**/Farthing1")
-		self.farthing_csphere = CollisionSphere(-70, -130, 125, 15)
+		self.farthing_csphere = CollisionSphere(-70, -175, 125, 15)
 		self.farthing_node = self.farthing.attachNewNode(CollisionNode("farthing"))
 		self.farthing_node.node().addSolid(self.farthing_csphere)
-		#self.farthing_node.show()
+		self.farthing_node.show()
 		self.farthing_node.setTag("name", "Farthing")
 
 		#Checkers
 		self.checkers = self.limbo_sonatu.find("**/Checkers")
-		self.checkers_csphere = CollisionSphere(5, -100, 95, 15)
+		self.checkers_csphere = CollisionSphere(7, -55, 95, 15)
 		self.checkers_node = self.checkers.attachNewNode(CollisionNode("checkers"))
 		self.checkers_node.node().addSolid(self.checkers_csphere)
-		#self.checkers_node.show()
+		self.checkers_node.show()
 		self.checkers_node.setTag("name", "Checkers")
 		
 		#Ivan
@@ -130,15 +116,15 @@ class PIRATES(ShowBase):
 		self.ivan_csphere = CollisionSphere(-45, -42, 95, 15)
 		self.ivan_node = self.ivan.attachNewNode(CollisionNode("checkers"))
 		self.ivan_node.node().addSolid(self.ivan_csphere)
-		#self.ivan_node.show()
+		self.ivan_node.show()
 		self.ivan_node.setTag("name", "Ivan")
 
 		#Michael
 		self.michael = self.limbo_sonatu.find("**/Michael1")
-		self.michael_csphere = CollisionSphere(18, 10, 95, 15)
+		self.michael_csphere = CollisionSphere(18, 22, 100, 15)
 		self.michael_node = self.michael.attachNewNode(CollisionNode("checkers"))
 		self.michael_node.node().addSolid(self.michael_csphere)
-		#self.michael_node.show()
+		self.michael_node.show()
 		self.michael_node.setTag("name", "Michael")
 
 		#Farthing
@@ -184,6 +170,10 @@ class PIRATES(ShowBase):
 		#Set up attributes
 		self.__in_combat = True
 		self.__number_enemies_alive = 3
+
+		#Remove blursharpen and cartoon ink
+        	self.filters.delCartoonInk()
+		self.filters.delBlurSharpen()
 
 		#Set up the camera for the Combat Menu
 		self.taskMgr.add(self.combat_camera_task, "Combat Camera")
@@ -308,7 +298,7 @@ class PIRATES(ShowBase):
 		render.clearLight(self.ambientlight_nodepath)
 
 		self.sunlight = DirectionalLight('combat_sunlight')
-		self.sunlight.setColor(VBase4(1, 1, 1, 1)) #.8, .8, .5, 1
+		self.sunlight.setColor(VBase4(1, 1, 1, 1))
 		self.sunlight_nodepath = render.attachNewNode(self.sunlight)
 		self.sunlight_nodepath.setPos(129, -75, 2)
 		self.sunlight_nodepath.lookAt(129, -75, 1)
@@ -333,7 +323,6 @@ class PIRATES(ShowBase):
 		self.farthing.hide()
 		self.checkers.hide()
 		self.ivan.hide()
-		self.water_limbo.hide()
 		render.clearLight(self.sunlight_nodepath)
 		render.clearLight(self.ambientlight_nodepath)
 	
@@ -371,11 +360,11 @@ class PIRATES(ShowBase):
 				if self.__number_enemies_alive < 1:
 					self.game_win_text.setText("YOU WIN!!! REJOICE!")
 
-				elif self.sonatu.getAP() < 1:
+				elif self.sonatu.getAP() < 1 and not self.sonatu_sequence.isPlaying():
 					self.__player_turn = False
 					self.sonatu.end_turn()
 					self.begin_enemy_turn()
-				
+
 	def limbo_mouse_task(self):
 		if base.mouseWatcherNode.hasMouse():
 			self.mouse_position = base.mouseWatcherNode.getMouse()
@@ -384,7 +373,6 @@ class PIRATES(ShowBase):
 			if self.handler.getNumEntries() > 0:
 				self.handler.sortEntries()
 				self.begin_dialogue(self.handler.getEntry(0).getIntoNodePath().getTag("name"))
-				
 
 	def sonatu_turn(self):
 		starting_gridspace = self.sonatu.get_gridspace()
@@ -409,7 +397,7 @@ class PIRATES(ShowBase):
 							self.sonatu_sequence.append( self.sonatu_interval2 )
 						if len(path) > 3:
 							self.sonatu_interval3 = self.combat_sonatu.posInterval(1, Point3(self.gridspace_list[path[3]].get_x_position(), self.gridspace_list[path[3]].get_y_position(), 1), Point3(self.gridspace_list[path[2]].get_x_position(), self.gridspace_list[path[2]].get_y_position(), 1), "sonatuMove1")
-							self.sonatu_sequence.append( self.sonatu_interval2 )
+							self.sonatu_sequence.append( self.sonatu_interval3 )
 						self.sonatu_sequence.start()
 
 						#self.combat_sonatu.setPos( self.gridspace_list[ending_gridspace].get_x_position(), self.gridspace_list[ending_gridspace].get_y_position(), 1)
@@ -489,7 +477,7 @@ class PIRATES(ShowBase):
 		sonatu_position = self.sonatu.get_gridspace()
 		path = self.combat_map.calculate_path(starting_gridspace, sonatu_position)
 		distance = len(path) - 1
-		
+
 		if distance <= enemy.get_unit_range():
 			if random.randint(1, 100) <= enemy.get_accuracy():
 				self.sonatu.setHP(self.sonatu.getHP() - enemy.get_damage())
@@ -605,19 +593,24 @@ class PIRATES(ShowBase):
 		return Task.cont
 
 	def limbo_camera_task_michael(self, task):
-		self.camera.setPos(41.752, -60.644, 103.902)
+		self.camera.setPos(22.742, -64.037, 108.925)
+		self.camera.lookAt(22.742, -64.037, 108.925)
 		return Task.cont
 
 	def limbo_camera_task_farthing(self, task):
-		self.camera.setPos(-96.343, 44.415, 134.102)
+		self.camera.setPos(-138.687, 62.531, 127.466)
+		self.camera.lookAt(-138.687, 62.531, 127.466)		
+		self.camera.setHpr(75, 5, 0)
 		return Task.cont
 	
 	def limbo_camera_task_ivan(self, task):
-		self.camera.setPos(3.764, -30.557, 92.994)
+		self.camera.setPos(-41.456, -13.393, 100.245)
+		self.camera.lookAt(-41.456, -13.393, 100.245)		
 		return Task.cont
 
 	def limbo_camera_task_checkers(self, task):
-		self.camera.setPos(-68.949, -49.766, 100.538)
+		self.camera.setPos(-54.347, -52.173, 103.392)
+		self.camera.lookAt(-54.347, -52.173, 103.392)		
 		return Task.cont
 
 	def collision_detection(self):
