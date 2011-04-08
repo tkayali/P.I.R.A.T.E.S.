@@ -90,3 +90,6 @@ class Gridspace:
     
     def set_occupiable(self, __occupiable):
         self.__occupiable = __occupiable
+
+    def getTag(self):
+	return self.__tag
