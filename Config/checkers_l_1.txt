@@ -1,6 +1,6 @@
 Checkers: Care for a game of checkers, Captain?
 Moot: <Shakes head>
-Checkers: Yeah, I figured you’d be pretty busy with your new duties. Must be difficult to captain a crew like this.
+Checkers: Yeah, I figured you’d be pretty busy with your duties. Must be difficult to captain a crew like this.
 Moot: <Shrugs>
 Checkers: You’ve gotta keep your eye on them, too. In fact, I’ve begun to suspect that Ivan is actually working with the government.
 Moot: <Rolls eyes>
