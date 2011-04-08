@@ -14,11 +14,12 @@ from direct.showbase.ShowBase import ShowBase
 from direct.showbase.DirectObject import DirectObject
 from direct.task import Task
 from pandac.PandaModules import TextureStage, TransparencyAttrib, DirectionalLight, AmbientLight, VBase4, CollisionTraverser, CollisionHandlerQueue, CollisionNode, BitMask32, CollisionRay, NodePath, CollisionSphere, MovieTexture
-from panda3d.core import loadPrcFile, ConfigVariableString, TextNode, Point3, PandaNode, LightRampAttrib
+from panda3d.core import loadPrcFile, ConfigVariableString, TextNode, Point3, PandaNode, LightRampAttrib, Vec3
 from direct.interval.MetaInterval import Sequence
 from direct.interval.FunctionInterval import Wait
 from pandac.PandaModules import CInterval
 from direct.filter.CommonFilters import CommonFilters
+from direct.gui.DirectGui import *
 
 #Second we need the config variables. We'll ignore these for now.
 loadPrcFile("Config/Config.prc")
@@ -178,6 +179,7 @@ class PIRATES(ShowBase):
 		self.combatHUD = OnscreenImage( image = 'Textures\hud.png', pos = (0, 0, -0.8))		
 		self.combatHUD.setSz(.2)
 		self.combatHUD.reparentTo(render2d)
+		self.end_turn_button = DirectButton( text = ( "END TURN"), text_scale = 0.2, pos = Vec3(1.0, 0, -0.8), text_align=TextNode.ACenter, scale = 0.4, pressEffect = 1, textMayChange = 1, state = DGG.NORMAL , command = sys.exit, relief = DGG.RIDGE, frameColor = (.6235, .4353, .2471, 1))
 
 		#Set up collision detection
 		#self.combat_collision_detection()
@@ -321,6 +323,8 @@ class PIRATES(ShowBase):
 		self.checkers.hide()
 		self.ivan.hide()
 		self.water_limbo.hide()
+		self.dialogue_box.hide()
+		self.instructions_text.hide()
 		render.clearLight(self.sunlight_nodepath)
 		render.clearLight(self.ambientlight_nodepath)
 	
