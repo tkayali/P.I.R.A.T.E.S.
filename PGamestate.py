@@ -26,7 +26,9 @@ loadPrcFile("Config/Config.prc")
 
 ##Now let's begin with some lovely Panda code!
 class PIRATES(ShowBase):
-	__in_combat = True
+	__in_combat = False
+        __in_limbo = False
+        __in_dialogue = False
 	__player_turn = True
 	__number_enemies_alive = 0
 	sonatu_end_turn = False
@@ -80,7 +82,8 @@ class PIRATES(ShowBase):
 	def limbo(self):
 		#Change attributes
 		self.__in_combat = False
-
+                self.__in_limbo = True
+                
 		#Set up the camera
 		self.taskMgr.add(self.limbo_camera_task, "Limbo Camera")
 
@@ -193,6 +196,7 @@ class PIRATES(ShowBase):
 		
 	def setup_combat(self):
 		#Set up attributes
+                self.__in_limbo = False
 		self.__in_combat = True
 		self.__number_enemies_alive = 3
 
@@ -376,9 +380,10 @@ class PIRATES(ShowBase):
 
 	def mouse_task(self, task):
 		if base.mouseWatcherNode.hasMouse():
-			if self.__in_combat:
+                        if self.__in_dialogue:
+			elif self.__in_combat:
 				self.accept("mouse1", self.combat_mouse_task)
-			else:
+			elif self.__in_limbo:
 				self.accept("mouse1", self.limbo_mouse_task)
 		return Task.cont
 	
@@ -477,30 +482,46 @@ class PIRATES(ShowBase):
 							self.__number_enemies_alive -= 1
 
 	def begin_dialogue(self, character):
+                self.__in_dialogue = True
 		self.taskMgr.remove("Limbo Camera")
 		self.dialogue_box = OnscreenImage( image = 'Textures\DialogueBox.png', pos = (0, 0, -0.65 ), scale = (1, 1, .35) )	
 		self.dialogue_box.setTransparency(TransparencyAttrib.MAlpha)
 		self.dialogue_box.setAlphaScale(0.65)
 		self.dialogue_box.reparentTo(render2d)
+                self.back_to_limbo_button = DirectButton( text = ( "BACK"), text_scale = 0.2, pos = Vec3(1.0, 0, -0.8), text_align=TextNode.ACenter, scale = 0.4, pressEffect = 1, textMayChange = 1, state = DGG.NORMAL , command = self.end_dialogue, extraArgs = [character], relief = DGG.RIDGE, frameColor = (.6235, .4353, .2471, 1))
 
 		if character == "Farthing":
 			print "Farthing speaks!"
-			self.taskMgr.add(self.limbo_camera_task_farthing, "Michal Camera")
+			self.taskMgr.add(self.limbo_camera_task_farthing, "Farthing Camera")
 			return
 		elif character == "Ivan":
 			print "Ivan speaks!"
-			self.taskMgr.add(self.limbo_camera_task_ivan, "Michal Camera")
+			self.taskMgr.add(self.limbo_camera_task_ivan, "Ivan Camera")
 			return
 		elif character == "Checkers":
 			print "Checkers speaks!"
-			self.taskMgr.add(self.limbo_camera_task_checkers, "Michal Camera")
+			self.taskMgr.add(self.limbo_camera_task_checkers, "Checkers Camera")
 			return
 		elif character == "Michael":
 			print "Michael speaks!"
-			self.taskMgr.add(self.limbo_camera_task_michael, "Michal Camera")
+			self.taskMgr.add(self.limbo_camera_task_michael, "Michael Camera")
 
 			#self.limbo_hide_all()
 			#self.setup_combat()
+        
+        def end_dialogue(self, character):
+                self.__in_dialogue = False
+                delf.dialogue_box.hide()
+                if character == "Farthing":
+			self.taskMgr.remove(self.limbo_camera_task_farthing, "Farthing Camera")
+		elif character == "Ivan":
+			self.taskMgr.remove(self.limbo_camera_task_ivan, "Ivan Camera")
+		elif character == "Checkers":
+			self.taskMgr.remove(self.limbo_camera_task_checkers, "Checkers Camera")
+		elif character == "Michael":
+			self.taskMgr.remove(self.limbo_camera_task_michael, "Michael Camera")
+                self.taskMgr.add(self.limbo_camera_task, "Limbo Camera")
+                
 
 	def enemy_turn(self, enemy):		
 		starting_gridspace = enemy.get_gridspace()
