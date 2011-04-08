@@ -32,6 +32,7 @@ class PIRATES(ShowBase):
 	def __init__(self):
 		ShowBase.__init__(self)
 		base.disableMouse()	
+
 		self.collision_detection()
 		self.limbo()
 		self.mouseTask = taskMgr.add(self.mouse_task, 'mouse_task')
@@ -63,14 +64,29 @@ class PIRATES(ShowBase):
 
 		#Set up the background sky
 		self.sky = self.loader.loadModel("square.egg")
-		self.sky.setSx(1200)
-		self.sky.setSy(400)
-		self.sky.setPos(-350, 470, 150)
+		self.sky.setSx(4800)	 	
+		self.sky.setSy(2400)
+		self.sky.setPos(-800, 1400, 80)
 		self.sky.setHpr(45, 90, 0)
 		ts = TextureStage('ts')
 		self.sky.setTexture(ts,loader.loadTexture("Models\Limbo\Sky.jpg"))
 		self.sky.setTexRotate(ts, 180)
 		self.sky.reparentTo(self.render)
+		
+		#Set up water!!!
+		self.water_limbo = self.loader.loadModel("square.egg")
+		self.water_limbo.setSx(2400)
+		self.water_limbo.setSy(2400)
+		self.water_limbo.setPos(self.limbo_sonatu, 0, 0, 50)
+		#ts = TextureStage('ts')
+		#self.waterTexture = loader.loadTexture("Textures\Water.jpg")
+		self.waterTexture2 = loader.loadTexture("Textures\Sea.mpg")
+		self.waterTexture2.setLoop(True)
+		self.waterTexture2.setPlayRate(2)
+		#self.water.setTexture(ts, self.waterTexture)
+		#self.water_limbo.setTexScale(ts, 4)
+		self.water_limbo.setTexture(self.waterTexture2)
+		self.water_limbo.reparentTo(self.render)
 
 		#Set up a lights
 		self.sunlight = DirectionalLight('limbo_sunlight')
@@ -79,6 +95,13 @@ class PIRATES(ShowBase):
 		self.sunlight_nodepath.setPos(937, -1386, 242) #1063, -1050, 555 || -12, -1625, 62
 		self.sunlight_nodepath.lookAt(self.limbo_sonatu)
 		render.setLight(self.sunlight_nodepath)
+
+		self.waterlight = DirectionalLight('limbo_sunlight')
+		self.waterlight.setColor(VBase4(1, 1, 1, 1))
+		self.waterlight_nodepath = render.attachNewNode(self.waterlight)
+		self.waterlight_nodepath.setPos(-129, 585, 645) #1063, -1050, 555 || -12, -1625, 62
+		self.waterlight_nodepath.lookAt(self.water_limbo)
+		self.water_limbo.setLight(self.waterlight_nodepath)
 
 		self.ambientlight = AmbientLight("limbo_ambient")
 		self.ambientlight.setColor(VBase4(0.2, 0.2, 0.2, 1))
@@ -100,7 +123,7 @@ class PIRATES(ShowBase):
 		self.farthing_csphere = CollisionSphere(-70, -175, 125, 15)
 		self.farthing_node = self.farthing.attachNewNode(CollisionNode("farthing"))
 		self.farthing_node.node().addSolid(self.farthing_csphere)
-		self.farthing_node.show()
+		#self.farthing_node.show()
 		self.farthing_node.setTag("name", "Farthing")
 
 		#Checkers
@@ -108,7 +131,7 @@ class PIRATES(ShowBase):
 		self.checkers_csphere = CollisionSphere(7, -55, 95, 15)
 		self.checkers_node = self.checkers.attachNewNode(CollisionNode("checkers"))
 		self.checkers_node.node().addSolid(self.checkers_csphere)
-		self.checkers_node.show()
+		#self.checkers_node.show()
 		self.checkers_node.setTag("name", "Checkers")
 		
 		#Ivan
@@ -116,7 +139,7 @@ class PIRATES(ShowBase):
 		self.ivan_csphere = CollisionSphere(-45, -42, 95, 15)
 		self.ivan_node = self.ivan.attachNewNode(CollisionNode("checkers"))
 		self.ivan_node.node().addSolid(self.ivan_csphere)
-		self.ivan_node.show()
+		#self.ivan_node.show()
 		self.ivan_node.setTag("name", "Ivan")
 
 		#Michael
@@ -124,40 +147,13 @@ class PIRATES(ShowBase):
 		self.michael_csphere = CollisionSphere(18, 22, 100, 15)
 		self.michael_node = self.michael.attachNewNode(CollisionNode("checkers"))
 		self.michael_node.node().addSolid(self.michael_csphere)
-		self.michael_node.show()
+		#self.michael_node.show()
 		self.michael_node.setTag("name", "Michael")
 
-		#Farthing
-		#self.farthing = self.loader.loadModel("Models\Characters\Farthing.egg")
-		#self.farthing.setPos(-31, 60, -34)
-		#self.farthing.setHpr(0, 0, 0)
-		#self.farthing.setSx(.85)
-		#self.farthing.setSy(.85)
-		#self.farthing.setSz(.85)
-		#self.farthing.setTag("name", "Farthing")
-		#self.farthing.reparentTo(self.render)
-
-		#Checkers
-		#self.checkers = self.loader.loadModel("Models\Characters\Checkers.egg")
-		#self.checkers.setPos(-36, -62, 3)
-		#self.checkers.setHpr(-45, 0, 0)
-		#self.checkers.setSx(.85)
-		#self.checkers.setSy(.85)
-		#self.checkers.setSz(.85)
-		#self.checkers.setTag("name", "Checkers")
-		#self.checkers.reparentTo(self.render)
-
-		#Ivan
-		#self.ivan = self.loader.loadModel("Models\Characters\Ivan.egg")
-		#self.ivan.setPos(-54, -113, -10)
-		#self.ivan.setHpr(0, 0, 0)
-		#self.ivan.setSx(.85)
-		#self.ivan.setSy(.85)
-		#self.ivan.setSz(.85)
-		#self.ivan.setTag("name", "Ivan")
-		#self.ivan.reparentTo(self.render)
-
-		#Michael
+		#Set up instructions
+		self.calibri_font = loader.loadFont('Config/calibri.ttf')
+		self.instructions_text = OnscreenText( text = "Interact with the characters!\nPress ESC to exit!", pos = (-1, .95), scale = 0.04, fg = (0, 0, 0, .8), shadow = (0, 0, 0, 1), align = TextNode.ALeft, font = self.calibri_font, mayChange = True)
+		self.instructions_text.reparentTo(render2d)
 
 	def reset_combat(self):
 		#Reset up attributes
@@ -200,7 +196,7 @@ class PIRATES(ShowBase):
 		#self.waterTexture = loader.loadTexture("Textures\Water.jpg")
 		self.waterTexture = loader.loadTexture("Textures\Sea.mpg")
 		self.waterTexture.setLoop(True)
-		#self.waterTexture.setPlayRate(2)
+		#self.waterTexture.setPlayRate(4)
 		#self.water.setTexture(ts, self.waterTexture)
 		#self.water.setTexScale(ts, 1.5)
 		self.water.setTexture(self.waterTexture)
@@ -296,6 +292,7 @@ class PIRATES(ShowBase):
 		#Set up combat lighting
 		render.clearLight(self.sunlight_nodepath)
 		render.clearLight(self.ambientlight_nodepath)
+		self.water_limbo.clearLight(self.waterlight_nodepath)
 
 		self.sunlight = DirectionalLight('combat_sunlight')
 		self.sunlight.setColor(VBase4(1, 1, 1, 1))
@@ -323,6 +320,7 @@ class PIRATES(ShowBase):
 		self.farthing.hide()
 		self.checkers.hide()
 		self.ivan.hide()
+		self.water_limbo.hide()
 		render.clearLight(self.sunlight_nodepath)
 		render.clearLight(self.ambientlight_nodepath)
 	
@@ -453,6 +451,11 @@ class PIRATES(ShowBase):
 
 	def begin_dialogue(self, character):
 		self.taskMgr.remove("Limbo Camera")
+		self.dialogue_box = OnscreenImage( image = 'Textures\DialogueBox.png', pos = (0, 0, -0.65 ), scale = (1, 1, .35) )	
+		self.dialogue_box.setTransparency(TransparencyAttrib.MAlpha)
+		self.dialogue_box.setAlphaScale(0.65)
+		self.dialogue_box.reparentTo(render2d)
+
 		if character == "Farthing":
 			print "Farthing speaks!"
 			self.taskMgr.add(self.limbo_camera_task_farthing, "Michal Camera")
