@@ -34,28 +34,28 @@ class PIRATES(ShowBase):
 	sonatu_end_turn = False
         
         #Dialogue!!!
-        self.dialogue_checkers_l_crew = open('Config\checkers_l_1.txt').readlines()
-        self.dialogue_checkers_l_how_are_we_doing = open('Config\checkers_l_2.txt').readlines()
-        self.dialogue_checkers_l_for_fun = open('Config\checkers_l_3.txt').readlines()
-        self.dialogue_checkers_l_future = open('Config\checkers_l_4.txt').readlines()
-        self.dialogue_checkers_l_situation = open('Config\checkers_l_s.txt').readlines()
-        self.dialogue_farthing_l_exploration = open('Config\farthing_l_1.txt').readlines()
-        self.dialogue_farthing_l_why_are_you_here = open('Config\farthing_l_2.txt').readlines()
-        self.dialogue_farthing_l_your_past = open('Config\farthing_l_3.txt').readlines()
-        self.dialogue_farthing_l_how_are_you_doing = open('Config\farthing_l_4.txt').readlines()
-        self.dialogue_farthing_l_situation = open('Config\farthing_l_s.txt').readlines()
-        self.dialogue_ivan_l_how_am_i_doing = open('Config\ivan_l_1.txt').readlines()
-        self.dialogue_ivan_l_how_are_we_doing = open('Config\ivan_l_2.txt').readlines()
-        self.dialogue_ivan_l_your_past = open('Config\ivan_l_3.txt').readlines()
-        self.dialogue_ivan_l_pirates = open('Config\ivan_l_4.txt').readlines()
-        self.dialogue_ivan_l_situation = open('Config\ivan_l_s.txt').readlines()
-        self.dialogue_michael = open('Config\michael.txt').readlines()
-        self.dialogue_mission_1 = open('Config\mission_1.txt').readlines()
-        self.dialogue_mission_2 = open('Config\mission_2.txt').readlines()
-        self.dialogue_mission_3 = open('Config\mission_3.txt').readlines()
-        self.dialogue_mission_4 = open('Config\mission_4.txt').readlines()
-        self.dialogue_mission_5 = open('Config\mission_5.txt').readlines()
-        self.dialogue_mission_6 = open('Config\mission_6.txt').readlines()
+        dialogue_checkers_l_crew = open('Config/checkers_l_1.txt').readlines()
+        dialogue_checkers_l_how_are_we_doing = open('Config/checkers_l_2.txt').readlines()
+        dialogue_checkers_l_for_fun = open('Config/checkers_l_3.txt').readlines()
+        dialogue_checkers_l_future = open('Config/checkers_l_4.txt').readlines()
+        dialogue_checkers_l_situation = open('Config/checkers_l_s.txt').readlines()
+        dialogue_farthing_l_exploration = open('Config/farthing_l_1.txt').readlines()
+        dialogue_farthing_l_why_are_you_here = open('Config/farthing_l_2.txt').readlines()
+        dialogue_farthing_l_your_past = open('Config/farthing_l_3.txt').readlines()
+        dialogue_farthing_l_how_are_you_doing = open('Config/farthing_l_4.txt').readlines()
+        dialogue_farthing_l_situation = open('Config/farthing_l_s.txt').readlines()
+        dialogue_ivan_l_how_am_i_doing = open('Config/ivan_l_1.txt').readlines()
+        dialogue_ivan_l_how_are_we_doing = open('Config/ivan_l_2.txt').readlines()
+        dialogue_ivan_l_your_past = open('Config/ivan_l_3.txt').readlines()
+        dialogue_ivan_l_pirates = open('Config/ivan_l_4.txt').readlines()
+        dialogue_ivan_l_situation = open('Config/ivan_l_s.txt').readlines()
+        dialogue_michael = open('Config/michael.txt').readlines()
+        dialogue_mission_1 = open('Config/mission_1.txt').readlines()
+        dialogue_mission_2 = open('Config/mission_2.txt').readlines()
+        dialogue_mission_3 = open('Config/mission_3.txt').readlines()
+        dialogue_mission_4 = open('Config/mission_4.txt').readlines()
+        dialogue_mission_5 = open('Config/mission_5.txt').readlines()
+        dialogue_mission_6 = open('Config/mission_6.txt').readlines()
 
 	def __init__(self):
 		ShowBase.__init__(self)
@@ -380,9 +380,9 @@ class PIRATES(ShowBase):
 
 	def mouse_task(self, task):
 		if base.mouseWatcherNode.hasMouse():
-                        if self.__in_dialogue:
-			elif self.__in_combat:
+			if self.__in_combat:
 				self.accept("mouse1", self.combat_mouse_task)
+
 			elif self.__in_limbo:
 				self.accept("mouse1", self.limbo_mouse_task)
 		return Task.cont
@@ -396,7 +396,7 @@ class PIRATES(ShowBase):
 					self.game_win_text.setText("YOU WIN!!! REJOICE!")
 
 	def limbo_mouse_task(self):
-		if base.mouseWatcherNode.hasMouse():
+		if base.mouseWatcherNode.hasMouse() and not self.__in_dialogue:
 			self.mouse_position = base.mouseWatcherNode.getMouse()
 			self.collision_ray.setFromLens(base.camNode, self.mouse_position.getX(), self.mouse_position.getY())
 			self.traverser.traverse(render)
@@ -420,13 +420,13 @@ class PIRATES(ShowBase):
 					if len(path) <= self.sonatu.getAP()+1:
 						#switch statement goes here
 						#must account for 1 hex away, 2 hexes away, 3 hexes away
-						self.sonatu_interval1 = self.combat_sonatu.posInterval(1, Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), Point3(self.gridspace_list[starting_gridspace].get_x_position(), self.gridspace_list[starting_gridspace].get_y_position(), 1), "sonatuMove1")
+						self.sonatu_interval1 = self.combat_sonatu.posInterval(0.5, Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), Point3(self.gridspace_list[starting_gridspace].get_x_position(), self.gridspace_list[starting_gridspace].get_y_position(), 1), "sonatuMove1")
 						self.sonatu_sequence = Sequence( self.sonatu_interval1 )
 						if len(path) > 2:
-							self.sonatu_interval2 = self.combat_sonatu.posInterval(1, Point3(self.gridspace_list[path[2]].get_x_position(), self.gridspace_list[path[2]].get_y_position(), 1), Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), "sonatuMove1")
+							self.sonatu_interval2 = self.combat_sonatu.posInterval(0.5, Point3(self.gridspace_list[path[2]].get_x_position(), self.gridspace_list[path[2]].get_y_position(), 1), Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), "sonatuMove1")
 							self.sonatu_sequence.append( self.sonatu_interval2 )
 						if len(path) > 3:
-							self.sonatu_interval3 = self.combat_sonatu.posInterval(1, Point3(self.gridspace_list[path[3]].get_x_position(), self.gridspace_list[path[3]].get_y_position(), 1), Point3(self.gridspace_list[path[2]].get_x_position(), self.gridspace_list[path[2]].get_y_position(), 1), "sonatuMove1")
+							self.sonatu_interval3 = self.combat_sonatu.posInterval(0.5, Point3(self.gridspace_list[path[3]].get_x_position(), self.gridspace_list[path[3]].get_y_position(), 1), Point3(self.gridspace_list[path[2]].get_x_position(), self.gridspace_list[path[2]].get_y_position(), 1), "sonatuMove1")
 							self.sonatu_sequence.append( self.sonatu_interval3 )
 						self.sonatu_sequence.start()
 
@@ -484,26 +484,123 @@ class PIRATES(ShowBase):
 	def begin_dialogue(self, character):
                 self.__in_dialogue = True
 		self.taskMgr.remove("Limbo Camera")
-		self.dialogue_box = OnscreenImage( image = 'Textures\DialogueBox.png', pos = (0, 0, -0.65 ), scale = (1, 1, .35) )	
+		self.dialogue_font = loader.loadFont("Config/King Luau.ttf")
+		self.dialogue_box = OnscreenImage( image = 'Textures/DialogueBox.png', pos = (0, 0, -0.65 ), scale = (1, 1, .35) )	
 		self.dialogue_box.setTransparency(TransparencyAttrib.MAlpha)
 		self.dialogue_box.setAlphaScale(0.65)
 		self.dialogue_box.reparentTo(render2d)
-                self.back_to_limbo_button = DirectButton( text = ( "BACK"), text_scale = 0.2, pos = Vec3(1.0, 0, -0.8), text_align=TextNode.ACenter, scale = 0.4, pressEffect = 1, textMayChange = 1, state = DGG.NORMAL , command = self.end_dialogue, extraArgs = [character], relief = DGG.RIDGE, frameColor = (.6235, .4353, .2471, 1))
 
+		#Dialogue greeting to be changed for each individual
+		dialogue_greeting = OnscreenText( text = "", pos = (0, 0.5, 0), scale = (0.1, 0.2), fg = (0, 0, 0, 1), shadow = (0, 0, 0, 1), align = TextNode.ACenter, wordwrap = 20, font = self.dialogue_font, parent = self.dialogue_box, mayChange = 1)
+
+		#Back button for each dialogue menu
+                self.dialogue_back_button = DirectButton(pos = Vec3(0.8, 0, -0.70), scale = 0.4, pressEffect = 1, textMayChange = 1, state = DGG.NORMAL, command = self.end_dialogue, extraArgs = [character], relief = DGG.GROOVE, frameColor = (.8, .867, .933, 1), pad = (0.7, 0.08))
+		self.dialogue_back_button["text"] = "Back"
+		self.dialogue_back_button["text_scale"] = 0.15
+		self.dialogue_back_button["text_pos"] = (0, -.03)
+		self.dialogue_back_button["text_align"] = TextNode.ACenter	
+
+		self.dialogue_personal_button1 = DirectButton(pos = Vec3(-0.8, 0, -0.70), scale = 0.4, pressEffect = 1, textMayChange = 1, state = DGG.NORMAL, command = self.end_dialogue, extraArgs = [character], relief = DGG.GROOVE, frameColor = (.6235, .4353, .2471, 1), pad = (0.7, 0.08))
+		self.dialogue_personal_button2 = DirectButton(pos = Vec3(-0.8, 0, -0.88), scale = 0.4, pressEffect = 1, textMayChange = 1, state = DGG.NORMAL, command = self.end_dialogue, extraArgs = [character], relief = DGG.GROOVE, frameColor = (.6235, .4353, .2471, 1), pad = (0.7, 0.08))
+		self.dialogue_personal_button3 = DirectButton(pos = Vec3( 0.8, 0, -0.88), scale = 0.4, pressEffect = 1, textMayChange = 1, state = DGG.NORMAL, command = self.end_dialogue, extraArgs = [character], relief = DGG.GROOVE, frameColor = (.6235, .4353, .2471, 1), pad = (0.7, 0.08))
+		self.dialogue_personal_button4 = DirectButton(pos = Vec3( 0, 0, -0.88), scale = 0.4, pressEffect = 1, textMayChange = 1, state = DGG.NORMAL, command = self.end_dialogue, extraArgs = [character], relief = DGG.GROOVE, frameColor = (.6235, .4353, .2471, 1), pad = (0.7, 0.08))
+		self.dialogue_situation_button = DirectButton(pos = Vec3( 0, 0, -0.70), scale = 0.4, pressEffect = 1, textMayChange = 1, state = DGG.NORMAL, command = self.end_dialogue, extraArgs = [character], relief = DGG.GROOVE, frameColor = (.6235, .4353, .2471, 1), pad = (0.7, 0.08))
+
+		
 		if character == "Farthing":
-			print "Farthing speaks!"
+			#Add the personalized text
+			dialogue_greeting.setText("Farthing: \"Oh! Hello Captain!\"")
+			self.dialogue_personal_button1["text"] = "Hobby"
+			self.dialogue_personal_button1["text_scale"] = 0.15
+			self.dialogue_personal_button1["text_pos"] = (0, -.03)
+			self.dialogue_personal_button1["text_align"] = TextNode.ACenter
+			self.dialogue_personal_button2["text"] = "Inspiration"
+			self.dialogue_personal_button2["text_scale"] = 0.15
+			self.dialogue_personal_button2["text_pos"] = (0, -.03)
+			self.dialogue_personal_button2["text_align"] = TextNode.ACenter
+			self.dialogue_personal_button3['text'] = "Past"
+			self.dialogue_personal_button3['text_scale'] = 0.15
+			self.dialogue_personal_button3['text_pos'] = (0, -.03)
+			self.dialogue_personal_button3['text_align'] = TextNode.ACenter
+			self.dialogue_personal_button4['text'] = "Status"
+			self.dialogue_personal_button4['text_scale'] = 0.15
+			self.dialogue_personal_button4['text_pos'] = (0, -.03)
+			self.dialogue_personal_button4['text_align'] = TextNode.ACenter
+			self.dialogue_situation_button['text'] = "Situation"
+			self.dialogue_situation_button['text_scale'] = 0.15
+			self.dialogue_situation_button['text_pos'] = (0, -.03)
+			self.dialogue_situation_button['text_align'] = TextNode.ACenter
+
 			self.taskMgr.add(self.limbo_camera_task_farthing, "Farthing Camera")
 			return
+
 		elif character == "Ivan":
-			print "Ivan speaks!"
+			#Add the personalized text
+			dialogue_greeting.setText("Ivan: \"Cap'\"")
+			self.dialogue_personal_button1["text"] = "Moot"
+			self.dialogue_personal_button1["text_scale"] = 0.15
+			self.dialogue_personal_button1["text_pos"] = (0, -.03)
+			self.dialogue_personal_button1["text_align"] = TextNode.ACenter
+			self.dialogue_personal_button2["text"] = "P.I.R.A.T.E.S"
+			self.dialogue_personal_button2["text_scale"] = 0.15
+			self.dialogue_personal_button2["text_pos"] = (0, -.03)
+			self.dialogue_personal_button2["text_align"] = TextNode.ACenter
+			self.dialogue_personal_button3['text'] = "Past"
+			self.dialogue_personal_button3['text_scale'] = 0.15
+			self.dialogue_personal_button3['text_pos'] = (0, -.03)
+			self.dialogue_personal_button3['text_align'] = TextNode.ACenter
+			self.dialogue_personal_button4['text'] = "Status"
+			self.dialogue_personal_button4['text_scale'] = 0.15
+			self.dialogue_personal_button4['text_pos'] = (0, -.03)
+			self.dialogue_personal_button4['text_align'] = TextNode.ACenter
+			self.dialogue_situation_button['text'] = "Situation"
+			self.dialogue_situation_button['text_scale'] = 0.15
+			self.dialogue_situation_button['text_pos'] = (0, -.03)
+			self.dialogue_situation_button['text_align'] = TextNode.ACenter
+
 			self.taskMgr.add(self.limbo_camera_task_ivan, "Ivan Camera")
 			return
+
 		elif character == "Checkers":
-			print "Checkers speaks!"
+			#Add the personalized text
+			dialogue_greeting.setText("Checkers: \"Heya Captain, how's it going?\"")
+			self.dialogue_personal_button1["text"] = "Fun"
+			self.dialogue_personal_button1["text_scale"] = 0.15
+			self.dialogue_personal_button1["text_pos"] = (0, -.03)
+			self.dialogue_personal_button1["text_align"] = TextNode.ACenter
+			self.dialogue_personal_button2["text"] = "Crew"
+			self.dialogue_personal_button2["text_scale"] = 0.15
+			self.dialogue_personal_button2["text_pos"] = (0, -.03)
+			self.dialogue_personal_button2["text_align"] = TextNode.ACenter
+			self.dialogue_personal_button3['text'] = "Future"
+			self.dialogue_personal_button3['text_scale'] = 0.15
+			self.dialogue_personal_button3['text_pos'] = (0, -.03)
+			self.dialogue_personal_button3['text_align'] = TextNode.ACenter
+			self.dialogue_personal_button4['text'] = "Status"
+			self.dialogue_personal_button4['text_scale'] = 0.15
+			self.dialogue_personal_button4['text_pos'] = (0, -.03)
+			self.dialogue_personal_button4['text_align'] = TextNode.ACenter
+			self.dialogue_situation_button['text'] = "Situation"
+			self.dialogue_situation_button['text_scale'] = 0.15
+			self.dialogue_situation_button['text_pos'] = (0, -.03)
+			self.dialogue_situation_button['text_align'] = TextNode.ACenter
+
 			self.taskMgr.add(self.limbo_camera_task_checkers, "Checkers Camera")
 			return
+
 		elif character == "Michael":
-			print "Michael speaks!"
+			#Add the personalized text and delete unnecessary buttons
+			dialogue_greeting.setText("Ready for your mission?")
+			self.dialogue_personal_button1['text'] = "Yes"
+			self.dialogue_personal_button1['text_scale'] = 0.15
+			self.dialogue_personal_button1['text_pos'] = (0, -.03)
+			self.dialogue_personal_button1['text_align'] = TextNode.ACenter
+			self.dialogue_back_button['text'] = "No"
+			self.dialogue_personal_button2.destroy()
+			self.dialogue_personal_button3.destroy()
+			self.dialogue_personal_button4.destroy()
+			self.dialogue_situation_button.destroy()
+
 			self.taskMgr.add(self.limbo_camera_task_michael, "Michael Camera")
 
 			#self.limbo_hide_all()
@@ -511,17 +608,29 @@ class PIRATES(ShowBase):
         
         def end_dialogue(self, character):
                 self.__in_dialogue = False
-                delf.dialogue_box.hide()
+
+		#Remove zoomed in cameras and add regular limbo camera
                 if character == "Farthing":
-			self.taskMgr.remove(self.limbo_camera_task_farthing, "Farthing Camera")
+			self.taskMgr.remove("Farthing Camera")
 		elif character == "Ivan":
-			self.taskMgr.remove(self.limbo_camera_task_ivan, "Ivan Camera")
+			self.taskMgr.remove("Ivan Camera")
 		elif character == "Checkers":
-			self.taskMgr.remove(self.limbo_camera_task_checkers, "Checkers Camera")
+			self.taskMgr.remove("Checkers Camera")
 		elif character == "Michael":
-			self.taskMgr.remove(self.limbo_camera_task_michael, "Michael Camera")
+			self.taskMgr.remove("Michael Camera")
+
                 self.taskMgr.add(self.limbo_camera_task, "Limbo Camera")
-                
+
+		#Hide dialogue_box and destroy direct buttons
+	        self.dialogue_box.hide()
+		self.dialogue_back_button.destroy()
+		self.dialogue_personal_button1.destroy()
+
+		if character is not "Michael":
+	 		self.dialogue_personal_button2.destroy()
+			self.dialogue_personal_button3.destroy()
+			self.dialogue_personal_button4.destroy()
+			self.dialogue_situation_button.destroy()        
 
 	def enemy_turn(self, enemy):		
 		starting_gridspace = enemy.get_gridspace()
@@ -543,16 +652,16 @@ class PIRATES(ShowBase):
 
 		elif distance == enemy.get_unit_range() + 1:
 			if enemy.get_name() == "Melee":
-				self.melee_interval1 = self.melee_monster.posInterval(1, Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), Point3(self.melee_monster.getX(), self.melee_monster.getY(), 1), "meleeMove1")
-				self.melee_monster_sequence = Sequence(	self.delay, self.melee_interval1 )
+				self.melee_interval1 = self.melee_monster.posInterval(0.7, Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), Point3(self.melee_monster.getX(), self.melee_monster.getY(), 1), "meleeMove1")
+				self.melee_monster_sequence = Sequence(	self.melee_interval1 )
 				self.melee_monster_sequence.start()
 			elif enemy.get_name() == "Short":
-				self.short_interval1 = self.short_monster.posInterval(1, Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), Point3(self.short_monster.getX(), self.short_monster.getY(), 1), "shortMove1")
-				self.short_monster_sequence = Sequence(	self.delay, self.short_interval1 )
+				self.short_interval1 = self.short_monster.posInterval(0.7, Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), Point3(self.short_monster.getX(), self.short_monster.getY(), 1), "shortMove1")
+				self.short_monster_sequence = Sequence( self.short_interval1 )
 				self.short_monster_sequence.start()
 			elif enemy.get_name() == "Long":
-				self.long_interval1 = self.long_monster.posInterval(1, Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), Point3(self.long_monster.getX(), self.long_monster.getY(), 1), "shortMove1")
-				self.long_monster_sequence = Sequence(	self.delay, self.long_interval1 )
+				self.long_interval1 = self.long_monster.posInterval(0.7, Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), Point3(self.long_monster.getX(), self.long_monster.getY(), 1), "shortMove1")
+				self.long_monster_sequence = Sequence( self.long_interval1 )
 				self.long_monster_sequence.start()
 
 			if random.randint(1, 100) <= enemy.get_accuracy():
@@ -567,23 +676,22 @@ class PIRATES(ShowBase):
 			enemy.setAP(0)
 			return True
 		else:
-			self.delay = Wait(1)
 			if enemy.get_name() == "Melee":
-				self.melee_interval1 = self.melee_monster.posInterval(1, Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), Point3(self.melee_monster.getX(), self.melee_monster.getY(), 1), "meleeMove1")
-				self.melee_interval2 = self.melee_monster.posInterval( 1, Point3(self.gridspace_list[path[2]].get_x_position(), self.gridspace_list[path[2]].get_y_position(), 1), Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), "meleeMove2")
-				self.melee_monster_sequence = Sequence(	self.delay, self.melee_interval1, self.melee_interval2	)
+				self.melee_interval1 = self.melee_monster.posInterval(0.7, Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), Point3(self.melee_monster.getX(), self.melee_monster.getY(), 1), "meleeMove1")
+				self.melee_interval2 = self.melee_monster.posInterval( 0.7, Point3(self.gridspace_list[path[2]].get_x_position(), self.gridspace_list[path[2]].get_y_position(), 1), Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), "meleeMove2")
+				self.melee_monster_sequence = Sequence(self.melee_interval1, self.melee_interval2)
 				self.melee_monster_sequence.start()
 
 			elif enemy.get_name() == "Short":
-				self.short_interval1 = self.short_monster.posInterval(1, Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), Point3(self.short_monster.getX(), self.short_monster.getY(), 1), "shortMove1")
-				self.short_interval2 = self.short_monster.posInterval( 1, Point3(self.gridspace_list[path[2]].get_x_position(), self.gridspace_list[path[2]].get_y_position(), 1), Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), "shortMove2")
-				self.short_monster_sequence = Sequence(	self.delay, self.short_interval1, self.short_interval2	)
+				self.short_interval1 = self.short_monster.posInterval(0.7, Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), Point3(self.short_monster.getX(), self.short_monster.getY(), 1), "shortMove1")
+				self.short_interval2 = self.short_monster.posInterval( 0.7, Point3(self.gridspace_list[path[2]].get_x_position(), self.gridspace_list[path[2]].get_y_position(), 1), Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), "shortMove2")
+				self.short_monster_sequence = Sequence(self.short_interval1, self.short_interval2)
 				self.short_monster_sequence.start()
 
 			elif enemy.get_name() == "Long":
-				self.long_interval1 = self.long_monster.posInterval(1, Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), Point3(self.long_monster.getX(), self.long_monster.getY(), 1), "longMove1")
-				self.long_interval2 = self.long_monster.posInterval( 1, Point3(self.gridspace_list[path[2]].get_x_position(), self.gridspace_list[path[2]].get_y_position(), 1), Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), "longMove2")
-				self.long_monster_sequence = Sequence( self.delay, self.long_interval1, self.long_interval2 )
+				self.long_interval1 = self.long_monster.posInterval(0.7, Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), Point3(self.long_monster.getX(), self.long_monster.getY(), 1), "longMove1")
+				self.long_interval2 = self.long_monster.posInterval( 0.7, Point3(self.gridspace_list[path[2]].get_x_position(), self.gridspace_list[path[2]].get_y_position(), 1), Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), "longMove2")
+				self.long_monster_sequence = Sequence(self.long_interval1, self.long_interval2)
 				self.long_monster_sequence.start()
 
 			self.gridspace_list[starting_gridspace].set_occupiable(True)
