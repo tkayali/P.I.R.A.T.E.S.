@@ -1,10 +1,10 @@
 Checkers: Care for a game of checkers, Captain?
 Moot: <Shakes head>
-Checkers: Yeah, I figured you’d be pretty busy with your duties. Must be difficult to captain a crew like this.
+Checkers: Yeah, I figured you'd be pretty busy with your duties. Must be difficult to captain a crew like this.
 Moot: <Shrugs>
-Checkers: You’ve gotta keep your eye on them, too. In fact, I’ve begun to suspect that Ivan is actually working with the government.
+Checkers: You've gotta keep your eye on them, too. In fact, I've begun to suspect that Ivan is actually working with the government.
 Moot: <Rolls eyes>
-Checkers: But it’s obvious!
+Checkers: But it's obvious!
 Moot: <Points at his own hat>
 Checkers: Ok, so I was wrong about you raising birds under there, but at the time, it seemed so obvious!
 Moot: <Stares pointedly>
