@@ -516,7 +516,7 @@ class PIRATES(ShowBase):
 		
 		if character == "Farthing":
 			#Add the personalized text
-			self.dialogue_greeting.setText("Farthing: \"Oh! Hello Captain!\"")
+			self.dialogue_greeting.setText("Farthing: Oh! Hello Captain!")
 			self.dialogue_personal_button1["text"] = "Hobby"
 			self.dialogue_personal_button1["text_scale"] = 0.15
 			self.dialogue_personal_button1["text_pos"] = (0, -.03)
@@ -554,7 +554,7 @@ class PIRATES(ShowBase):
 
 		elif character == "Ivan":
 			#Add the personalized text
-			self.dialogue_greeting.setText("Ivan: \"Cap'\"")
+			self.dialogue_greeting.setText("Ivan: Cap'")
 			self.dialogue_personal_button1["text"] = "Moot"
 			self.dialogue_personal_button1["text_scale"] = 0.15
 			self.dialogue_personal_button1["text_pos"] = (0, -.03)
@@ -591,7 +591,7 @@ class PIRATES(ShowBase):
 
 		elif character == "Checkers":
 			#Add the personalized text
-			self.dialogue_greeting.setText("Checkers: \"Heya Captain, how's it going?\"")
+			self.dialogue_greeting.setText("Checkers: Heya Captain, how's it going?")
 			self.dialogue_personal_button1["text"] = "Fun"
 			self.dialogue_personal_button1["text_scale"] = 0.15
 			self.dialogue_personal_button1["text_pos"] = (0, -.03)
