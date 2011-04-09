@@ -491,7 +491,7 @@ class PIRATES(ShowBase):
 		self.dialogue_font = loader.loadFont("Config/King Luau.ttf")
 		self.dialogue_box = OnscreenImage( image = 'Textures/DialogueBox.png', pos = (0, 0, -0.65 ), scale = (1, 1, .35) )	
 		self.dialogue_box.setTransparency(TransparencyAttrib.MAlpha)
-		self.dialogue_box.setAlphaScale(0.65)
+		self.dialogue_box.setAlphaScale(0.7)
 		self.dialogue_box.reparentTo(render2d)
 		self.dialogue_line_number = 0
 		self.current_dialogue = None
@@ -633,6 +633,8 @@ class PIRATES(ShowBase):
 			self.dialogue_personal_button1['text_scale'] = 0.15
 			self.dialogue_personal_button1['text_pos'] = (0, -.03)
 			self.dialogue_personal_button1['text_align'] = TextNode.ACenter
+			self.dialogue_personal_button1['command'] = self.display_dialogue
+			self.dialogue_personal_button1['extraArgs'] = [self.dialogue_michael]
 			self.dialogue_back_button['text'] = "No"
 			self.dialogue_personal_button2.destroy()
 			self.dialogue_personal_button3.destroy()
@@ -661,12 +663,21 @@ class PIRATES(ShowBase):
 		if self.current_dialogue is None:
 			return
 		
-		elif len(self.current_dialogue) == self.dialogue_line_number+1:
-			self.dialogue_box.hide()
-			self.begin_dialogue(self.current_speaker)
-			self.current_dialogue = None
-			self.dialogue_line_number = 0
-			self.dialogue_greeting.show()
+		elif len(self.current_dialogue) == self.dialogue_line_number:
+			if self.current_speaker == "Michael":
+				self.limbo_hide_all()
+				self.setup_combat()
+				self.current_dialogue = None
+				self.dialogue_line_number = 0
+				self.current_speaker = None
+			else:
+				self.dialogue_box.hide()
+				self.begin_dialogue(self.current_speaker)
+				self.current_dialogue = None
+				self.dialogue_line_number = 0
+				self.dialogue_greeting.show()
+
+
 
 		else:
 			self.dialogue_greeting.hide()
