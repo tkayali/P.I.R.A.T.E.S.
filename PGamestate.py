@@ -6,7 +6,7 @@ from PGridspace import Gridspace
 from PMap import Map
 
 from math import pi, sin, cos
-import random, sys, os
+import random, sys
 
 from direct.gui.OnscreenText import OnscreenText
 from direct.gui.OnscreenImage import OnscreenImage
@@ -33,20 +33,20 @@ class PIRATES(ShowBase):
 	__number_enemies_alive = 0
 	sonatu_end_turn = False
         
-        #Dialogue!!!
+        #Import dialogue from associated files
         dialogue_checkers_l_crew = open('Config/checkers_l_1.txt').readlines()
-        dialogue_checkers_l_how_are_we_doing = open('Config/checkers_l_2.txt').readlines()
-        dialogue_checkers_l_for_fun = open('Config/checkers_l_3.txt').readlines()
+        dialogue_checkers_l_status = open('Config/checkers_l_2.txt').readlines()
+        dialogue_checkers_l_fun = open('Config/checkers_l_3.txt').readlines()
         dialogue_checkers_l_future = open('Config/checkers_l_4.txt').readlines()
         dialogue_checkers_l_situation = open('Config/checkers_l_s.txt').readlines()
-        dialogue_farthing_l_exploration = open('Config/farthing_l_1.txt').readlines()
-        dialogue_farthing_l_why_are_you_here = open('Config/farthing_l_2.txt').readlines()
-        dialogue_farthing_l_your_past = open('Config/farthing_l_3.txt').readlines()
-        dialogue_farthing_l_how_are_you_doing = open('Config/farthing_l_4.txt').readlines()
+        dialogue_farthing_l_hobby = open('Config/farthing_l_1.txt').readlines()
+        dialogue_farthing_l_inspiration = open('Config/farthing_l_2.txt').readlines()
+        dialogue_farthing_l_past = open('Config/farthing_l_3.txt').readlines()
+        dialogue_farthing_l_status = open('Config/farthing_l_4.txt').readlines()
         dialogue_farthing_l_situation = open('Config/farthing_l_s.txt').readlines()
-        dialogue_ivan_l_how_am_i_doing = open('Config/ivan_l_1.txt').readlines()
-        dialogue_ivan_l_how_are_we_doing = open('Config/ivan_l_2.txt').readlines()
-        dialogue_ivan_l_your_past = open('Config/ivan_l_3.txt').readlines()
+        dialogue_ivan_l_moot = open('Config/ivan_l_1.txt').readlines()
+        dialogue_ivan_l_status = open('Config/ivan_l_2.txt').readlines()
+        dialogue_ivan_l_past = open('Config/ivan_l_3.txt').readlines()
         dialogue_ivan_l_pirates = open('Config/ivan_l_4.txt').readlines()
         dialogue_ivan_l_situation = open('Config/ivan_l_s.txt').readlines()
         dialogue_michael = open('Config/michael.txt').readlines()
@@ -67,6 +67,7 @@ class PIRATES(ShowBase):
 		mouseTask = taskMgr.add(self.mouse_task, 'mouse_task')
 		taskMgr.add(self.end_turn_task, "end_turn")
 
+		self.accept("arrow_down", self.display_line )
 		self.accept("escape", sys.exit)
 		self.accept("h", self.limbo_hide_all )
 		self.accept("c", self.setup_combat )
@@ -402,7 +403,9 @@ class PIRATES(ShowBase):
 			self.traverser.traverse(render)
 			if self.handler.getNumEntries() > 0:
 				self.handler.sortEntries()
+				#self.current_speaker = self.handler.getEntry(0).getIntoNodePath().getTag("name")
 				self.begin_dialogue(self.handler.getEntry(0).getIntoNodePath().getTag("name"))
+				
 
 	def sonatu_turn(self):
 		starting_gridspace = self.sonatu.get_gridspace()
@@ -482,6 +485,7 @@ class PIRATES(ShowBase):
 							self.__number_enemies_alive -= 1
 
 	def begin_dialogue(self, character):
+		self.current_speaker = character
                 self.__in_dialogue = True
 		self.taskMgr.remove("Limbo Camera")
 		self.dialogue_font = loader.loadFont("Config/King Luau.ttf")
@@ -489,9 +493,12 @@ class PIRATES(ShowBase):
 		self.dialogue_box.setTransparency(TransparencyAttrib.MAlpha)
 		self.dialogue_box.setAlphaScale(0.65)
 		self.dialogue_box.reparentTo(render2d)
+		self.dialogue_line_number = 0
+		self.current_dialogue = None
+		self.line = OnscreenText(pos = (0, 0.5, 0), scale = (0.08, 0.18), fg = (0, 0, 0, 1), shadow = (0, 0, 0, 1), align = TextNode.ACenter, wordwrap = 20, font = self.dialogue_font, parent = self.dialogue_box, mayChange = 1)
 
 		#Dialogue greeting to be changed for each individual
-		dialogue_greeting = OnscreenText( text = "", pos = (0, 0.5, 0), scale = (0.1, 0.2), fg = (0, 0, 0, 1), shadow = (0, 0, 0, 1), align = TextNode.ACenter, wordwrap = 20, font = self.dialogue_font, parent = self.dialogue_box, mayChange = 1)
+		self.dialogue_greeting = OnscreenText( text = "", pos = (0, 0.5, 0), scale = (0.1, 0.2), fg = (0, 0, 0, 1), shadow = (0, 0, 0, 1), align = TextNode.ACenter, wordwrap = 20, font = self.dialogue_font, parent = self.dialogue_box, mayChange = 1)
 
 		#Back button for each dialogue menu
                 self.dialogue_back_button = DirectButton(pos = Vec3(0.8, 0, -0.70), scale = 0.4, pressEffect = 1, textMayChange = 1, state = DGG.NORMAL, command = self.end_dialogue, extraArgs = [character], relief = DGG.GROOVE, frameColor = (.8, .867, .933, 1), pad = (0.7, 0.08))
@@ -500,97 +507,128 @@ class PIRATES(ShowBase):
 		self.dialogue_back_button["text_pos"] = (0, -.03)
 		self.dialogue_back_button["text_align"] = TextNode.ACenter	
 
-		self.dialogue_personal_button1 = DirectButton(pos = Vec3(-0.8, 0, -0.70), scale = 0.4, pressEffect = 1, textMayChange = 1, state = DGG.NORMAL, command = self.end_dialogue, extraArgs = [character], relief = DGG.GROOVE, frameColor = (.6235, .4353, .2471, 1), pad = (0.7, 0.08))
-		self.dialogue_personal_button2 = DirectButton(pos = Vec3(-0.8, 0, -0.88), scale = 0.4, pressEffect = 1, textMayChange = 1, state = DGG.NORMAL, command = self.end_dialogue, extraArgs = [character], relief = DGG.GROOVE, frameColor = (.6235, .4353, .2471, 1), pad = (0.7, 0.08))
-		self.dialogue_personal_button3 = DirectButton(pos = Vec3( 0.8, 0, -0.88), scale = 0.4, pressEffect = 1, textMayChange = 1, state = DGG.NORMAL, command = self.end_dialogue, extraArgs = [character], relief = DGG.GROOVE, frameColor = (.6235, .4353, .2471, 1), pad = (0.7, 0.08))
-		self.dialogue_personal_button4 = DirectButton(pos = Vec3( 0, 0, -0.88), scale = 0.4, pressEffect = 1, textMayChange = 1, state = DGG.NORMAL, command = self.end_dialogue, extraArgs = [character], relief = DGG.GROOVE, frameColor = (.6235, .4353, .2471, 1), pad = (0.7, 0.08))
-		self.dialogue_situation_button = DirectButton(pos = Vec3( 0, 0, -0.70), scale = 0.4, pressEffect = 1, textMayChange = 1, state = DGG.NORMAL, command = self.end_dialogue, extraArgs = [character], relief = DGG.GROOVE, frameColor = (.6235, .4353, .2471, 1), pad = (0.7, 0.08))
+		self.dialogue_personal_button1 = DirectButton(pos = Vec3(-0.8, 0, -0.70), scale = 0.4, pressEffect = 1, textMayChange = 1, state = DGG.NORMAL, relief = DGG.GROOVE, frameColor = (.6235, .4353, .2471, 1), pad = (0.7, 0.08))
+		self.dialogue_personal_button2 = DirectButton(pos = Vec3(-0.8, 0, -0.88), scale = 0.4, pressEffect = 1, textMayChange = 1, state = DGG.NORMAL, relief = DGG.GROOVE, frameColor = (.6235, .4353, .2471, 1), pad = (0.7, 0.08))
+		self.dialogue_personal_button3 = DirectButton(pos = Vec3( 0.8, 0, -0.88), scale = 0.4, pressEffect = 1, textMayChange = 1, state = DGG.NORMAL, relief = DGG.GROOVE, frameColor = (.6235, .4353, .2471, 1), pad = (0.7, 0.08))
+		self.dialogue_personal_button4 = DirectButton(pos = Vec3( 0, 0, -0.88), scale = 0.4, pressEffect = 1, textMayChange = 1, state = DGG.NORMAL, relief = DGG.GROOVE, frameColor = (.6235, .4353, .2471, 1), pad = (0.7, 0.08))
+		self.dialogue_situation_button = DirectButton(pos = Vec3( 0, 0, -0.70), scale = 0.4, pressEffect = 1, textMayChange = 1, state = DGG.NORMAL, relief = DGG.GROOVE, frameColor = (.6235, .4353, .2471, 1), pad = (0.7, 0.08))
 
 		
 		if character == "Farthing":
 			#Add the personalized text
-			dialogue_greeting.setText("Farthing: \"Oh! Hello Captain!\"")
+			self.dialogue_greeting.setText("Farthing: \"Oh! Hello Captain!\"")
 			self.dialogue_personal_button1["text"] = "Hobby"
 			self.dialogue_personal_button1["text_scale"] = 0.15
 			self.dialogue_personal_button1["text_pos"] = (0, -.03)
 			self.dialogue_personal_button1["text_align"] = TextNode.ACenter
+			self.dialogue_personal_button1['command'] = self.display_dialogue
+			self.dialogue_personal_button1['extraArgs'] = [self.dialogue_farthing_l_hobby]
 			self.dialogue_personal_button2["text"] = "Inspiration"
 			self.dialogue_personal_button2["text_scale"] = 0.15
 			self.dialogue_personal_button2["text_pos"] = (0, -.03)
 			self.dialogue_personal_button2["text_align"] = TextNode.ACenter
+			self.dialogue_personal_button2['command'] = self.display_dialogue
+			self.dialogue_personal_button2['extraArgs'] = [self.dialogue_farthing_l_inspiration]
 			self.dialogue_personal_button3['text'] = "Past"
 			self.dialogue_personal_button3['text_scale'] = 0.15
 			self.dialogue_personal_button3['text_pos'] = (0, -.03)
 			self.dialogue_personal_button3['text_align'] = TextNode.ACenter
+			self.dialogue_personal_button3['command'] = self.display_dialogue
+			self.dialogue_personal_button3['extraArgs'] = [self.dialogue_farthing_l_past]
 			self.dialogue_personal_button4['text'] = "Status"
 			self.dialogue_personal_button4['text_scale'] = 0.15
 			self.dialogue_personal_button4['text_pos'] = (0, -.03)
 			self.dialogue_personal_button4['text_align'] = TextNode.ACenter
+			self.dialogue_personal_button4['command'] = self.display_dialogue
+			self.dialogue_personal_button4['extraArgs'] = [self.dialogue_farthing_l_status]
 			self.dialogue_situation_button['text'] = "Situation"
 			self.dialogue_situation_button['text_scale'] = 0.15
 			self.dialogue_situation_button['text_pos'] = (0, -.03)
 			self.dialogue_situation_button['text_align'] = TextNode.ACenter
+			self.dialogue_situation_button['command'] = self.display_dialogue
+			self.dialogue_situation_button['extraArgs'] = [self.dialogue_farthing_l_situation]
+			self.current_speaker = "Farthing"
 
 			self.taskMgr.add(self.limbo_camera_task_farthing, "Farthing Camera")
 			return
 
 		elif character == "Ivan":
 			#Add the personalized text
-			dialogue_greeting.setText("Ivan: \"Cap'\"")
+			self.dialogue_greeting.setText("Ivan: \"Cap'\"")
 			self.dialogue_personal_button1["text"] = "Moot"
 			self.dialogue_personal_button1["text_scale"] = 0.15
 			self.dialogue_personal_button1["text_pos"] = (0, -.03)
 			self.dialogue_personal_button1["text_align"] = TextNode.ACenter
+			self.dialogue_personal_button1['command'] = self.display_dialogue
+			self.dialogue_personal_button1['extraArgs'] = [self.dialogue_ivan_l_moot]
 			self.dialogue_personal_button2["text"] = "P.I.R.A.T.E.S"
 			self.dialogue_personal_button2["text_scale"] = 0.15
 			self.dialogue_personal_button2["text_pos"] = (0, -.03)
 			self.dialogue_personal_button2["text_align"] = TextNode.ACenter
+			self.dialogue_personal_button2['command'] = self.display_dialogue
+			self.dialogue_personal_button2['extraArgs'] = [self.dialogue_ivan_l_pirates]
 			self.dialogue_personal_button3['text'] = "Past"
 			self.dialogue_personal_button3['text_scale'] = 0.15
 			self.dialogue_personal_button3['text_pos'] = (0, -.03)
 			self.dialogue_personal_button3['text_align'] = TextNode.ACenter
+			self.dialogue_personal_button3['command'] = self.display_dialogue
+			self.dialogue_personal_button3['extraArgs'] = [self.dialogue_ivan_l_past]
 			self.dialogue_personal_button4['text'] = "Status"
 			self.dialogue_personal_button4['text_scale'] = 0.15
 			self.dialogue_personal_button4['text_pos'] = (0, -.03)
 			self.dialogue_personal_button4['text_align'] = TextNode.ACenter
+			self.dialogue_personal_button4['command'] = self.display_dialogue
+			self.dialogue_personal_button4['extraArgs'] = [self.dialogue_ivan_l_status]
 			self.dialogue_situation_button['text'] = "Situation"
 			self.dialogue_situation_button['text_scale'] = 0.15
 			self.dialogue_situation_button['text_pos'] = (0, -.03)
 			self.dialogue_situation_button['text_align'] = TextNode.ACenter
+			self.dialogue_situation_button['command'] = self.display_dialogue
+			self.dialogue_situation_button['extraArgs'] = [self.dialogue_ivan_l_situation]
 
 			self.taskMgr.add(self.limbo_camera_task_ivan, "Ivan Camera")
 			return
 
 		elif character == "Checkers":
 			#Add the personalized text
-			dialogue_greeting.setText("Checkers: \"Heya Captain, how's it going?\"")
+			self.dialogue_greeting.setText("Checkers: \"Heya Captain, how's it going?\"")
 			self.dialogue_personal_button1["text"] = "Fun"
 			self.dialogue_personal_button1["text_scale"] = 0.15
 			self.dialogue_personal_button1["text_pos"] = (0, -.03)
 			self.dialogue_personal_button1["text_align"] = TextNode.ACenter
+			self.dialogue_personal_button1['command'] = self.display_dialogue
+			self.dialogue_personal_button1['extraArgs'] = [self.dialogue_checkers_l_fun]
 			self.dialogue_personal_button2["text"] = "Crew"
 			self.dialogue_personal_button2["text_scale"] = 0.15
 			self.dialogue_personal_button2["text_pos"] = (0, -.03)
 			self.dialogue_personal_button2["text_align"] = TextNode.ACenter
+			self.dialogue_personal_button2['command'] = self.display_dialogue
+			self.dialogue_personal_button2['extraArgs'] = [self.dialogue_checkers_l_crew]
 			self.dialogue_personal_button3['text'] = "Future"
 			self.dialogue_personal_button3['text_scale'] = 0.15
 			self.dialogue_personal_button3['text_pos'] = (0, -.03)
 			self.dialogue_personal_button3['text_align'] = TextNode.ACenter
+			self.dialogue_personal_button3['command'] = self.display_dialogue
+			self.dialogue_personal_button3['extraArgs'] = [self.dialogue_checkers_l_future]
 			self.dialogue_personal_button4['text'] = "Status"
 			self.dialogue_personal_button4['text_scale'] = 0.15
 			self.dialogue_personal_button4['text_pos'] = (0, -.03)
 			self.dialogue_personal_button4['text_align'] = TextNode.ACenter
+			self.dialogue_personal_button4['command'] = self.display_dialogue
+			self.dialogue_personal_button4['extraArgs'] = [self.dialogue_checkers_l_status]
 			self.dialogue_situation_button['text'] = "Situation"
 			self.dialogue_situation_button['text_scale'] = 0.15
 			self.dialogue_situation_button['text_pos'] = (0, -.03)
 			self.dialogue_situation_button['text_align'] = TextNode.ACenter
+			self.dialogue_situation_button['command'] = self.display_dialogue
+			self.dialogue_situation_button['extraArgs'] = [self.dialogue_checkers_l_situation]
 
 			self.taskMgr.add(self.limbo_camera_task_checkers, "Checkers Camera")
 			return
 
 		elif character == "Michael":
 			#Add the personalized text and delete unnecessary buttons
-			dialogue_greeting.setText("Ready for your mission?")
+			self.dialogue_greeting.setText("Ready for your mission?")
 			self.dialogue_personal_button1['text'] = "Yes"
 			self.dialogue_personal_button1['text_scale'] = 0.15
 			self.dialogue_personal_button1['text_pos'] = (0, -.03)
@@ -605,6 +643,35 @@ class PIRATES(ShowBase):
 
 			#self.limbo_hide_all()
 			#self.setup_combat()
+
+	def display_dialogue(self, dialogue):
+		if self.current_speaker is not "Michael":
+			self.dialogue_personal_button2.destroy()
+			self.dialogue_personal_button3.destroy()
+			self.dialogue_personal_button4.destroy()
+			self.dialogue_situation_button.destroy()
+		
+		self.dialogue_personal_button1.destroy()
+		self.dialogue_back_button.destroy()
+		self.current_dialogue = dialogue
+		self.dialogue_line_number = 0
+		self.display_line()
+	
+	def display_line(self):
+		if self.current_dialogue is None:
+			return
+		
+		elif len(self.current_dialogue) == self.dialogue_line_number+1:
+			self.dialogue_box.hide()
+			self.begin_dialogue(self.current_speaker)
+			self.current_dialogue = None
+			self.dialogue_line_number = 0
+			self.dialogue_greeting.show()
+
+		else:
+			self.dialogue_greeting.hide()
+			self.line.setText(text = self.current_dialogue[self.dialogue_line_number])
+			self.dialogue_line_number += 1
         
         def end_dialogue(self, character):
                 self.__in_dialogue = False
