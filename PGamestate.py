@@ -32,7 +32,8 @@ class PIRATES(ShowBase):
 	__player_turn = True
 	__number_enemies_alive = 0
 	sonatu_end_turn = False
-        
+       	sonatu_attacked = False
+
         #Import dialogue from associated files
         dialogue_checkers_l_crew = open('Config/checkers_l_1.txt').readlines()
         dialogue_checkers_l_status = open('Config/checkers_l_2.txt').readlines()
@@ -185,8 +186,13 @@ class PIRATES(ShowBase):
 
 		#Set up instructions
 		self.calibri_font = loader.loadFont('Config/calibri.ttf')
-		self.instructions_text = OnscreenText( text = "Interact with the characters!\nPress ESC to exit!", pos = (-1, .95), scale = 0.04, fg = (0, 0, 0, .8), shadow = (0, 0, 0, 1), align = TextNode.ALeft, font = self.calibri_font, mayChange = True)
+		self.instructions_text = OnscreenText( text = "Click on the characters!\nScroll through dialogue with the down arrow!\nPress ESC to exit!", pos = (-1, .95), scale = 0.04, fg = (0, 0, 0, .8), shadow = (0, 0, 0, 1), align = TextNode.ALeft, font = self.calibri_font, mayChange = True)
 		self.instructions_text.reparentTo(render2d)
+
+		#Name of character to be changed depending on which character dialogue is initiated with
+		self.character_name = OnscreenText( text = "", pos = (0, 0.9, 0), scale = (0.1, 0.1), fg = (1, 1, 1, 1), align = TextNode.ACenter, font = self.calibri_font, mayChange = 1)
+		self.character_name.reparentTo(render2d)
+		self.character_name.hide()
 
 	def reset_combat(self):
 		#Reset up attributes
@@ -200,6 +206,10 @@ class PIRATES(ShowBase):
                 self.__in_limbo = False
 		self.__in_combat = True
 		self.__number_enemies_alive = 3
+		self.monster_list = []
+		self.monster_model_list = []
+		self.gridspace_list = []
+		self.obstacle_list = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
 
 		#Remove blursharpen and cartoon ink
         	self.filters.delCartoonInk()
@@ -237,57 +247,6 @@ class PIRATES(ShowBase):
 		self.water.setTexture(self.waterTexture)
 		self.water.reparentTo(self.render)
 
-		#Combat Sonatu
-		self.combat_sonatu = self.loader.loadModel("Models\Sonatu\Sonatu.egg")
-		self.combat_sonatu.setSx(.022)
-		self.combat_sonatu.setSy(.022)
-		self.combat_sonatu.setSz(.022)
-		self.combat_sonatu.setPos(242.487, -90, 1)
-		self.combat_sonatu.lookAt(-1000, 0, 0)
-		self.combat_sonatu.reparentTo(self.render)
-		self.sonatu = Sonatu(107, 0)
-		
-		#Our lovely lists
-		self.monster_list = []
-		self.monster_model_list = []
-		self.gridspace_list = []
-
-		#Monster - Melee
-		self.melee_monster = self.loader.loadModel("Models\Monsters\octopus.egg")
-		self.melee_monster.setSx(0.35)
-		self.melee_monster.setSy(0.35)
-		self.melee_monster.setSz(0.35)
-		self.melee_monster.lookAt(-1000, 0, 0)
-		self.melee_monster.setPos(17.321, -90, 1)
-		self.melee_monster.reparentTo(self.render)
-		self.melee = Enemy(94, 1)
-		self.monster_list.append(self.melee)
-		self.monster_model_list.append(self.melee_monster)
-
-		#Monster - Short
-		self.short_monster = self.loader.loadModel("Models\Monsters\conch.egg")
-		self.short_monster.setSx(0.35)
-		self.short_monster.setSy(0.35)
-		self.short_monster.setSz(0.35)
-		self.short_monster.lookAt(-1000, 0, 0)
-		self.short_monster.setPos(17.321, -120, 0)
-		self.short_monster.reparentTo(self.render)
-		self.short = Enemy(125, 2)
-		self.monster_list.append(self.short)
-		self.monster_model_list.append(self.short_monster)
-
-		#Monster - Long
-		self.long_monster = self.loader.loadModel("Models\Monsters\serpent.egg")
-		self.long_monster.setSx(0.35)
-		self.long_monster.setSy(0.35)
-		self.long_monster.setSz(0.35)
-		self.long_monster.lookAt(1000, 0, 0)
-		self.long_monster.setPos(17.321, -60, 0)
-		self.long_monster.reparentTo(self.render)
-		self.long = Enemy(63, 4)
-		self.monster_list.append(self.long)
-		self.monster_model_list.append(self.long_monster)
-		
 		#Create the hex grid
 		y_counter = 0
 		hex_radius = 10
@@ -312,6 +271,75 @@ class PIRATES(ShowBase):
 		#Create map to hold the gridspaces
 		self.combat_map = Map(self.gridspace_list, False)
 
+		#Combat Sonatu
+		self.combat_sonatu = self.loader.loadModel("Models\Sonatu\Sonatu.egg")
+		self.combat_sonatu.setSx(.022)
+		self.combat_sonatu.setSy(.022)
+		self.combat_sonatu.setSz(.022)
+		self.combat_sonatu.setPos(242.487, -90, 1)
+		self.combat_sonatu.lookAt(-1000, 0, 0)
+		self.combat_sonatu.reparentTo(self.render)
+		self.sonatu = Sonatu(107, 0)
+		self.gridspace_list[107].set_occupiable(False)
+
+		#Monster - Melee
+		self.melee_monster = self.loader.loadModel("Models\Monsters\octopus.egg")
+		self.melee_monster.setSx(0.35)
+		self.melee_monster.setSy(0.35)
+		self.melee_monster.setSz(0.35)
+		self.melee_monster.lookAt(self.combat_sonatu)
+		self.melee_monster.setPos(17.321, -90, 1)
+		self.melee_monster.reparentTo(self.render)
+		self.melee = Enemy(94, 1)
+		self.gridspace_list[94].set_occupiable(False)
+		self.monster_list.append(self.melee)
+		self.monster_model_list.append(self.melee_monster)
+
+		#Monster - Short
+		self.short_monster = self.loader.loadModel("Models\Monsters\conch.egg")
+		self.short_monster.setSx(0.35)
+		self.short_monster.setSy(0.35)
+		self.short_monster.setSz(0.35)
+		self.short_monster.lookAt(self.combat_sonatu)
+		self.short_monster.setPos(17.321, -120, 0)
+		self.short_monster.reparentTo(self.render)
+		self.short = Enemy(125, 2)
+		self.gridspace_list[125].set_occupiable(False)
+		self.monster_list.append(self.short)
+		self.monster_model_list.append(self.short_monster)
+
+		#Monster - Long
+		self.long_monster = self.loader.loadModel("Models\Monsters\serpent.egg")
+		self.long_monster.setSx(0.35)
+		self.long_monster.setSy(0.35)
+		self.long_monster.setSz(0.35)
+		self.long_monster.lookAt(self.combat_sonatu)
+		self.long_monster.setPos(17.321, -60, 0)
+		self.long_monster.reparentTo(self.render)
+		self.long = Enemy(63, 4)
+		self.gridspace_list[63].set_occupiable(False)
+		self.monster_list.append(self.long)
+		self.monster_model_list.append(self.long_monster)
+
+		taskMgr.add(self.lookAt_sonatu, "lookAt_sonatu")
+
+		#Set up obstacles
+		for i in range(len(self.obstacle_list)):
+			position = random.randint(0, 201)
+			while not self.gridspace_list[position].get_occupiable(): #position is 107 or position is 94 or position is 125 or position is 63 or not
+				position = random.randint(0, 201)
+			self.gridspace_list[position].set_occupiable(False)
+			rock = random.randint(0, 1)
+			if rock is 1:
+				self.obstacle_list[i] = self.loader.loadModel("Models/Obstacles/rock_1.egg")
+			
+			elif rock is 0:
+				self.obstacle_list[i] = self.loader.loadModel("Models/Obstacles/rock_2.egg")
+				self.obstacle_list[i].setScale(0.7)
+
+			self.obstacle_list[i].setPos(self.gridspace_list[position].get_x_position(), self.gridspace_list[position].get_y_position(), 1)
+			self.obstacle_list[i].reparentTo(render)
+
 		#Add a hex grid texture
 		self.map_grid = self.loader.loadModel("square.egg")
 		self.map_grid.setTexture(ts, loader.loadTexture("textures\HexGrid.png"))	
@@ -334,20 +362,12 @@ class PIRATES(ShowBase):
 		self.sunlight_nodepath = render.attachNewNode(self.sunlight)
 		self.sunlight_nodepath.setPos(129, -75, 2)
 		self.sunlight_nodepath.lookAt(129, -75, 1)
-		self.melee_monster.setLight(self.sunlight_nodepath)
-		self.short_monster.setLight(self.sunlight_nodepath)
-		self.long_monster.setLight(self.sunlight_nodepath)
-		self.combat_sonatu.setLight(self.sunlight_nodepath)
-		self.water.setLight(self.sunlight_nodepath)
+		render.setLight(self.sunlight_nodepath)
 
 		self.ambientlight = AmbientLight("combat_ambient")
 		self.ambientlight.setColor(VBase4(0.2, 0.2, 0.2, 1))
 		self.ambientlight_nodepath = render.attachNewNode(self.ambientlight)
-		self.melee_monster.setLight(self.ambientlight_nodepath)
-		self.short_monster.setLight(self.ambientlight_nodepath)
-		self.long_monster.setLight(self.ambientlight_nodepath)
-		self.combat_sonatu.setLight(self.ambientlight_nodepath)
-		self.water.setLight(self.ambientlight_nodepath)
+		render.setLight(self.ambientlight_nodepath)
 
 	def limbo_hide_all(self):
 		self.limbo_sonatu.hide()
@@ -358,6 +378,7 @@ class PIRATES(ShowBase):
 		self.water_limbo.hide()
 		self.dialogue_box.hide()
 		self.instructions_text.hide()
+		self.character_name.hide()
 		render.clearLight(self.sunlight_nodepath)
 		render.clearLight(self.ambientlight_nodepath)
 	
@@ -365,6 +386,9 @@ class PIRATES(ShowBase):
 		for i in range(len(self.monster_list)):
 			if self.monster_list[i].get_alive():
 				self.monster_model_list[i].hide()
+
+		for i in range(len(self.obstacle_list)):
+			self.obstacle_list[i].hide()
 
 		self.map_grid.hide()
 		self.water.hide()
@@ -486,6 +510,7 @@ class PIRATES(ShowBase):
 
 	def begin_dialogue(self, character):
 		self.current_speaker = character
+		self.character_name.show()
                 self.__in_dialogue = True
 		self.taskMgr.remove("Limbo Camera")
 		self.dialogue_font = loader.loadFont("Config/King Luau.ttf")
@@ -515,6 +540,9 @@ class PIRATES(ShowBase):
 
 		
 		if character == "Farthing":
+			#Update the character name
+			self.character_name.setText("Farthing")
+
 			#Add the personalized text
 			self.dialogue_greeting.setText("Farthing: Oh! Hello Captain!")
 			self.dialogue_personal_button1["text"] = "Hobby"
@@ -553,6 +581,9 @@ class PIRATES(ShowBase):
 			return
 
 		elif character == "Ivan":
+			#Update the character name
+			self.character_name.setText("Ivan")
+
 			#Add the personalized text
 			self.dialogue_greeting.setText("Ivan: Cap'")
 			self.dialogue_personal_button1["text"] = "Moot"
@@ -590,6 +621,9 @@ class PIRATES(ShowBase):
 			return
 
 		elif character == "Checkers":
+			#Update the character name
+			self.character_name.setText("Checkers")
+
 			#Add the personalized text
 			self.dialogue_greeting.setText("Checkers: Heya Captain, how's it going?")
 			self.dialogue_personal_button1["text"] = "Fun"
@@ -627,6 +661,9 @@ class PIRATES(ShowBase):
 			return
 
 		elif character == "Michael":
+			#Update the character name
+			self.character_name.setText("Michael")
+
 			#Add the personalized text and delete unnecessary buttons
 			self.dialogue_greeting.setText("Ready for your mission?")
 			self.dialogue_personal_button1['text'] = "Yes"
@@ -677,8 +714,6 @@ class PIRATES(ShowBase):
 				self.dialogue_line_number = 0
 				self.dialogue_greeting.show()
 
-
-
 		else:
 			self.dialogue_greeting.hide()
 			self.line.setText(text = self.current_dialogue[self.dialogue_line_number])
@@ -686,6 +721,7 @@ class PIRATES(ShowBase):
         
         def end_dialogue(self, character):
                 self.__in_dialogue = False
+		self.character_name.hide()
 
 		#Remove zoomed in cameras and add regular limbo camera
                 if character == "Farthing":
@@ -720,13 +756,89 @@ class PIRATES(ShowBase):
 			if random.randint(1, 100) <= enemy.get_accuracy():
 				self.sonatu.setHP(self.sonatu.getHP() - enemy.get_damage())
 				self.sonatu_health_text.setText( "HP: " + str(self.sonatu.getHP()))
+				self.sonatu_attacked = True
 
 			if random.randint(1, 100) <= enemy.get_accuracy():
 				self.sonatu.setHP(self.sonatu.getHP() - enemy.get_damage())
 				self.sonatu_health_text.setText( "HP: " + str(self.sonatu.getHP()))
+				self.sonatu_attacked = True
 
 			enemy.setAP(0)
 			return True
+
+		elif distance == enemy.get_unit_range() + 2:
+			if enemy.get_name() == "Melee":
+				self.melee_interval1 = self.melee_monster.posInterval(0.7, Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), Point3(self.melee_monster.getX(), self.melee_monster.getY(), 1), "meleeMove1")
+				self.melee_monster_sequence = Sequence(self.melee_interval1)
+				self.gridspace_list[starting_gridspace].set_occupiable(True)
+				self.gridspace_list[starting_gridspace].set_occupying_unit(None)
+				self.gridspace_list[path[1]].set_occupiable(False)
+				self.gridspace_list[path[1]].set_occupying_unit(enemy)
+				enemy.set_gridspace(path[1])
+
+				if random.randint(1, 2) == 1:
+					self.melee_interval2 = self.melee_monster.posInterval( 0.7, Point3(self.gridspace_list[path[2]].get_x_position(), self.gridspace_list[path[2]].get_y_position(), 1), Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), "meleeMove2")
+					self.melee_monster_sequence.append(self.melee_interval2)
+					self.gridspace_list[starting_gridspace].set_occupiable(True)
+					self.gridspace_list[starting_gridspace].set_occupying_unit(None)
+					self.gridspace_list[path[2]].set_occupiable(False)
+					self.gridspace_list[path[2]].set_occupying_unit(enemy)
+					self.gridspace_list[path[1]].set_occupiable(True)
+					self.gridspace_list[path[1]].set_occupying_unit(None)
+					enemy.set_gridspace(path[2])
+				
+				enemy.setAP(0)
+				self.melee_monster_sequence.start()
+				return True
+
+			elif enemy.get_name() == "Short":
+				self.short_interval1 = self.short_monster.posInterval(0.7, Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), Point3(self.short_monster.getX(), self.short_monster.getY(), 1), "shortMove1")
+				self.short_monster_sequence = Sequence(self.short_interval1)
+				self.gridspace_list[starting_gridspace].set_occupiable(True)
+				self.gridspace_list[starting_gridspace].set_occupying_unit(None)
+				self.gridspace_list[path[1]].set_occupiable(False)
+				self.gridspace_list[path[1]].set_occupying_unit(enemy)
+				enemy.set_gridspace(path[1])
+
+				if random.randint(1, 2) == 1:
+					self.short_interval2 = self.short_monster.posInterval( 0.7, Point3(self.gridspace_list[path[2]].get_x_position(), self.gridspace_list[path[2]].get_y_position(), 1), Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), "shortMove2")
+					self.short_monster_sequence.append(self.short_interval2)
+					self.gridspace_list[starting_gridspace].set_occupiable(True)
+					self.gridspace_list[starting_gridspace].set_occupying_unit(None)
+					self.gridspace_list[path[2]].set_occupiable(False)
+					self.gridspace_list[path[2]].set_occupying_unit(enemy)
+					self.gridspace_list[path[1]].set_occupiable(True)
+					self.gridspace_list[path[1]].set_occupying_unit(None)
+					enemy.set_gridspace(path[2])
+				
+				enemy.setAP(0)
+				self.short_monster_sequence.start()
+				return True
+
+			
+			elif enemy.get_name() == "Long":
+				self.long_interval1 = self.long_monster.posInterval(0.7, Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), Point3(self.long_monster.getX(), self.long_monster.getY(), 1), "longMove1")
+				self.long_monster_sequence = Sequence(self.long_interval1)
+				self.gridspace_list[starting_gridspace].set_occupiable(True)
+				self.gridspace_list[starting_gridspace].set_occupying_unit(None)
+				self.gridspace_list[path[1]].set_occupiable(False)
+				self.gridspace_list[path[1]].set_occupying_unit(enemy)
+				enemy.set_gridspace(path[1])
+
+				if random.randint(1, 2) == 1:
+					self.long_interval2 = self.long_monster.posInterval( 0.7, Point3(self.gridspace_list[path[2]].get_x_position(), self.gridspace_list[path[2]].get_y_position(), 1), Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), "longMove2")
+					self.long_monster_sequence.append(self.long_interval2)
+					self.gridspace_list[starting_gridspace].set_occupiable(True)
+					self.gridspace_list[starting_gridspace].set_occupying_unit(None)
+					self.gridspace_list[path[2]].set_occupiable(False)
+					self.gridspace_list[path[2]].set_occupying_unit(enemy)
+					self.gridspace_list[path[1]].set_occupiable(True)
+					self.gridspace_list[path[1]].set_occupying_unit(None)
+					enemy.set_gridspace(path[2])
+				
+				enemy.setAP(0)
+				self.long_monster_sequence.start()
+				return True
 
 		elif distance == enemy.get_unit_range() + 1:
 			if enemy.get_name() == "Melee":
@@ -745,6 +857,7 @@ class PIRATES(ShowBase):
 			if random.randint(1, 100) <= enemy.get_accuracy():
 				self.sonatu.setHP(self.sonatu.getHP() - enemy.get_damage())
 				self.sonatu_health_text.setText( "HP: " + str(self.sonatu.getHP()))
+				self.sonatu_attacked = True
 
 			self.gridspace_list[starting_gridspace].set_occupiable(True)
 			self.gridspace_list[starting_gridspace].set_occupying_unit(None)
@@ -818,10 +931,39 @@ class PIRATES(ShowBase):
 		self.sonatu_health_text.setText( "HP: " + str(self.sonatu.getHP()) )
 		self.sonatu_ap_text.setText("AP: " + str(self.sonatu.getAP()) )
 
+	def lookAt_sonatu(self, task):
+		if self.long.get_alive():
+			self.long_monster.lookAt(self.combat_sonatu)
+
+		if self.short.get_alive():
+			self.short_monster.lookAt(self.combat_sonatu)
+			self.short_monster.setHpr(self.short_monster, 180, 0, 0)
+
+		if self.melee.get_alive():
+			self.melee_monster.lookAt(self.combat_sonatu)
+			self.melee_monster.setHpr(self.melee_monster, 180, 0, 0)
+
+		return Task.cont
+
 	def combat_camera_task(self, task):
 		self.camera.setPos(20*sin(pi/3)*7.5, 225, 225)
 		self.camera.lookAt(20*sin(pi/3)*7.5, -15*6.5, 0)
 		self.camera.setHpr(self.camera, 0, -pi, 0)
+
+		if self.sonatu_attacked:
+			self.sonatu_attacked = False
+			self.camera_interval1 = self.camera.hprInterval(0.05, self.camera.getHpr() + Point3(0, 0, 1), self.camera.getHpr())
+			self.camera_interval2 = self.camera.hprInterval(0.05, self.camera.getHpr() + Point3(0, -1, 0), self.camera.getHpr())
+			self.camera_interval3 = self.camera.hprInterval(0.05, self.camera.getHpr() + Point3(0, 0, -1), self.camera.getHpr())
+			self.camera_interval4 = self.camera.hprInterval(0.05, self.camera.getHpr() + Point3(0, 0, 1), self.camera.getHpr())
+			self.camera_interval5 = self.camera.hprInterval(0.05, self.camera.getHpr() + Point3(0, 1, 0), self.camera.getHpr())
+			self.camera_interval6 = self.camera.hprInterval(0.05, self.camera.getHpr() + Point3(0, 0, -1), self.camera.getHpr())
+			self.camera_interval7 = self.camera.hprInterval(0.05, self.camera.getHpr() + Point3(-1, 0, 0), self.camera.getHpr())
+			self.camera_interval8 = self.camera.hprInterval(0.05, self.camera.getHpr() + Point3(1, 0, 0), self.camera.getHpr())
+
+			self.camera_sequence = Sequence(self.camera_interval1, self.camera_interval2, self.camera_interval3, self.camera_interval4, self.camera_interval5, self.camera_interval6, self.camera_interval7, self.camera_interval8)
+			self.camera_sequence.start()
+
 		return Task.cont
 
 	def limbo_camera_task(self, task):
