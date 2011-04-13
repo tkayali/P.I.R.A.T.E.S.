@@ -60,6 +60,7 @@ class PIRATES(ShowBase):
 
 	def __init__(self):
 		ShowBase.__init__(self)
+		
 		base.disableMouse()	
 
 		self.collision_detection()
@@ -91,21 +92,62 @@ class PIRATES(ShowBase):
 
 		#Set up the Limbo Sonatu
 		self.limbo_sonatu = self.loader.loadModel("Models\Limbo\Limbo.egg")
-		#self.limbo_sonatu = self.loader.loadModel("Models\Sonatu\Sonatu.egg")
 		self.limbo_sonatu.setPos(0, 0, 0)
 		self.limbo_sonatu.setHpr(-90, 0, 0)
 		self.limbo_sonatu.reparentTo(self.render)
 
 		#Set up the background sky
 		self.sky = self.loader.loadModel("square.egg")
-		self.sky.setSx(4800)	 	
-		self.sky.setSy(2400)
-		self.sky.setPos(-800, 1400, 80)
+		self.sky.setSx(9600)	 	
+		self.sky.setSy(4800)
+		self.sky.setPos(-800, 1400, 60)
 		self.sky.setHpr(45, 90, 0)
 		ts = TextureStage('ts')
-		self.sky.setTexture(ts,loader.loadTexture("Models\Limbo\Sky.jpg"))
+		self.sky.setTexture(ts,loader.loadTexture("Models\Limbo\Sky.png"))
+		self.sky.setTexScale(ts, 2)
 		self.sky.setTexRotate(ts, 180)
 		self.sky.reparentTo(self.render)
+
+		#Set up the clouds for the sky
+		self.cloud1 = self.loader.loadModel("square.egg")
+		self.cloud1.setScale(400)
+		self.cloud1.setPos(-50, 1300, 300)
+		self.cloud1.setHpr(0, 90, 0)
+		ts1 = TextureStage('ts')
+		self.cloud1.setTexture(ts1, loader.loadTexture("Models\Limbo\Cloud.png"))
+		self.cloud1.setTransparency(TransparencyAttrib.MAlpha)
+		self.cloud1.setTexRotate(ts1, 180)
+		self.cloud1.reparentTo(self.render)
+		
+		self.cloud2 = self.loader.loadModel("square.egg")
+		self.cloud2.setScale(400)
+		self.cloud2.setPos(-600, 1300, 380)
+		self.cloud2.setHpr(0, 90, 0)
+		ts1 = TextureStage('ts')
+		self.cloud2.setTexture(ts1, loader.loadTexture("Models\Limbo\Cloud.png"))
+		self.cloud2.setTransparency(TransparencyAttrib.MAlpha)		
+		self.cloud2.setTexRotate(ts1, 180)
+		self.cloud2.reparentTo(self.render)
+		
+		self.cloud3 = self.loader.loadModel("square.egg")
+		self.cloud3.setScale(400)
+		self.cloud3.setPos(-700, 1301, 450)
+		self.cloud3.setHpr(0, 90, 0)
+		ts1 = TextureStage('ts')
+		self.cloud3.setTexture(ts1, loader.loadTexture("Models\Limbo\Cloud.png"))
+		self.cloud3.setTransparency(TransparencyAttrib.MAlpha)		
+		self.cloud3.setTexRotate(ts1, 180)
+		self.cloud3.reparentTo(self.render)
+
+		self.cloud4 = self.loader.loadModel("square.egg")
+		self.cloud4.setScale(400)
+		self.cloud4.setPos(-1000, 901, 450)
+		self.cloud4.setHpr(0, 90, 0)
+		ts1 = TextureStage('ts')
+		self.cloud4.setTexture(ts1, loader.loadTexture("Models\Limbo\Cloud.png"))
+		self.cloud4.setTransparency(TransparencyAttrib.MAlpha)		
+		self.cloud4.setTexRotate(ts1, 180)
+		self.cloud4.reparentTo(self.render)
 		
 		#Set up water!!!
 		self.water_limbo = self.loader.loadModel("square.egg")
