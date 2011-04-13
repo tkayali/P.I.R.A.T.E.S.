@@ -17,17 +17,17 @@ class Enemy(Unit):
 
 		if _unit_range == 1:
 			self.__damage = 8
-			self.__accuracy = .90
+			self.__accuracy = 90
 			self.__name = "Melee"
 
 		elif _unit_range == 2:
 			self.__damage = 5
-			self.__accuracy = .85
+			self.__accuracy = 85
 			self.__name = "Short"
 
 		elif _unit_range == 4:
 			self.__damage = 3
-			self.__accuracy = .80
+			self.__accuracy = 80
 			self.__name = "Long"
 
 		else:
