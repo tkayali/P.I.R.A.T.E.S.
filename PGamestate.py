@@ -455,7 +455,7 @@ class PIRATES(ShowBase):
 		return Task.cont
 	
 	def combat_mouse_task(self):
-		if self.__player_turn:
+		if self.__player_turn and not self.__in_dialogue:
 			if self.__number_enemies_alive > 0:
 				self.sonatu_turn()
 				self.update_text( self.__player_turn )
@@ -746,9 +746,21 @@ class PIRATES(ShowBase):
 			if self.current_speaker == "Michael":
 				self.limbo_hide_all()
 				self.setup_combat()
-				self.current_dialogue = None
+                                self.combatHUD.hide()
+                                self.hide_text()
+                                self.end_turn_button.hide()
+                                self.dialogue_box.show()
+                                self.__in_dialogue = True
+				self.current_dialogue = self.dialogue_mission_1
 				self.dialogue_line_number = 0
-				self.current_speaker = None
+				self.current_speaker = "Mission"
+                                self.display_line()
+                        elif self.current_speaker == "Mission":
+                                self.__in_dialogue = False
+                                self.dialogue_box.hide()
+                                self.combatHUD.show()
+                                self.end_turn_button.show()
+                                self.setup_text()
 			else:
 				self.dialogue_box.hide()
 				self.begin_dialogue(self.current_speaker)
@@ -963,6 +975,14 @@ class PIRATES(ShowBase):
 		self.attack_type_text.reparentTo(render2d)
 		self.game_over_text.reparentTo(render2d)
 		self.game_win_text.reparentTo(render2d)
+                
+        def hide_text(self):
+                self.turn_text.hide()
+                self.sonatu_health_text.hide()
+                self.sonatu_ap_text.hide()
+                self.attack_type_text.hide()
+                self.game_over_text.hide()
+                self.game_win_text.hide()
 
 	def update_text(self, player_turn):
 		if player_turn:
