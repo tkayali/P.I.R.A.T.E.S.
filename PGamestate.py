@@ -148,7 +148,7 @@ class PIRATES(ShowBase):
 		self.cloud4.setTransparency(TransparencyAttrib.MAlpha)		
 		self.cloud4.setTexRotate(ts1, 180)
 		self.cloud4.reparentTo(self.render)
-		
+
 		#Set up water!!!
 		self.water_limbo = self.loader.loadModel("square.egg")
 		self.water_limbo.setSx(2400)
@@ -389,7 +389,21 @@ class PIRATES(ShowBase):
 		self.map_grid.setSx(16*20*sin(pi/3)+5)
 		self.map_grid.setSy(13.5*15+4)
 		self.map_grid.setTransparency(TransparencyAttrib.MAlpha)
-		self.map_grid.reparentTo(self.render)				
+		self.map_grid.reparentTo(self.render)	
+
+		#Set up military base
+		self.military_base = self.loader.loadModel("Models\Combat\military_base.egg")
+		self.military_base.setPos(self.gridspace_list[22].get_x_position(), self.gridspace_list[22].get_y_position(), 1)
+		self.military_base.reparentTo(self.render)
+
+		#Set up land
+		self.land = self.loader.loadModel("square.egg")
+		self.land.setTexture( self.loader.loadTexture("Textures\Land.png") )
+		self.land.setSx(16*20*sin(pi/3)+5)
+		self.land.setSy(13.5*15+4)
+		self.land.setPos(self.gridspace_list[50].get_x_position()-3, self.gridspace_list[50].get_y_position()-3.5, 0.5)
+		self.land.setTransparency(TransparencyAttrib.MAlpha)
+		self.land.reparentTo(self.render)
 
 		#Set up all text
 		self.setup_text()
@@ -506,6 +520,9 @@ class PIRATES(ShowBase):
 						self.gridspace_list[starting_gridspace].set_occupying_unit(None)
 						self.gridspace_list[ending_gridspace].set_occupying_unit(self.sonatu)
 						self.sonatu.setAP(self.sonatu.getAP()-len(path)+1)
+
+						print "Ending gridspace:" + str(ending_gridspace)
+						print "Starting gridspace:" + str(starting_gridspace)
 
 				#Check to see if enemy is clicked
 				elif self.gridspace_list[ending_gridspace].get_occupying_unit() is not None and starting_gridspace is not ending_gridspace:
@@ -755,6 +772,7 @@ class PIRATES(ShowBase):
 				self.dialogue_line_number = 0
 				self.current_speaker = "Mission"
                                 self.display_line()
+
                         elif self.current_speaker == "Mission":
                                 self.__in_dialogue = False
                                 self.dialogue_box.hide()
