@@ -460,7 +460,15 @@ class PIRATES(ShowBase):
 				self.sonatu_turn()
 				self.update_text( self.__player_turn )
 				if self.__number_enemies_alive < 1:
-					self.game_win_text.setText("YOU WIN!!! REJOICE!")
+                                        self.combatHUD.hide()
+                                        self.hide_text()
+                                        self.end_turn_button.hide()
+                                        self.dialogue_box.show()
+                                        self.__in_dialogue = True
+                                        self.current_dialogue = self.dialogue_mission_2
+                                        self.dialogue_line_number = 0
+                                        self.current_speaker = "Mission"
+                                        self.display_line()
 
 	def limbo_mouse_task(self):
 		if base.mouseWatcherNode.hasMouse() and not self.__in_dialogue:
@@ -755,6 +763,7 @@ class PIRATES(ShowBase):
 				self.dialogue_line_number = 0
 				self.current_speaker = "Mission"
                                 self.display_line()
+                        
                         elif self.current_speaker == "Mission":
                                 self.__in_dialogue = False
                                 self.dialogue_box.hide()
