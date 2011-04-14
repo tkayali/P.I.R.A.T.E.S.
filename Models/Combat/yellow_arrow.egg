@@ -4,7 +4,7 @@
   "maya2egg2011 -o yellow_arrow.egg yellow_arrow.mb"
 }
 <Texture> phong1SG {
-  Yellow.jpg
+  "Models/Combat/Yellow.jpg"
   <Scalar> wrapu { repeat }
   <Scalar> wrapv { repeat }
   <Scalar> minfilter { linear_mipmap_linear }

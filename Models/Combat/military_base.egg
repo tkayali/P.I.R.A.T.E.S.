@@ -4,7 +4,7 @@
   "maya2egg2011 -a model -o military_base.egg Military_Base.mb"
 }
 <Texture> phong2SG {
-  "../Textures/Rock.jpg"
+  "Models/Combat/Rock.jpg"
   <Scalar> format { rgb }
   <Scalar> wrapu { repeat }
   <Scalar> wrapv { repeat }
@@ -12,7 +12,7 @@
   <Scalar> magfilter { linear }
 }
 <Texture> phong1SG {
-  "../Textures/Castle Stone.jpg"
+  "Models/Combat/Castle Stone.jpg"
   <Scalar> format { rgb }
   <Scalar> wrapu { repeat }
   <Scalar> wrapv { repeat }
