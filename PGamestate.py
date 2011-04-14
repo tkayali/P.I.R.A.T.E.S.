@@ -14,8 +14,8 @@ from direct.showbase.ShowBase import ShowBase
 from direct.showbase.DirectObject import DirectObject
 from direct.task import Task
 from pandac.PandaModules import TextureStage, TransparencyAttrib, DirectionalLight, AmbientLight, VBase4, CollisionTraverser, CollisionHandlerQueue, CollisionNode, BitMask32, CollisionRay, NodePath, CollisionSphere, MovieTexture
-from panda3d.core import loadPrcFile, ConfigVariableString, TextNode, Point3, PandaNode, LightRampAttrib, Vec3
-from direct.interval.MetaInterval import Sequence
+from panda3d.core import loadPrcFile, ConfigVariableString, TextNode, Point3, PandaNode, LightRampAttrib, Vec3, Vec4
+from direct.interval.MetaInterval import Sequence, Parallel
 from direct.interval.FunctionInterval import Wait
 from pandac.PandaModules import CInterval
 from direct.filter.CommonFilters import CommonFilters
@@ -248,7 +248,6 @@ class PIRATES(ShowBase):
 		#Set up attributes
                 self.__in_limbo = False
 		self.__in_combat = True
-		#self.__number_enemies_alive = 3
 		self.monster_list = []
 		self.monster_model_list = []
 		self.gridspace_list = []
@@ -325,47 +324,70 @@ class PIRATES(ShowBase):
 		self.sonatu = Sonatu(107, 0)
 		self.gridspace_list[107].set_occupiable(False)
 
-		#Monster - Melee
-		#self.melee_monster = self.loader.loadModel("Models\Monsters\octopus.egg")
-		#self.melee_monster.setSx(0.35)
-		#self.melee_monster.setSy(0.35)
-		#self.melee_monster.setSz(0.35)
-		#self.melee_monster.lookAt(self.combat_sonatu)
-		#self.melee_monster.setPos(17.321, -90, 1)
-		#self.melee_monster.reparentTo(self.render)
-		#self.melee = Enemy(94, 1)
-		#self.gridspace_list[94].set_occupiable(False)
-		#self.monster_list.append(self.melee)
-		#self.monster_model_list.append(self.melee_monster)
+		if self.screen == 2:
+			self.__number_enemies_alive = 3
 
-		#Monster - Short
-		#self.short_monster = self.loader.loadModel("Models\Monsters\conch.egg")
-		#self.short_monster.setSx(0.35)
-		#self.short_monster.setSy(0.35)
-		#self.short_monster.setSz(0.35)
-		#self.short_monster.lookAt(self.combat_sonatu)
-		#self.short_monster.setPos(17.321, -120, 0)
-		#self.short_monster.reparentTo(self.render)
-		#self.short = Enemy(125, 2)
-		#self.gridspace_list[125].set_occupiable(False)
-		#self.monster_list.append(self.short)
-		#self.monster_model_list.append(self.short_monster)
+			#Monster - Melee
+			self.melee_monster = self.loader.loadModel("Models\Monsters\octopus.egg")
+			self.melee_monster.setSx(0.35)
+			self.melee_monster.setSy(0.35)
+			self.melee_monster.setSz(0.35)
+			self.melee_monster.lookAt(self.combat_sonatu)
+			self.melee_monster.setPos(17.321, -90, 1)
+			self.melee_monster.reparentTo(self.render)
+			self.melee = Enemy(94, 1)
+			self.gridspace_list[94].set_occupiable(False)
+			self.monster_list.append(self.melee)
+			self.monster_model_list.append(self.melee_monster)
 
-		#Monster - Long
-		#self.long_monster = self.loader.loadModel("Models\Monsters\serpent.egg")
-		#self.long_monster.setSx(0.35)
-		#self.long_monster.setSy(0.35)
-		#self.long_monster.setSz(0.35)
-		#self.long_monster.lookAt(self.combat_sonatu)
-		#self.long_monster.setPos(17.321, -60, 0)
-		#self.long_monster.reparentTo(self.render)
-		#self.long = Enemy(63, 4)
-		#self.gridspace_list[63].set_occupiable(False)
-		#self.monster_list.append(self.long)
-		#self.monster_model_list.append(self.long_monster)
+			#Monster - Short
+			self.short_monster = self.loader.loadModel("Models\Monsters\conch.egg")
+			self.short_monster.setSx(0.35)
+			self.short_monster.setSy(0.35)
+			self.short_monster.setSz(0.35)
+			self.short_monster.lookAt(self.combat_sonatu)
+			self.short_monster.setPos(17.321, -120, 0)
+			self.short_monster.reparentTo(self.render)
+			self.short = Enemy(125, 2)
+			self.gridspace_list[125].set_occupiable(False)
+			self.monster_list.append(self.short)
+			self.monster_model_list.append(self.short_monster)
+	
+			#Monster - Long
+			self.long_monster = self.loader.loadModel("Models\Monsters\serpent.egg")
+			self.long_monster.setSx(0.35)
+			self.long_monster.setSy(0.35)
+			self.long_monster.setSz(0.35)
+			self.long_monster.lookAt(self.combat_sonatu)
+			self.long_monster.setPos(17.321, -60, 0)
+			self.long_monster.reparentTo(self.render)
+			self.long = Enemy(63, 4)
+			self.gridspace_list[63].set_occupiable(False)
+			self.monster_list.append(self.long)
+			self.monster_model_list.append(self.long_monster)
+	
+			taskMgr.add(self.lookAt_sonatu, "lookAt_sonatu")
 
-		taskMgr.add(self.lookAt_sonatu, "lookAt_sonatu")
+			#Set up obstacles
+			for i in range(len(self.obstacle_list)):
+				position = random.randint(0, 201)
+				
+				while not self.gridspace_list[position].get_occupiable():
+					position = random.randint(0, 201)
 
+				self.gridspace_list[position].set_occupiable(False)
+				rock = random.randint(0, 1)
+			
+				if rock is 1:
+					self.obstacle_list[i] = self.loader.loadModel("Models/Obstacles/rock_1.egg")
+			
+				elif rock is 0:
+					self.obstacle_list[i] = self.loader.loadModel("Models/Obstacles/rock_2.egg")
+					self.obstacle_list[i].setScale(0.7)
+	
+				self.obstacle_list[i].setPos(self.gridspace_list[position].get_x_position(), self.gridspace_list[position].get_y_position(), 1)
+				self.obstacle_list[i].reparentTo(render)
+		
 		#Add a hex grid texture
 		self.map_grid = self.loader.loadModel("square.egg")
 		self.map_grid.setTexture(ts, loader.loadTexture("textures\HexGrid.png"))	
@@ -393,24 +415,6 @@ class PIRATES(ShowBase):
                     #Set up task
                     self.taskMgr.add(self.hex_check, "Hex Check")
                 
-                #Set up obstacles
-		#for i in range(len(self.obstacle_list)):
-		#	position = random.randint(0, 201)
-		#	while not self.gridspace_list[position].get_occupiable(): #position is 107 or position is 94 or position is 125 or position is 63 or not
-		#		position = random.randint(0, 201)
-		#	self.gridspace_list[position].set_occupiable(False)
-		#	rock = random.randint(0, 1)
-		#	if rock is 1:
-		#		self.obstacle_list[i] = self.loader.loadModel("Models/Obstacles/rock_1.egg")
-		#	
-		#	elif rock is 0:
-		#		self.obstacle_list[i] = self.loader.loadModel("Models/Obstacles/rock_2.egg")
-		#		self.obstacle_list[i].setScale(0.7)
-
-		#	self.obstacle_list[i].setPos(self.gridspace_list[position].get_x_position(), self.gridspace_list[position].get_y_position(), 1)
-		#	self.obstacle_list[i].reparentTo(render)
-
-
 		#Set up all text
 		self.setup_text()
 
@@ -445,12 +449,21 @@ class PIRATES(ShowBase):
 		render.clearLight(self.ambientlight_nodepath)
 	
 	def combat_hide_all(self):
-		for i in range(len(self.monster_list)):
-			if self.monster_list[i].get_alive():
-				self.monster_model_list[i].hide()
+		if self.screen is 2:
+			self.land.hide()
+			self.military_base.hide()
+			self.arrow_parallel.finish()
+			self.arrow1.hide()
+			self.arrow2.hide()
+			self.arrow3.hide()
+	
+		elif self.screen is 3:
+			for i in range(len(self.monster_list)):
+				if self.monster_list[i].get_alive():
+					self.monster_model_list[i].hide()
 
-		for i in range(len(self.obstacle_list)):
-			self.obstacle_list[i].hide()
+			for i in range(len(self.obstacle_list)):
+				self.obstacle_list[i].hide()
 
 		self.map_grid.hide()
 		self.water.hide()
@@ -478,16 +491,17 @@ class PIRATES(ShowBase):
 		if self.__player_turn and not self.__in_dialogue:
 				self.sonatu_turn()
 				self.update_text( self.__player_turn )
-				#if self.__number_enemies_alive < 1:
-                                #        self.combatHUD.hide()
-                                #        self.hide_text()
-                                #        self.end_turn_button.hide()
-                                #        self.dialogue_box.show()
-                                #        self.__in_dialogue = True
-                                #        self.current_dialogue = self.dialogue_mission_2
-                                #        self.dialogue_line_number = 0
-                                #        self.current_speaker = "Mission"
-                                #        self.display_line()
+				if self.__number_enemies_alive < 1 and self.screen == 3:
+					self.screen += 1
+                                        #self.combatHUD.hide()
+                                        #self.hide_text()
+                                        #self.end_turn_button.hide()
+                                        #self.dialogue_box.show()
+                                        #self.__in_dialogue = True
+                                        #self.current_dialogue = self.dialogue_mission_2
+                                        #self.dialogue_line_number = 0
+                                        #self.current_speaker = "Mission"
+                                        #self.display_line()
 
 	def limbo_mouse_task(self):
 		if base.mouseWatcherNode.hasMouse() and not self.__in_dialogue:
@@ -792,9 +806,10 @@ class PIRATES(ShowBase):
                                 self.dialogue_box.hide()
                                 self.combatHUD.show()
                                 self.end_turn_button.show()
-                                self.setup_text()
+                                self.show_text()
 			else:
 				self.dialogue_box.hide()
+				self.hide_text()
 				self.begin_dialogue(self.current_speaker)
 				self.current_dialogue = None
 				self.dialogue_line_number = 0
@@ -1015,8 +1030,16 @@ class PIRATES(ShowBase):
                 self.attack_type_text.hide()
                 self.game_over_text.hide()
                 self.game_win_text.hide()
+	
+	def show_text(self):
+		self.turn_text.show()
+                self.sonatu_health_text.show()
+                self.sonatu_ap_text.show()
+                self.attack_type_text.show()
+                self.game_over_text.show()
+                self.game_win_text.show()
 
-	def update_text(self, player_turn):
+	def update_text(self, player_turn): #comment out and make a tastk
 		if player_turn:
 			self.turn_text.setText("Your turn!")
 		else:
@@ -1087,7 +1110,7 @@ class PIRATES(ShowBase):
 		return Task.cont
         
         def hex_check(self, task):
-		if screen == 1:
+		if self.screen == 1:
                     if self.sonatu.get_gridspace() == 23 or self.sonatu.get_gridspace() == 7 or self.sonatu.get_gridspace() == 6 or self.sonatu.get_gridspace() == 37 or self.sonatu.get_gridspace() == 38:
                         self.combatHUD.hide()
                         self.hide_text()
@@ -1098,6 +1121,69 @@ class PIRATES(ShowBase):
                         self.dialogue_line_number = 0
                         self.current_speaker = "Mission"
                         self.display_line()
+
+			#Show the arrows!
+			self.arrow1 = loader.loadModel("Models/Combat/yellow_arrow.egg")
+			self.arrow1.setPos(self.gridspace_list[184].get_x_position(), self.gridspace_list[184].get_y_position(), 1)
+			self.arrow1.setHpr(180, 0, 0)
+			self.arrow1.setTransparency(TransparencyAttrib.MAlpha)
+			self.arrow1_fadeOut = self.arrow1.colorScaleInterval(2, Vec4(1, 1, 0, 0))
+			self.arrow1_fadeIn = self.arrow1.colorScaleInterval(2, Vec4(1, 1, 0, 1), Vec4(1, 1, 0, 0) )
+			self.arrow1_fade = Sequence( self.arrow1_fadeOut, self.arrow1_fadeIn )
+			#self.arrow1_fade.loop()
+			self.arrow1.reparentTo(self.render)
+
+			self.arrow2 = loader.loadModel("Models/Combat/yellow_arrow.egg")
+			self.arrow2.setPos(self.gridspace_list[178].get_x_position(), self.gridspace_list[178].get_y_position(), 1)
+			self.arrow2.setHpr(180, 0, 0)
+			self.arrow2.setTransparency(TransparencyAttrib.MAlpha)			
+			self.arrow2_fadeOut = self.arrow2.colorScaleInterval(2, Vec4(1, 1, 0, 0))
+			self.arrow2_fadeIn = self.arrow2.colorScaleInterval(2, Vec4(1, 1, 0, 1), Vec4(1, 1, 0, 0) )
+			self.arrow2_fade = Sequence( self.arrow2_fadeOut, self.arrow2_fadeIn )
+			#self.arrow2_fade.loop()
+			self.arrow2.reparentTo(self.render)
+
+			self.arrow3 = loader.loadModel("Models/Combat/yellow_arrow.egg")
+			self.arrow3.setPos(self.gridspace_list[172].get_x_position(), self.gridspace_list[172].get_y_position(), 1)
+			self.arrow3.setHpr(180, 0, 0)
+			self.arrow3.setTransparency(TransparencyAttrib.MAlpha)			
+			self.arrow3_fadeOut = self.arrow3.colorScaleInterval(2, Vec4(1, 1, 0, 0))
+			self.arrow3_fadeIn = self.arrow3.colorScaleInterval(2, Vec4(1, 1, 0, 1), Vec4(1, 1, 0, 0) )
+			self.arrow3_fade = Sequence( self.arrow3_fadeOut, self.arrow3_fadeIn )
+			#self.arrow3_fade.loop()
+			self.arrow3.reparentTo(self.render)
+			
+			self.arrow_parallel = Parallel( self.arrow1_fade, self.arrow2_fade, self.arrow3_fade)
+			self.arrow_parallel.loop()
+			self.screen += 1
+
+		elif self.screen == 2:
+			if self.sonatu.get_gridspace() > 154:
+				self.combat_hide_all()
+				self.setup_combat()
+				self.screen += 1
+
+		elif self.screen == 4:
+			self.queen_position = random.randint(0, 201)
+			while self.queen_position == self.sonatu.get_gridspace():
+				self.queen_position = random.randint(0, 201)
+
+			self.queen_model = self.loader.loadModel("Models\Monsters\Crab.egg")
+			self.queen_model.setPos(self.gridspace_list[self.queen_position].get_x_position(), self.gridspace_list[self.queen_position].get_y_position(),-10)
+			self.queen_model.lookAt(self.combat_sonatu)
+			self.queen_model.setScale(.8)
+			self.queen_interval1 = self.queen_model.posInterval(1, Point3(self.gridspace_list[self.queen_position].get_x_position(), self.gridspace_list[self.queen_position].get_y_position(), 0), Point3(self.gridspace_list[self.queen_position].get_x_position(), self.gridspace_list[self.queen_position].get_y_position(), -10), "queenIntro1")
+			self.queen_interval2 = self.queen_model.posInterval(0.75, Point3(self.gridspace_list[self.queen_position].get_x_position(), self.gridspace_list[self.queen_position].get_y_position(), -3), Point3(self.gridspace_list[self.queen_position].get_x_position(), self.gridspace_list[self.queen_position].get_y_position(), 1), "queenIntro1")
+			self.queen_interval3 = self.queen_model.posInterval(0.5, Point3(self.gridspace_list[self.queen_position].get_x_position(), self.gridspace_list[self.queen_position].get_y_position(), 2), Point3(self.gridspace_list[self.queen_position].get_x_position(), self.gridspace_list[self.queen_position].get_y_position(), 0-2), "queenIntro1")
+			self.queen_intro_sequence = Sequence( self.queen_interval1, self.queen_interval2, self.queen_interval3 )
+			self.queen_intro_sequence.start()
+
+			self.queen_model.reparentTo(self.render)
+			self.queen = Enemy( self.queen_position, 1 )
+			self.gridspace_list[self.queen_position].set_occupiable(False)
+
+			self.screen += 1
+		
 		return Task.cont
 
 	def collision_detection(self):
