@@ -33,6 +33,7 @@ class PIRATES(ShowBase):
 	__number_enemies_alive = 0
 	sonatu_end_turn = False
        	sonatu_attacked = False
+        screen = 0
 
         #Import dialogue from associated files
         dialogue_checkers_l_crew = open('Config/checkers_l_1.txt').readlines()
@@ -247,7 +248,7 @@ class PIRATES(ShowBase):
 		#Set up attributes
                 self.__in_limbo = False
 		self.__in_combat = True
-		self.__number_enemies_alive = 3
+		#self.__number_enemies_alive = 3
 		self.monster_list = []
 		self.monster_model_list = []
 		self.gridspace_list = []
@@ -325,62 +326,45 @@ class PIRATES(ShowBase):
 		self.gridspace_list[107].set_occupiable(False)
 
 		#Monster - Melee
-		self.melee_monster = self.loader.loadModel("Models\Monsters\octopus.egg")
-		self.melee_monster.setSx(0.35)
-		self.melee_monster.setSy(0.35)
-		self.melee_monster.setSz(0.35)
-		self.melee_monster.lookAt(self.combat_sonatu)
-		self.melee_monster.setPos(17.321, -90, 1)
-		self.melee_monster.reparentTo(self.render)
-		self.melee = Enemy(94, 1)
-		self.gridspace_list[94].set_occupiable(False)
-		self.monster_list.append(self.melee)
-		self.monster_model_list.append(self.melee_monster)
+		#self.melee_monster = self.loader.loadModel("Models\Monsters\octopus.egg")
+		#self.melee_monster.setSx(0.35)
+		#self.melee_monster.setSy(0.35)
+		#self.melee_monster.setSz(0.35)
+		#self.melee_monster.lookAt(self.combat_sonatu)
+		#self.melee_monster.setPos(17.321, -90, 1)
+		#self.melee_monster.reparentTo(self.render)
+		#self.melee = Enemy(94, 1)
+		#self.gridspace_list[94].set_occupiable(False)
+		#self.monster_list.append(self.melee)
+		#self.monster_model_list.append(self.melee_monster)
 
 		#Monster - Short
-		self.short_monster = self.loader.loadModel("Models\Monsters\conch.egg")
-		self.short_monster.setSx(0.35)
-		self.short_monster.setSy(0.35)
-		self.short_monster.setSz(0.35)
-		self.short_monster.lookAt(self.combat_sonatu)
-		self.short_monster.setPos(17.321, -120, 0)
-		self.short_monster.reparentTo(self.render)
-		self.short = Enemy(125, 2)
-		self.gridspace_list[125].set_occupiable(False)
-		self.monster_list.append(self.short)
-		self.monster_model_list.append(self.short_monster)
+		#self.short_monster = self.loader.loadModel("Models\Monsters\conch.egg")
+		#self.short_monster.setSx(0.35)
+		#self.short_monster.setSy(0.35)
+		#self.short_monster.setSz(0.35)
+		#self.short_monster.lookAt(self.combat_sonatu)
+		#self.short_monster.setPos(17.321, -120, 0)
+		#self.short_monster.reparentTo(self.render)
+		#self.short = Enemy(125, 2)
+		#self.gridspace_list[125].set_occupiable(False)
+		#self.monster_list.append(self.short)
+		#self.monster_model_list.append(self.short_monster)
 
 		#Monster - Long
-		self.long_monster = self.loader.loadModel("Models\Monsters\serpent.egg")
-		self.long_monster.setSx(0.35)
-		self.long_monster.setSy(0.35)
-		self.long_monster.setSz(0.35)
-		self.long_monster.lookAt(self.combat_sonatu)
-		self.long_monster.setPos(17.321, -60, 0)
-		self.long_monster.reparentTo(self.render)
-		self.long = Enemy(63, 4)
-		self.gridspace_list[63].set_occupiable(False)
-		self.monster_list.append(self.long)
-		self.monster_model_list.append(self.long_monster)
+		#self.long_monster = self.loader.loadModel("Models\Monsters\serpent.egg")
+		#self.long_monster.setSx(0.35)
+		#self.long_monster.setSy(0.35)
+		#self.long_monster.setSz(0.35)
+		#self.long_monster.lookAt(self.combat_sonatu)
+		#self.long_monster.setPos(17.321, -60, 0)
+		#self.long_monster.reparentTo(self.render)
+		#self.long = Enemy(63, 4)
+		#self.gridspace_list[63].set_occupiable(False)
+		#self.monster_list.append(self.long)
+		#self.monster_model_list.append(self.long_monster)
 
 		taskMgr.add(self.lookAt_sonatu, "lookAt_sonatu")
-
-		#Set up obstacles
-		for i in range(len(self.obstacle_list)):
-			position = random.randint(0, 201)
-			while not self.gridspace_list[position].get_occupiable(): #position is 107 or position is 94 or position is 125 or position is 63 or not
-				position = random.randint(0, 201)
-			self.gridspace_list[position].set_occupiable(False)
-			rock = random.randint(0, 1)
-			if rock is 1:
-				self.obstacle_list[i] = self.loader.loadModel("Models/Obstacles/rock_1.egg")
-			
-			elif rock is 0:
-				self.obstacle_list[i] = self.loader.loadModel("Models/Obstacles/rock_2.egg")
-				self.obstacle_list[i].setScale(0.7)
-
-			self.obstacle_list[i].setPos(self.gridspace_list[position].get_x_position(), self.gridspace_list[position].get_y_position(), 1)
-			self.obstacle_list[i].reparentTo(render)
 
 		#Add a hex grid texture
 		self.map_grid = self.loader.loadModel("square.egg")
@@ -391,19 +375,41 @@ class PIRATES(ShowBase):
 		self.map_grid.setTransparency(TransparencyAttrib.MAlpha)
 		self.map_grid.reparentTo(self.render)	
 
-		#Set up military base
-		self.military_base = self.loader.loadModel("Models\Combat\military_base.egg")
-		self.military_base.setPos(self.gridspace_list[22].get_x_position(), self.gridspace_list[22].get_y_position(), 1)
-		self.military_base.reparentTo(self.render)
+                if self.screen == 1:
+                    #Set up military base
+                    self.military_base = self.loader.loadModel("Models\Combat\military_base.egg")
+                    self.military_base.setPos(self.gridspace_list[22].get_x_position(), self.gridspace_list[22].get_y_position(), 1)
+                    self.military_base.reparentTo(self.render)
 
-		#Set up land
-		self.land = self.loader.loadModel("square.egg")
-		self.land.setTexture( self.loader.loadTexture("Textures\Land.png") )
-		self.land.setSx(16*20*sin(pi/3)+5)
-		self.land.setSy(13.5*15+4)
-		self.land.setPos(self.gridspace_list[50].get_x_position()-3, self.gridspace_list[50].get_y_position()-3.5, 0.5)
-		self.land.setTransparency(TransparencyAttrib.MAlpha)
-		self.land.reparentTo(self.render)
+                    #Set up land
+                    self.land = self.loader.loadModel("square.egg")
+                    self.land.setTexture( self.loader.loadTexture("Textures\Land.png") )
+                    self.land.setSx(16*20*sin(pi/3)+5)
+                    self.land.setSy(13.5*15+4)
+                    self.land.setPos(self.gridspace_list[50].get_x_position()-3, self.gridspace_list[50].get_y_position()-3.5, 0.5)
+                    self.land.setTransparency(TransparencyAttrib.MAlpha)
+                    self.land.reparentTo(self.render)
+                    
+                    #Set up task
+                    self.taskMgr.add(self.hex_check, "Hex Check")
+                
+                #Set up obstacles
+		#for i in range(len(self.obstacle_list)):
+		#	position = random.randint(0, 201)
+		#	while not self.gridspace_list[position].get_occupiable(): #position is 107 or position is 94 or position is 125 or position is 63 or not
+		#		position = random.randint(0, 201)
+		#	self.gridspace_list[position].set_occupiable(False)
+		#	rock = random.randint(0, 1)
+		#	if rock is 1:
+		#		self.obstacle_list[i] = self.loader.loadModel("Models/Obstacles/rock_1.egg")
+		#	
+		#	elif rock is 0:
+		#		self.obstacle_list[i] = self.loader.loadModel("Models/Obstacles/rock_2.egg")
+		#		self.obstacle_list[i].setScale(0.7)
+
+		#	self.obstacle_list[i].setPos(self.gridspace_list[position].get_x_position(), self.gridspace_list[position].get_y_position(), 1)
+		#	self.obstacle_list[i].reparentTo(render)
+
 
 		#Set up all text
 		self.setup_text()
@@ -470,19 +476,18 @@ class PIRATES(ShowBase):
 	
 	def combat_mouse_task(self):
 		if self.__player_turn and not self.__in_dialogue:
-			if self.__number_enemies_alive > 0:
 				self.sonatu_turn()
 				self.update_text( self.__player_turn )
-				if self.__number_enemies_alive < 1:
-                                        self.combatHUD.hide()
-                                        self.hide_text()
-                                        self.end_turn_button.hide()
-                                        self.dialogue_box.show()
-                                        self.__in_dialogue = True
-                                        self.current_dialogue = self.dialogue_mission_2
-                                        self.dialogue_line_number = 0
-                                        self.current_speaker = "Mission"
-                                        self.display_line()
+				#if self.__number_enemies_alive < 1:
+                                #        self.combatHUD.hide()
+                                #        self.hide_text()
+                                #        self.end_turn_button.hide()
+                                #        self.dialogue_box.show()
+                                #        self.__in_dialogue = True
+                                #        self.current_dialogue = self.dialogue_mission_2
+                                #        self.dialogue_line_number = 0
+                                #        self.current_speaker = "Mission"
+                                #        self.display_line()
 
 	def limbo_mouse_task(self):
 		if base.mouseWatcherNode.hasMouse() and not self.__in_dialogue:
@@ -770,6 +775,7 @@ class PIRATES(ShowBase):
 		elif len(self.current_dialogue) == self.dialogue_line_number:
 			if self.current_speaker == "Michael":
 				self.limbo_hide_all()
+                                self.screen = 1
 				self.setup_combat()
                                 self.combatHUD.hide()
                                 self.hide_text()
@@ -1079,6 +1085,20 @@ class PIRATES(ShowBase):
 		self.camera.setPos(-54.347, -52.173, 103.392)
 		self.camera.lookAt(-54.347, -52.173, 103.392)		
 		return Task.cont
+        
+        def hex_check(self, task):
+		if screen == 1:
+                    if self.sonatu.get_gridspace() == 23 or self.sonatu.get_gridspace() == 7 or self.sonatu.get_gridspace() == 6 or self.sonatu.get_gridspace() == 37 or self.sonatu.get_gridspace() == 38:
+                        self.combatHUD.hide()
+                        self.hide_text()
+                        self.end_turn_button.hide()
+                        self.dialogue_box.show()
+                        self.__in_dialogue = True
+                        self.current_dialogue = self.dialogue_mission_2
+                        self.dialogue_line_number = 0
+                        self.current_speaker = "Mission"
+                        self.display_line()
+		return Task.cont
 
 	def collision_detection(self):
 		self.traverser = CollisionTraverser()
@@ -1097,8 +1117,7 @@ class PIRATES(ShowBase):
 		if self.sonatu_end_turn:
 			self.sonatu_end_turn = False
                	        self.sonatu.end_turn()
-			self.begin_enemy_turn()
-		        #elf.__player_turn = False
+                        self.begin_enemy_turn()
 		       
 		return Task.cont
 	
