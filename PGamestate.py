@@ -1161,6 +1161,15 @@ class PIRATES(ShowBase):
 			if self.sonatu.get_gridspace() > 154:
 				self.combat_hide_all()
 				self.setup_combat()
+                                self.combatHUD.hide()
+                                self.hide_text()
+                                self.end_turn_button.hide()
+                                self.dialogue_box.show()
+                                self.__in_dialogue = True
+				self.current_dialogue = self.dialogue_mission_3
+				self.dialogue_line_number = 0
+				self.current_speaker = "Mission"
+                                self.display_line()
 				self.screen += 1
 
 		elif self.screen == 4:
@@ -1181,6 +1190,16 @@ class PIRATES(ShowBase):
 			self.queen_model.reparentTo(self.render)
 			self.queen = Enemy( self.queen_position, 1 )
 			self.gridspace_list[self.queen_position].set_occupiable(False)
+                        
+                        self.combatHUD.hide()
+                        self.hide_text()
+                        self.end_turn_button.hide()
+                        self.dialogue_box.show()
+                        self.__in_dialogue = True
+			self.current_dialogue = self.dialogue_mission_4
+			self.dialogue_line_number = 0
+			self.current_speaker = "Mission"
+                        self.display_line()
 
 			self.screen += 1
 		
