@@ -477,6 +477,7 @@ class PIRATES(ShowBase):
 		self.game_over_text.hide()
 		self.game_win_text.hide()
 		self.combatHUD.hide()
+                self.end_turn_button.hide()
 
 	def mouse_task(self, task):
 		if base.mouseWatcherNode.hasMouse():
