@@ -7,8 +7,8 @@ class Queen(Unit):
 	__damage = 0
 	__accuracy = 0
 
-	def __init__(self):
-		Unit.__init__(self, 30, 2, None, True, False, 4)
+	def __init__(self, gridspace):
+		Unit.__init__(self, 30, 2, gridspace, True, False, 4)
 
 	def set_attributes(self, range):
 		if range == 1:
@@ -30,7 +30,7 @@ class Queen(Unit):
 
 		print "Damage: " + str(damage) + " Accuracy: " + str(accuracy)
 
-	def end_turn():
+	def end_turn(self):
 		Unit.setAP(self, 2)
 
 	def get_damage(self):
