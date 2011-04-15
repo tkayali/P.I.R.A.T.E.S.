@@ -34,6 +34,7 @@ class PIRATES(ShowBase):
 	__number_enemies_alive = 0
 	sonatu_end_turn = False
        	sonatu_attacked = False
+	dead_queen = False
         screen = 0
 	previous_position = 0
 	previous_AP = 0
@@ -77,7 +78,6 @@ class PIRATES(ShowBase):
 		taskMgr.add(self.end_turn_task, "end_turn")
 		taskMgr.add(self.begin_movie_task, "movie_task")
 
-		self.accept("arrow_down", self.display_line )
 		self.accept("escape", sys.exit)
 		self.accept("h", self.limbo_hide_all )
 		self.accept("c", self.setup_combat )
@@ -94,22 +94,79 @@ class PIRATES(ShowBase):
 		#Set up opening intro
 		self.in_movie = True
 		self.opening = self.loader.loadModel("square.egg")
+		self.blackout = self.loader.loadModel("square.egg")
 		self.opening.setTransparency( TransparencyAttrib.MAlpha )
+		self.blackout.setTransparency( TransparencyAttrib.MAlpha )
 		self.opening.setPos(31.732, -101.826, 112.665)
-		self.opening.setSx(33)
+		self.blackout.setPos(31.732, -100.826, 112.665)
+		self.opening.setSx(36)
 		self.opening.setSy(20)
+		self.blackout.setSx(40)
+		self.blackout.setSy(25)
 		self.opening.setHpr(32.99, 90.875, -0.152)
+		self.blackout.setHpr(32.99, 90.875, -0.152)
 		self.opening_texture = self.loader.loadTexture("Textures\Intro.mpg")
+		self.blackout_texture = self.loader.loadTexture("Textures\Black.png")
 		self.opening_texture_time = self.opening_texture.getTime()
 		self.opening_texture.setLoop(False)
 		self.opening_texture.play()
-		#self.opening_texture.setPlayRate(10)
+		self.opening_texture.setPlayRate(1.2)
 		ts = TextureStage("ts")
 		self.opening.setTexture(ts, self.opening_texture)
+		self.blackout.setTexture(self.blackout_texture)
 		self.opening.setTexRotate(ts, 180)
-		#self.opening_sound = self.loader.loadSfx("Textures\Intro.mpg")
-		#self.opening_texture.synchronizeTo(self.opening_sound)
+		self.opening_sound = self.loader.loadSfx("Sound\Intro.wav")
+		self.opening_sound.setPlayRate(1.2)
+		self.opening_sound.play()
+		self.instructions_text.hide()
 		self.opening.reparentTo(self.render)
+		self.blackout.reparentTo(self.render)
+	
+	def play_ending(self):
+		self.taskMgr.remove("Combat Camera")
+		self.taskMgr.add(self.limbo_camera_task, "Limbo Camera")
+		self.ignore("arrow_down")
+
+		#Set up ending outro
+		self.in_movie = True
+		self.ending = self.loader.loadModel("square.egg")
+		self.ending.setTransparency( TransparencyAttrib.MAlpha )
+		self.ending.setPos(31.732, -101.826, 112.665)
+		self.ending.setSx(36)
+		self.ending.setSy(20)
+		self.ending.setHpr(32.99, 90.875, -0.152)
+		self.ending_texture = self.loader.loadTexture("Textures\Outro.mpg")
+		self.ending_texture_time = self.ending_texture.getTime()
+		self.ending_texture.setLoop(False)
+		self.ending_texture.play()
+		self.ending_texture.setPlayRate(1.2)
+		ts = TextureStage("ts")
+		self.ending.setTexture(ts, self.ending_texture)
+		self.ending.setTexRotate(ts, 180)
+		self.ending_sound = self.loader.loadSfx("Sound\Outro.wav")
+		self.ending_sound.setPlayRate(1.2)
+		self.ending_sound.play()
+		self.instructions_text.hide()
+		self.ending.reparentTo(self.render)
+
+		self.sunlight = DirectionalLight('limbo_sunlight')
+		self.sunlight.setColor(VBase4(0.8, 0.8, 0.5, 1))
+		self.sunlight_nodepath = render.attachNewNode(self.sunlight)
+		self.sunlight_nodepath.setPos(937, -1386, 242) #1063, -1050, 555 || -12, -1625, 62
+		self.sunlight_nodepath.lookAt(self.limbo_sonatu)
+		render.setLight(self.sunlight_nodepath)
+
+		self.waterlight = DirectionalLight('limbo_sunlight')
+		self.waterlight.setColor(VBase4(1, 1, 1, 1))
+		self.waterlight_nodepath = render.attachNewNode(self.waterlight)
+		self.waterlight_nodepath.setPos(-129, 585, 645) #1063, -1050, 555 || -12, -1625, 62
+		self.waterlight_nodepath.lookAt(self.water_limbo)
+		self.water_limbo.setLight(self.waterlight_nodepath)
+
+		self.ambientlight = AmbientLight("limbo_ambient")
+		self.ambientlight.setColor(VBase4(0.2, 0.2, 0.2, 1))
+		self.ambientlight_nodepath = render.attachNewNode(self.ambientlight)
+		render.setLight(self.ambientlight_nodepath)
 	
 	def limbo(self):
 		#Change attributes
@@ -260,9 +317,37 @@ class PIRATES(ShowBase):
 	def reset_combat(self):
 		#Reset up attributes
 		self.__player_turn = True
+		self.screen = 2
 
-		self.combat_hide_all()
+		if self.dead_queen:
+			self.queen_model.hide()
+
+		else:
+
+			for i in range(len(self.monster_list)):
+				if self.monster_list[i].get_alive():
+					self.monster_model_list[i].hide()
+
+		
+		for i in range(len(self.obstacle_list)):
+			self.obstacle_list[i].hide()
+
+		self.map_grid.hide()
+		self.water.hide()
+		self.combat_sonatu.hide()
+		render.clearLight(self.sunlight_nodepath)
+		render.clearLight(self.ambientlight_nodepath)
+		self.turn_text.hide()
+		self.sonatu_health_text.hide()
+		self.sonatu_ap_text.hide()
+		self.attack_type_text.hide()
+		self.game_over_text.hide()
+		self.game_win_text.hide()
+		self.combatHUD.hide()
+                self.end_turn_button.hide()
+
 		self.setup_combat()
+		self.screen += 1
 		
 	def setup_combat(self):
 		#Set up attributes
@@ -415,11 +500,12 @@ class PIRATES(ShowBase):
 		if self.screen == 4:
 			#Load the queen's model and do it's bobbing motion
 			self.queen_position = random.randint(0, 201)
-			while self.queen_position == self.sonatu.get_gridspace():
+			while not self.gridspace_list[self.queen_position].get_occupiable():
 				self.queen_position = random.randint(0, 201)
 
 			self.queen = Queen(self.queen_position)
 			self.gridspace_list[self.queen_position].set_occupiable(False)
+			self.gridspace_list[self.queen_position].set_occupying_unit(self.queen)
 			self.queen_model = self.loader.loadModel("Models\Monsters\Crab.egg")
 			self.queen_model.setPos(self.gridspace_list[self.queen_position].get_x_position(), self.gridspace_list[self.queen_position].get_y_position(),-10)
 			self.queen_model.lookAt(self.combat_sonatu)
@@ -510,6 +596,9 @@ class PIRATES(ShowBase):
 			for i in range(len(self.obstacle_list)):
 				self.obstacle_list[i].hide()
 
+		elif self.dead_queen:
+			self.queen_model.hide()
+
 		self.map_grid.hide()
 		self.water.hide()
 		self.combat_sonatu.hide()
@@ -540,16 +629,9 @@ class PIRATES(ShowBase):
 				if self.__number_enemies_alive < 1 and self.screen == 3:
 					self.screen += 1
 
-				elif self.screen == 5:
-					self.previous_position = self.sonatu.get_gridspace()
-					self.previous_HP = self.sonatu.getHP()
-					self.previous_AP = self.sonatu.getAP()
-
-					if self.queen.get_alive():
-						self.screen += 1
-
 	def limbo_mouse_task(self):
-		if base.mouseWatcherNode.hasMouse() and not self.__in_dialogue:
+		if base.mouseWatcherNode.hasMouse() and not self.__in_dialogue and not self.in_movie:
+			self.accept("arrow_down", self.display_line )
 			self.mouse_position = base.mouseWatcherNode.getMouse()
 			self.collision_ray.setFromLens(base.camNode, self.mouse_position.getX(), self.mouse_position.getY())
 			self.traverser.traverse(render)
@@ -627,8 +709,7 @@ class PIRATES(ShowBase):
 								self.short_monster.removeNode()
 							elif unit_attacked.get_name() == "Long":
 								self.long_monster.removeNode()
-
-							elif self.screen == 5:
+							elif unit_attacked.get_name() == "Queen":
 								self.queen_model.removeNode()
 							
 							self.gridspace_list[ending_gridspace].set_occupying_unit(None)
@@ -846,6 +927,12 @@ class PIRATES(ShowBase):
                                 self.combatHUD.show()
                                 self.end_turn_button.show()
                                 self.show_text()
+
+			elif self.current_speaker == "Ending":
+				self.__in_dialogue = False
+                                self.dialogue_box.hide()
+				self.play_ending()
+				self.taskMgr.add(self.end_movie_task, "end_movie_task")
 			else:
 				self.dialogue_box.hide()
 				self.begin_dialogue(self.current_speaker)
@@ -1045,34 +1132,48 @@ class PIRATES(ShowBase):
 		distance = len(path) - 1
 
 		if distance <= self.queen.get_unit_range():
-			print "Ridiculous"
-			#Everything that needs to be added to the queen should be done here
-
-		elif distance == self.queen.get_unit_range() + 1:
-			self.queen_interval1 = self.queen_model.posInterval(0.7, Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), Point3(self.queen.getX(), self.queen.getY(), 1), "queenMove1")
-			self.queen_sequence = Sequence(	self.melee_interval1 )
-			self.queen_sequence.start()
+			self.queen.set_attributes(4)
 
 			if random.randint(1, 100) <= self.queen.get_accuracy():
-				self.sonatu.setHP(self.sonatu.getHP() - queen.get_damage())
+				self.sonatu.setHP(self.sonatu.getHP() - self.queen.get_damage())
 				self.sonatu_health_text.setText( "HP: " + str(self.sonatu.getHP()))
 				self.sonatu_attacked = True
+
+			if random.randint(1, 100) <= self.queen.get_accuracy():
+				self.sonatu.setHP(self.sonatu.getHP() - self.queen.get_damage())
+				self.sonatu_health_text.setText( "HP: " + str(self.sonatu.getHP()))
+				self.sonatu_attacked = True
+
+			self.queen.set_attributes(1)
+			return True
+			
+		elif distance == self.queen.get_unit_range() + 1:
+			self.queen_interval1 = self.queen_model.posInterval(0.7, Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), Point3(self.queen_model.getX(), self.queen_model.getY(), 1), "queenMove1")
+			self.queen_sequence = Sequence(	self.queen_interval1 )
+			self.queen_sequence.start()
+
+			if random.randint(1, 2) == 1:
+				if random.randint(1, 100) <= self.queen.get_accuracy():
+					self.sonatu.setHP(self.sonatu.getHP() - self.queen.get_damage())
+					self.sonatu_health_text.setText( "HP: " + str(self.sonatu.getHP()))
+					self.sonatu_attacked = True
+			else:
+				self.queen.set_attributes(2)
 
 			self.gridspace_list[starting_gridspace].set_occupiable(True)
 			self.gridspace_list[starting_gridspace].set_occupying_unit(None)
 			self.gridspace_list[path[1]].set_occupiable(False)
-			self.gridspace_list[path[1]].set_occupying_unit(enemy)
+			self.gridspace_list[path[1]].set_occupying_unit(self.queen)
 			self.queen.set_gridspace(path[1])
-			self.queen.setAP(0)
 			return True
 
 		elif distance == self.queen.get_unit_range() + 2:
-			self.queen_interval1 = self.queen_model.posInterval(0.7, Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), Point3(self.queen.getX(), self.queen.getY(), 1), "queenMove1")
+			self.queen_interval1 = self.queen_model.posInterval(0.7, Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), Point3(self.queen_model.getX(), self.queen_model.getY(), 1), "queenMove1")
 			self.queen_sequence = Sequence(self.queen_interval1)
 			self.gridspace_list[starting_gridspace].set_occupiable(True)
 			self.gridspace_list[starting_gridspace].set_occupying_unit(None)
 			self.gridspace_list[path[1]].set_occupiable(False)
-			self.gridspace_list[path[1]].set_occupying_unit(enemy)
+			self.gridspace_list[path[1]].set_occupying_unit(self.queen)
 			self.queen.set_gridspace(path[1])
 
 			if random.randint(1, 2) == 1:
@@ -1081,18 +1182,24 @@ class PIRATES(ShowBase):
 				self.gridspace_list[starting_gridspace].set_occupiable(True)
 				self.gridspace_list[starting_gridspace].set_occupying_unit(None)
 				self.gridspace_list[path[2]].set_occupiable(False)
-				self.gridspace_list[path[2]].set_occupying_unit(enemy)
+				self.gridspace_list[path[2]].set_occupying_unit(self.queen)
 				self.gridspace_list[path[1]].set_occupiable(True)
 				self.gridspace_list[path[1]].set_occupying_unit(None)
 				self.queen.set_gridspace(path[2])
 			
-			self.queen.setAP(0)
 			self.queen_sequence.start()
 
 		else:
 			self.queen_interval1 = self.queen_model.posInterval(0.7, Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), Point3(self.queen_model.getX(), self.queen_model.getY(), 1), "queenMove1")
 			self.queen_interval2 = self.queen_model.posInterval( 0.7, Point3(self.gridspace_list[path[2]].get_x_position(), self.gridspace_list[path[2]].get_y_position(), 1), Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), "queenMove2")
 			self.queen_sequence = Sequence(self.queen_interval1, self.queen_interval2)
+
+			self.gridspace_list[starting_gridspace].set_occupiable(True)
+			self.gridspace_list[starting_gridspace].set_occupying_unit(None)
+			self.gridspace_list[path[2]].set_occupiable(False)
+			self.gridspace_list[path[2]].set_occupying_unit(self.queen)
+			self.queen.set_gridspace(path[2])
+			self.queen.set_attributes(4)
 			self.queen_sequence.start()
 
 	def begin_enemy_turn(self):
@@ -1109,9 +1216,11 @@ class PIRATES(ShowBase):
 					monster.end_turn()
 
 		if self.sonatu.getHP() <= 0:
-			self.game_over_text.setText("GAME OVER! DEAL WITH IT!")
+			if self.screen == 5:
+				self.dead_queen = True
+
 			self.reset_combat()
-		
+
 		else:
 			self.__player_turn = True
 
@@ -1165,6 +1274,9 @@ class PIRATES(ShowBase):
 		if self.melee.get_alive():
 			self.melee_monster.lookAt(self.combat_sonatu)
 			self.melee_monster.setHpr(self.melee_monster, 180, 0, 0)
+
+		if self.screen == 5 and self.queen.get_alive():
+			self.queen_model.lookAt(self.combat_sonatu)
 
 		return Task.cont
 
@@ -1227,6 +1339,8 @@ class PIRATES(ShowBase):
                         self.dialogue_line_number = 0
                         self.current_speaker = "Mission"
                         self.display_line()
+			self.sonatu.setAP(3)
+			self.sonatu_ap_text.setText("AP: " + str(self.sonatu.getAP()) )
 
 			#Show the arrows!
 			self.arrow1 = loader.loadModel("Models/Combat/yellow_arrow.egg")
@@ -1280,9 +1394,11 @@ class PIRATES(ShowBase):
 				self.screen += 1
 
 		elif self.screen == 4:
-                        #self.enemy_list = [self.queen]
-                        #self.__number_enemies_alive = 1
-                        
+                        self.__number_enemies_alive = 1
+                        self.previous_position = self.sonatu.get_gridspace()
+			self.previous_HP = self.sonatu.getHP()
+			self.previous_AP = self.sonatu.getAP()
+
 			self.combat_hide_all()
 			self.setup_combat()
                         self.combatHUD.hide()
@@ -1294,22 +1410,69 @@ class PIRATES(ShowBase):
 			self.dialogue_line_number = 0
 			self.current_speaker = "Mission"
                         self.display_line()
+			self.sonatu.setAP(3)
+			self.sonatu_ap_text.setText("AP: " + str(self.sonatu.getAP()) )
 
 			self.screen += 1
                         
-		#QUEEN IS DEAD = 5
-                elif self.screen == 6:
+                elif self.screen == 5:
                         if self.__number_enemies_alive < 1:
                                 self.combatHUD.hide()
                                 self.hide_text()
                                 self.end_turn_button.hide()
                                 self.dialogue_box.show()
                                 self.__in_dialogue = True
-                                self.current_dialogue = self.dialogue_mission_4
+                                self.current_dialogue = self.dialogue_mission_5
                                 self.dialogue_line_number = 0
                                 self.current_speaker = "Mission"
                                 self.display_line()
+                                self.screen += 1
 
+		elif self.screen == 6:
+         		self.end_turn_button.hide()
+			if not self.__in_dialogue:
+				self.ignore("arrow_down")
+				self.fader = OnscreenImage( image = "Textures/Black.png", pos = (0, 0, 0), scale = (1, 1, 1) )
+				self.fader.setTransparency(TransparencyAttrib.MAlpha)
+				self.fader.reparentTo(render2d)
+				self.fader_fadeOut = self.fader.colorScaleInterval(4, Vec4(1, 1, 1, 0))
+				self.fader_fadeIn = self.fader.colorScaleInterval(4, Vec4(1, 1, 1, 1), Vec4(1, 1, 1, 0) )
+				self.fader_fade = Sequence( self.fader_fadeIn )
+				self.fader_fade.start()
+				self.screen += 1
+				
+
+		elif self.screen == 7:
+			if not self.fader_fade.isPlaying():
+				self.combatHUD.hide()
+				self.hide_text()
+				self.fader_fade = Sequence( Wait(4), self.fader_fadeOut )
+				self.fader_fade.start()
+				
+				government_list = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
+				for i in range(15):
+					government_list[i] = self.loader.loadModel("Models\Sonatu\Sonatu.egg")
+					government_list[i].reparentTo(self.render)
+					government_list[i].setTexture(self.loader.loadTexture("Textures\Black.png"), 1)
+					government_list[i].setScale(0.022)
+
+					position = random.randint(0, 201)
+					while not self.gridspace_list[position].get_occupiable():
+						position = random.randint(0, 201)
+
+					government_list[i].setPos(self.gridspace_list[position].get_x_position(), self.gridspace_list[position].get_y_position(), 1)
+					government_list[i].lookAt(self.combat_sonatu)
+				self.screen += 1
+
+		elif self.screen == 8:
+			if not self.fader_fade.isPlaying():
+				self.accept('arrow_down', self.display_line)
+				self.dialogue_box.show()
+                                self.__in_dialogue = True
+                                self.current_dialogue = self.dialogue_mission_6
+                                self.dialogue_line_number = 0
+                                self.current_speaker = "Ending"
+                                self.display_line()
                                 self.screen += 1
 		
 		return Task.cont
@@ -1329,16 +1492,31 @@ class PIRATES(ShowBase):
 	
 	def begin_movie_task(self, task):
 		if self.opening_texture.getTime() == self.opening_texture_time:
-			print "Entered here!"
 			self.opening_texture.stop()
 			self.in_movie = False
 			opening_fadeOut = self.opening.colorScaleInterval(5, Vec4(1, 1, 1, 0))
+			blackout_fadeOut = self.blackout.colorScaleInterval(5, Vec4(1, 1, 1, 0))
 			opening_sequence = Sequence( opening_fadeOut )
+			blackout_sequence = Sequence( blackout_fadeOut )
 			opening_sequence.start()
+			blackout_sequence.start()
 			
 			if not opening_sequence.isPlaying():
 				self.opening.remove()
+				self.instructions_text.show()
 				self.taskMgr.remove("movie_task")
+
+		return Task.cont
+
+	def end_movie_task(self, task):
+		if self.ending_texture.getTime() == self.ending_texture_time:
+			self.ending_texture.stop()
+			self.black_screen = OnscreenImage(image = "Textures\Black.png", pos = (0, 0, 0), scale = 1 )
+			self.black_screen.reparentTo(render2d)
+			self.game_over_text = OnscreenText( text = "Game Over!! :)", pos = (0, 0), scale = 0.2, fg = (1, 1, 1, 1), shadow = (0, 0, 0, 1), align = TextNode.ACenter, font = self.calibri_font, mayChange = False, parent = self.black_screen)
+			self.escape_text = OnscreenText( text = "Press ESC to exit!", pos = (0, -0.5), scale = 0.04, fg = (1, 1, 1, 1), shadow = (0, 0, 0, 1), align = TextNode.ACenter, font = self.calibri_font, mayChange = False, parent = self.black_screen)
+			self.taskMgr.remove("end_movie_task")
+			#self.in_movie = False
 
 		return Task.cont
 	
