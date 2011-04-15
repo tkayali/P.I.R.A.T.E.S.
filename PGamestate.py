@@ -79,17 +79,7 @@ class PIRATES(ShowBase):
 		taskMgr.add(self.begin_movie_task, "movie_task")
 
 		self.accept("escape", sys.exit)
-		self.accept("h", self.limbo_hide_all )
-		self.accept("c", self.setup_combat )
-		self.accept("a", self.combat_hide_all )
-		self.accept("z", self.limbo )
-		self.accept("g", self.printCamera )
 
-	def printCamera(self):	
-		print self.camera.getX()
-		print self.camera.getY()
-		print self.camera.getZ()
-	
 	def play_opening(self):
 		#Set up opening intro
 		self.in_movie = True
@@ -110,13 +100,13 @@ class PIRATES(ShowBase):
 		self.opening_texture_time = self.opening_texture.getTime()
 		self.opening_texture.setLoop(False)
 		self.opening_texture.play()
-		self.opening_texture.setPlayRate(1.2)
+		self.opening_texture.setPlayRate(12)
 		ts = TextureStage("ts")
 		self.opening.setTexture(ts, self.opening_texture)
 		self.blackout.setTexture(self.blackout_texture)
 		self.opening.setTexRotate(ts, 180)
 		self.opening_sound = self.loader.loadSfx("Sound\Intro.wav")
-		self.opening_sound.setPlayRate(1.2)
+		self.opening_sound.setPlayRate(12)
 		self.opening_sound.play()
 		self.instructions_text.hide()
 		self.opening.reparentTo(self.render)
@@ -152,14 +142,14 @@ class PIRATES(ShowBase):
 		self.sunlight = DirectionalLight('limbo_sunlight')
 		self.sunlight.setColor(VBase4(0.8, 0.8, 0.5, 1))
 		self.sunlight_nodepath = render.attachNewNode(self.sunlight)
-		self.sunlight_nodepath.setPos(937, -1386, 242) #1063, -1050, 555 || -12, -1625, 62
+		self.sunlight_nodepath.setPos(937, -1386, 242)
 		self.sunlight_nodepath.lookAt(self.limbo_sonatu)
 		render.setLight(self.sunlight_nodepath)
 
 		self.waterlight = DirectionalLight('limbo_sunlight')
 		self.waterlight.setColor(VBase4(1, 1, 1, 1))
 		self.waterlight_nodepath = render.attachNewNode(self.waterlight)
-		self.waterlight_nodepath.setPos(-129, 585, 645) #1063, -1050, 555 || -12, -1625, 62
+		self.waterlight_nodepath.setPos(-129, 585, 645)
 		self.waterlight_nodepath.lookAt(self.water_limbo)
 		self.water_limbo.setLight(self.waterlight_nodepath)
 
@@ -338,8 +328,8 @@ class PIRATES(ShowBase):
 		render.clearLight(self.sunlight_nodepath)
 		render.clearLight(self.ambientlight_nodepath)
 		self.turn_text.hide()
-		self.sonatu_health_text.hide()
-		self.sonatu_ap_text.hide()
+		self.health_text.hide()
+		self.ap_text.hide()
 		self.attack_type_text.hide()
 		self.game_over_text.hide()
 		self.game_win_text.hide()
@@ -369,6 +359,7 @@ class PIRATES(ShowBase):
 		self.combatHUD = OnscreenImage( image = 'Textures\hud.png', pos = (0, 0, -0.8))		
 		self.combatHUD.setSz(.2)
 		self.combatHUD.reparentTo(render2d)
+		self.unit_image = OnscreenImage( image = 'Textures\SonatuFight.jpg', pos = (-0.7, 0, 0), scale = (0.2, 0, 0.8), parent = self.combatHUD )
 		self.end_turn_button = DirectButton( text = ( "END TURN"), text_scale = 0.2, pos = Vec3(1.0, 0, -0.8), text_align=TextNode.ACenter, scale = 0.4, pressEffect = 1, textMayChange = 1, state = DGG.NORMAL , command = self.set_sonatu_end_turn, extraArgs = [True], relief = DGG.RIDGE, frameColor = (.6235, .4353, .2471, 1))
 
 		#Set up sequences
@@ -420,14 +411,14 @@ class PIRATES(ShowBase):
 		self.combat_sonatu.lookAt(-1000, 0, 0)
 		self.combat_sonatu.reparentTo(self.render)
 		if self.screen == 4:
-			self.sonatu = Sonatu(self.previous_position, 0)
+			self.sonatu = Sonatu(self.previous_position, 0, "Textures\SonatuFight.jpg")
 			self.gridspace_list[self.previous_position].set_occupiable(False)
 			self.combat_sonatu.setPos(self.gridspace_list[self.previous_position].get_x_position(), self.gridspace_list[self.previous_position].get_y_position(), 1)
 			self.sonatu.setAP(self.previous_AP)
 			self.sonatu.setHP(self.previous_HP)
 
 		else:
-			self.sonatu = Sonatu(107, 0)
+			self.sonatu = Sonatu(107, 0, "Textures\SonatuFight.jpg")
 			self.gridspace_list[107].set_occupiable(False)
 
 		if self.screen == 2:
@@ -442,8 +433,9 @@ class PIRATES(ShowBase):
 			self.melee_monster.lookAt(self.combat_sonatu)
 			self.melee_monster.setPos(17.321, -90, 1)
 			self.melee_monster.reparentTo(self.render)
-			self.melee = Enemy(94, 1)
+			self.melee = Enemy(94, 1, "Textures\Octopic.jpg")
 			self.gridspace_list[94].set_occupiable(False)
+			self.gridspace_list[94].set_occupying_unit(self.melee)
 			self.monster_list.append(self.melee)
 			self.monster_model_list.append(self.melee_monster)
 
@@ -455,8 +447,9 @@ class PIRATES(ShowBase):
 			self.short_monster.lookAt(self.combat_sonatu)
 			self.short_monster.setPos(17.321, -120, 0)
 			self.short_monster.reparentTo(self.render)
-			self.short = Enemy(125, 2)
+			self.short = Enemy(125, 2, "Textures\Conpic.jpg")
 			self.gridspace_list[125].set_occupiable(False)
+			self.gridspace_list[125].set_occupying_unit(self.short)
 			self.monster_list.append(self.short)
 			self.monster_model_list.append(self.short_monster)
 	
@@ -468,8 +461,9 @@ class PIRATES(ShowBase):
 			self.long_monster.lookAt(self.combat_sonatu)
 			self.long_monster.setPos(17.321, -60, 0)
 			self.long_monster.reparentTo(self.render)
-			self.long = Enemy(63, 4)
+			self.long = Enemy(63, 4, "Textures\Serppic.jpg")
 			self.gridspace_list[63].set_occupiable(False)
+			self.gridspace_list[63].set_occupying_unit(self.long)
 			self.monster_list.append(self.long)
 			self.monster_model_list.append(self.long_monster)
 	
@@ -503,7 +497,7 @@ class PIRATES(ShowBase):
 			while not self.gridspace_list[self.queen_position].get_occupiable():
 				self.queen_position = random.randint(0, 201)
 
-			self.queen = Queen(self.queen_position)
+			self.queen = Queen(self.queen_position, "Textures\Crapic.jpg")
 			self.gridspace_list[self.queen_position].set_occupiable(False)
 			self.gridspace_list[self.queen_position].set_occupying_unit(self.queen)
 			self.queen_model = self.loader.loadModel("Models\Monsters\Crab.egg")
@@ -541,6 +535,29 @@ class PIRATES(ShowBase):
                     self.land.setPos(self.gridspace_list[50].get_x_position()-3, self.gridspace_list[50].get_y_position()-3.5, 0.5)
                     self.land.setTransparency(TransparencyAttrib.MAlpha)
                     self.land.reparentTo(self.render)
+		    
+		    for i in range(6):
+		    	self.gridspace_list[i].set_occupiable(False)
+		    
+		    for i in range(7):
+		    	self.gridspace_list[i+16].set_occupiable(False)
+
+		    for i in range(6):
+		    	self.gridspace_list[i+31].set_occupiable(False)
+
+		    for i in range(5):
+		    	self.gridspace_list[i+47].set_occupiable(False)
+		    
+		    for i in range(4):
+			self.gridspace_list[i+62].set_occupiable(False)
+		    
+		    for i in range(3):
+			self.gridspace_list[i+78].set_occupiable(False)
+		    
+		    for i in range(3):
+			self.gridspace_list[i+93].set_occupiable(False)
+
+		    self.gridspace_list[109].set_occupiable(False)
                     
                     #Set up task
                     self.taskMgr.add(self.hex_check, "Hex Check")
@@ -605,8 +622,8 @@ class PIRATES(ShowBase):
 		render.clearLight(self.sunlight_nodepath)
 		render.clearLight(self.ambientlight_nodepath)
 		self.turn_text.hide()
-		self.sonatu_health_text.hide()
-		self.sonatu_ap_text.hide()
+		self.health_text.hide()
+		self.ap_text.hide()
 		self.attack_type_text.hide()
 		self.game_over_text.hide()
 		self.game_win_text.hide()
@@ -625,7 +642,6 @@ class PIRATES(ShowBase):
 	def combat_mouse_task(self):
 		if self.__player_turn and not self.__in_dialogue:
 				self.sonatu_turn()
-				self.update_text( self.__player_turn )
 				if self.__number_enemies_alive < 1 and self.screen == 3:
 					self.screen += 1
 
@@ -642,6 +658,7 @@ class PIRATES(ShowBase):
 
 	def sonatu_turn(self):
 		starting_gridspace = self.sonatu.get_gridspace()
+		self.attack_type_text.setText("")
 		if base.mouseWatcherNode.hasMouse() and not self.melee_monster_sequence.isPlaying() and not self.short_monster_sequence.isPlaying() and not self.long_monster_sequence.isPlaying():
 			self.mouse_position = base.mouseWatcherNode.getMouse()
 			self.collision_ray.setFromLens(base.camNode, self.mouse_position.getX(), self.mouse_position.getY())
@@ -670,38 +687,53 @@ class PIRATES(ShowBase):
 						self.gridspace_list[starting_gridspace].set_occupying_unit(None)
 						self.gridspace_list[ending_gridspace].set_occupying_unit(self.sonatu)
 						self.sonatu.setAP(self.sonatu.getAP()-len(path)+1)
+						self.update_text()
+						self.unit_image.setImage(self.sonatu.get_picture())
 
 				#Check to see if enemy is clicked
 				elif self.gridspace_list[ending_gridspace].get_occupying_unit() is not None and starting_gridspace is not ending_gridspace:
 					distance = len(self.combat_map.calculate_crow_path(starting_gridspace, ending_gridspace))-1
 
-					if self.sonatu.getAP() > 1:
+					if self.sonatu.getAP() > 0:
 						unit_attacked = self.gridspace_list[ending_gridspace].get_occupying_unit()
-
-						if distance == 1:
+						
+						if distance == 1 and self.sonatu.getAP() > 1:
 							self.attack_type_text.setText("Attack with melee!")
 							if random.randint(1, 100) <= 90:
 								unit_attacked.setHP(unit_attacked.getHP() - 10)
 							else:
 								self.attack_type_text.setText("Attack missed! DOH")
+							self.sonatu.setAP(self.sonatu.getAP()-2)
+							self.unit_image.setImage(self.sonatu.get_picture())
+							self.update_text()
 
-						elif distance == 2:
+						elif distance == 2 and self.sonatu.getAP() > 1:
 							self.attack_type_text.setText("Attack with short!")
 							if random.randint(1, 100) <= 85:
 								unit_attacked.setHP(unit_attacked.getHP() - 6 )
 							else:
 								self.attack_type_text.setText("Attack missed! DOH")
+							self.sonatu.setAP(self.sonatu.getAP()-2)
+							self.unit_image.setImage(self.sonatu.get_picture())
+							self.update_text()
 
-						elif distance <=4:
+						elif distance <=4 and self.sonatu.getAP() > 1:
 							self.attack_type_text.setText("Attack with long!")
 							if random.randint(1, 100) <= 80:
 								unit_attacked.setHP(unit_attacked.getHP() - 4 )
 							else:
 								self.attack_type_text.setText("Attack missed! DOH")
+							self.sonatu.setAP(self.sonatu.getAP()-2)
+							self.unit_image.setImage(self.sonatu.get_picture())
+							self.update_text()
+						
 						else:
+							self.health_text.setText("HP: " + str(unit_attacked.getHP()))
+							self.ap_text.setText("AP: " + str(unit_attacked.getAP()))
+							self.unit_image.setImage(unit_attacked.get_picture())
+
 							return	
 						
-						self.sonatu.setAP(self.sonatu.getAP()-2)
 						if unit_attacked.getHP() <= 0:
 							if unit_attacked.get_name() == "Melee":
 								self.melee_monster.removeNode()
@@ -983,12 +1015,12 @@ class PIRATES(ShowBase):
 		if distance <= enemy.get_unit_range():
 			if random.randint(1, 100) <= enemy.get_accuracy():
 				self.sonatu.setHP(self.sonatu.getHP() - enemy.get_damage())
-				self.sonatu_health_text.setText( "HP: " + str(self.sonatu.getHP()))
+				self.health_text.setText( "HP: " + str(self.sonatu.getHP()))
 				self.sonatu_attacked = True
 
 			if random.randint(1, 100) <= enemy.get_accuracy():
 				self.sonatu.setHP(self.sonatu.getHP() - enemy.get_damage())
-				self.sonatu_health_text.setText( "HP: " + str(self.sonatu.getHP()))
+				self.health_text.setText( "HP: " + str(self.sonatu.getHP()))
 				self.sonatu_attacked = True
 
 			enemy.setAP(0)
@@ -1086,7 +1118,7 @@ class PIRATES(ShowBase):
 
 			if random.randint(1, 100) <= enemy.get_accuracy():
 				self.sonatu.setHP(self.sonatu.getHP() - enemy.get_damage())
-				self.sonatu_health_text.setText( "HP: " + str(self.sonatu.getHP()))
+				self.health_text.setText( "HP: " + str(self.sonatu.getHP()))
 				self.sonatu_attacked = True
 
 			self.gridspace_list[starting_gridspace].set_occupiable(True)
@@ -1136,12 +1168,12 @@ class PIRATES(ShowBase):
 
 			if random.randint(1, 100) <= self.queen.get_accuracy():
 				self.sonatu.setHP(self.sonatu.getHP() - self.queen.get_damage())
-				self.sonatu_health_text.setText( "HP: " + str(self.sonatu.getHP()))
+				self.health_text.setText( "HP: " + str(self.sonatu.getHP()))
 				self.sonatu_attacked = True
 
 			if random.randint(1, 100) <= self.queen.get_accuracy():
 				self.sonatu.setHP(self.sonatu.getHP() - self.queen.get_damage())
-				self.sonatu_health_text.setText( "HP: " + str(self.sonatu.getHP()))
+				self.health_text.setText( "HP: " + str(self.sonatu.getHP()))
 				self.sonatu_attacked = True
 
 			self.queen.set_attributes(1)
@@ -1155,7 +1187,7 @@ class PIRATES(ShowBase):
 			if random.randint(1, 2) == 1:
 				if random.randint(1, 100) <= self.queen.get_accuracy():
 					self.sonatu.setHP(self.sonatu.getHP() - self.queen.get_damage())
-					self.sonatu_health_text.setText( "HP: " + str(self.sonatu.getHP()))
+					self.health_text.setText( "HP: " + str(self.sonatu.getHP()))
 					self.sonatu_attacked = True
 			else:
 				self.queen.set_attributes(2)
@@ -1203,7 +1235,8 @@ class PIRATES(ShowBase):
 			self.queen_sequence.start()
 
 	def begin_enemy_turn(self):
-		self.update_text( self.__player_turn )
+		self.update_text()
+		self.unit_image.setImage(self.sonatu.get_picture())
 
 		if self.screen == 5:
 			self.queen_turn()
@@ -1226,42 +1259,38 @@ class PIRATES(ShowBase):
 
 	def setup_text(self):
 		self.turn_text = OnscreenText( text = "Your turn!", pos = (0, .9, 0), scale = 0.065, fg = (1, 1, 1, 1) ) 
-		self.sonatu_health_text = OnscreenText( text= "HP: " + str(self.sonatu.getHP()), pos = (-.5, -.9, 0), scale = 0.05, fg = (1, 1, 1, 1) )
-		self.sonatu_ap_text = OnscreenText( text= "AP: " + str(self.sonatu.getAP()), pos = (-.5, -.8, 0), scale = 0.05, fg = (1, 1, 1, 1) )
+		self.health_text = OnscreenText( text= "HP: " + str(self.sonatu.getHP()), pos = (-.2, -.9, 0), scale = 0.05, fg = (1, 1, 1, 1) )
+		self.ap_text = OnscreenText( text= "AP: " + str(self.sonatu.getAP()), pos = (-.2, -.8, 0), scale = 0.05, fg = (1, 1, 1, 1) )
 		self.attack_type_text = OnscreenText( text= "", pos = (0, .8, 0), scale = 0.06, fg = (1, 1, 1, 1) )
 		self.game_over_text = OnscreenText( text= "", pos = (0, 0, 0), scale = 0.1, fg = (1, 1, 1, 1), align = TextNode.ACenter )
 		self.game_win_text = OnscreenText( scale = 0.1, fg = (1, 1, 1, 1), align = TextNode.ACenter)
+		self.taskMgr.add(self.display_enemy_turn, "Turn Text")
 		self.turn_text.reparentTo(render2d)
-		self.sonatu_health_text.reparentTo(render2d)
-		self.sonatu_ap_text.reparentTo(render2d)
+		self.health_text.reparentTo(render2d)
+		self.ap_text.reparentTo(render2d)
 		self.attack_type_text.reparentTo(render2d)
 		self.game_over_text.reparentTo(render2d)
 		self.game_win_text.reparentTo(render2d)
                 
         def hide_text(self):
                 self.turn_text.hide()
-                self.sonatu_health_text.hide()
-                self.sonatu_ap_text.hide()
+                self.health_text.hide()
+                self.ap_text.hide()
                 self.attack_type_text.hide()
                 self.game_over_text.hide()
                 self.game_win_text.hide()
 	
 	def show_text(self):
 		self.turn_text.show()
-                self.sonatu_health_text.show()
-                self.sonatu_ap_text.show()
+                self.health_text.show()
+                self.ap_text.show()
                 self.attack_type_text.show()
                 self.game_over_text.show()
                 self.game_win_text.show()
 
-	def update_text(self, player_turn): #comment out and make a tastk
-		if player_turn:
-			self.turn_text.setText("Your turn!")
-		else:
-			self.turn_text.setText("Enemy turn!")
-
-		self.sonatu_health_text.setText( "HP: " + str(self.sonatu.getHP()) )
-		self.sonatu_ap_text.setText("AP: " + str(self.sonatu.getAP()) )
+	def update_text(self):
+		self.health_text.setText( "HP: " + str(self.sonatu.getHP()) )
+		self.ap_text.setText("AP: " + str(self.sonatu.getAP()) )
 
 	def lookAt_sonatu(self, task):
 		if self.long.get_alive():
@@ -1326,6 +1355,15 @@ class PIRATES(ShowBase):
 		self.camera.setPos(-54.347, -52.173, 103.392)
 		self.camera.lookAt(-54.347, -52.173, 103.392)		
 		return Task.cont
+
+	def display_enemy_turn(self, task):
+		if self.melee_monster_sequence.isPlaying() or self.short_monster_sequence.isPlaying() or self.long_monster_sequence.isPlaying():
+			self.turn_text.setText("Enemy Turn!")
+
+		else:
+			self.turn_text.setText("Your Turn!")
+
+		return Task.cont
         
         def hex_check(self, task):
 		if self.screen == 1:
@@ -1340,7 +1378,7 @@ class PIRATES(ShowBase):
                         self.current_speaker = "Mission"
                         self.display_line()
 			self.sonatu.setAP(3)
-			self.sonatu_ap_text.setText("AP: " + str(self.sonatu.getAP()) )
+			self.ap_text.setText("AP: " + str(self.sonatu.getAP()) )
 
 			#Show the arrows!
 			self.arrow1 = loader.loadModel("Models/Combat/yellow_arrow.egg")
@@ -1411,7 +1449,7 @@ class PIRATES(ShowBase):
 			self.current_speaker = "Mission"
                         self.display_line()
 			self.sonatu.setAP(3)
-			self.sonatu_ap_text.setText("AP: " + str(self.sonatu.getAP()) )
+			self.ap_text.setText("AP: " + str(self.sonatu.getAP()) )
 
 			self.screen += 1
                         
