@@ -10,7 +10,7 @@ class Queen(Unit):
 	def __init__(self, _model = None):
 		Unit.__init__(self, 30, 2, None, True, False, 4)
 
-	def attack(self, range):
+	def set_attributes(self, range):
 		if range == 1:
 			self.__damage = 10
 			self.__accuracy = 90
@@ -26,7 +26,7 @@ class Queen(Unit):
 		else:
 			print "What are you doing!?!?!?!\nYou should not see this!!!"
 
-		Unit.setAP(self, Unit.getAp()-1)
+		#Unit.setAP(self, Unit.getAp()-1)
 
 		print "Damage: " + str(damage) + " Accuracy: " + str(accuracy)
 
