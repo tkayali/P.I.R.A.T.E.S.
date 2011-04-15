@@ -11,8 +11,8 @@ class Enemy(Unit):
 	__gridspace = None
 	__name = None
 
-	def __init__ (self, gridspace=0, _unit_range=0):
-		Unit.__init__(self, 10, 2, gridspace, True, False, _unit_range)
+	def __init__ (self, gridspace=0, _unit_range=0, picture=None):
+		Unit.__init__(self, 10, 2, gridspace, True, False, _unit_range, picture)
 		self.__gridspace = gridspace
 
 		if _unit_range == 1:

@@ -8,8 +8,8 @@ class Sonatu(Unit):
 
 	__special = 0
 
-	def __init__ (self, gridspace=94, special=0):
-		Unit.__init__(self, 30, 3, gridspace, True, True, 4)
+	def __init__ (self, gridspace=94, special=0, picture=None):
+		Unit.__init__(self, 30, 3, gridspace, True, True, 4, picture)
 		self.__special = special
 
 	def get_special(self):
@@ -23,4 +23,3 @@ class Sonatu(Unit):
 
 	def to_string(self):
 		Unit.to_string(self)
-		print "Special: " + str(self.__special)

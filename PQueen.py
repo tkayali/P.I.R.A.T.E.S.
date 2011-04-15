@@ -8,8 +8,8 @@ class Queen(Unit):
 	__accuracy = 0
 	__name = "Queen"
 
-	def __init__(self, gridspace):
-		Unit.__init__(self, 30, 2, gridspace, True, False, 4)
+	def __init__(self, gridspace=None, picture=None):
+		Unit.__init__(self, 30, 2, gridspace, True, False, 4, picture)
 
 	def set_attributes(self, range):
 		if range == 1:

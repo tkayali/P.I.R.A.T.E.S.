@@ -13,14 +13,19 @@ class Unit:
 	_alive = False
 	_player = False
 	_unit_range = 0
+	__picture = None
 
-	def __init__ (self, _HP=0, _AP=0, gridspace=None, _alive=False, _player=False, _unit_range=0):
+	def __init__ (self, _HP=0, _AP=0, gridspace=None, _alive=False, _player=False, _unit_range=0, picture=None):
 		self._HP = _HP
 		self._AP = _AP
 		self.__gridspace = gridspace
 		self._alive = _alive
 		self._unit_range = _unit_range
 		self._player = _player
+		self.__picture = picture
+	
+	def get_picture(self):
+		return self.__picture
 	
 	def getAP(self):
 		return self._AP
