@@ -6,29 +6,26 @@ class Queen(Unit):
 	"""
 	__damage = 0
 	__accuracy = 0
+	__name = "Queen"
 
 	def __init__(self, gridspace):
 		Unit.__init__(self, 30, 2, gridspace, True, False, 4)
 
 	def set_attributes(self, range):
 		if range == 1:
-			self.__damage = 10
+			self.__damage = 8
 			self.__accuracy = 90
 
 		elif range == 2:
-			self.__damage = 6
+			self.__damage = 4
 			self.__accuracy = 85
 
 		elif range < 5:
-			self.__damage = 4
+			self.__damage = 2
 			self.__accuracy = 80
 
 		else:
 			print "What are you doing!?!?!?!\nYou should not see this!!!"
-
-		#Unit.setAP(self, Unit.getAp()-1)
-
-		print "Damage: " + str(damage) + " Accuracy: " + str(accuracy)
 
 	def end_turn(self):
 		Unit.setAP(self, 2)
@@ -44,4 +41,7 @@ class Queen(Unit):
 	
 	def set_accuracy(self, accuracy):
 		self.__accuracy = accuracy
+	
+	def get_name(self):
+		return self.__name
 
