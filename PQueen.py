@@ -7,7 +7,7 @@ class Queen(Unit):
 	__damage = 0
 	__accuracy = 0
 
-	def __init__(self, _model = None):
+	def __init__(self):
 		Unit.__init__(self, 30, 2, None, True, False, 4)
 
 	def set_attributes(self, range):
