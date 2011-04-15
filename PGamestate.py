@@ -4,6 +4,7 @@ from PEnemy import Enemy
 from PSonatu import Sonatu
 from PGridspace import Gridspace
 from PMap import Map
+from PQueen import Queen
 
 from math import pi, sin, cos
 import random, sys
@@ -34,6 +35,10 @@ class PIRATES(ShowBase):
 	sonatu_end_turn = False
        	sonatu_attacked = False
         screen = 0
+	previous_position = 0
+	previous_AP = 0
+	previous_HP = 0
+	in_movie = False
 
         #Import dialogue from associated files
         dialogue_checkers_l_crew = open('Config/checkers_l_1.txt').readlines()
@@ -66,9 +71,11 @@ class PIRATES(ShowBase):
 
 		self.collision_detection()
 		self.limbo()
+		self.play_opening()
 
 		mouseTask = taskMgr.add(self.mouse_task, 'mouse_task')
 		taskMgr.add(self.end_turn_task, "end_turn")
+		taskMgr.add(self.begin_movie_task, "movie_task")
 
 		self.accept("arrow_down", self.display_line )
 		self.accept("escape", sys.exit)
@@ -82,7 +89,28 @@ class PIRATES(ShowBase):
 		print self.camera.getX()
 		print self.camera.getY()
 		print self.camera.getZ()
-
+	
+	def play_opening(self):
+		#Set up opening intro
+		self.in_movie = True
+		self.opening = self.loader.loadModel("square.egg")
+		self.opening.setTransparency( TransparencyAttrib.MAlpha )
+		self.opening.setPos(31.732, -101.826, 112.665)
+		self.opening.setSx(33)
+		self.opening.setSy(20)
+		self.opening.setHpr(32.99, 90.875, -0.152)
+		self.opening_texture = self.loader.loadTexture("Textures\Intro.mpg")
+		self.opening_texture_time = self.opening_texture.getTime()
+		self.opening_texture.setLoop(False)
+		self.opening_texture.play()
+		#self.opening_texture.setPlayRate(10)
+		ts = TextureStage("ts")
+		self.opening.setTexture(ts, self.opening_texture)
+		self.opening.setTexRotate(ts, 180)
+		#self.opening_sound = self.loader.loadSfx("Textures\Intro.mpg")
+		#self.opening_texture.synchronizeTo(self.opening_sound)
+		self.opening.reparentTo(self.render)
+	
 	def limbo(self):
 		#Change attributes
 		self.__in_combat = False
@@ -155,13 +183,9 @@ class PIRATES(ShowBase):
 		self.water_limbo.setSx(2400)
 		self.water_limbo.setSy(2400)
 		self.water_limbo.setPos(self.limbo_sonatu, 0, 0, 50)
-		#ts = TextureStage('ts')
-		#self.waterTexture = loader.loadTexture("Textures\Water.jpg")
 		self.waterTexture2 = loader.loadTexture("Textures\Sea.mpg")
 		self.waterTexture2.setLoop(True)
 		self.waterTexture2.setPlayRate(2)
-		#self.water.setTexture(ts, self.waterTexture)
-		#self.water_limbo.setTexScale(ts, 4)
 		self.water_limbo.setTexture(self.waterTexture2)
 		self.water_limbo.reparentTo(self.render)
 
@@ -185,11 +209,7 @@ class PIRATES(ShowBase):
 		self.ambientlight_nodepath = render.attachNewNode(self.ambientlight)
 		render.setLight(self.ambientlight_nodepath)
 		
-		#Set up shadows
-		#tempnode = NodePath(PandaNode("temp node"))
-        	#tempnode.setAttrib(LightRampAttrib.makeDoubleThreshold(0.3, 0.7, 0.4, 0.8)) #np.setAttrib(LightRampAttrib.makeDoubleThreshold(t0, l0, t1, l1)
-        	#tempnode.setShaderAuto()
-        	#base.cam.node().setInitialState(tempnode.getState())	
+		#Set up filters
         	self.filters = CommonFilters(base.win, base.cam)
         	self.blur_sharpen = self.filters.setBlurSharpen(.8)
 		self.cartoon_ink = self.filters.setCartoonInk(0.5)
@@ -249,9 +269,9 @@ class PIRATES(ShowBase):
                 self.__in_limbo = False
 		self.__in_combat = True
 		self.monster_list = []
-		self.monster_model_list = []
-		self.gridspace_list = []
-		self.obstacle_list = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
+
+		if self.screen is not 4:
+			self.gridspace_list = []
 
 		#Remove blursharpen and cartoon ink
         	self.filters.delCartoonInk()
@@ -266,9 +286,6 @@ class PIRATES(ShowBase):
 		self.combatHUD.reparentTo(render2d)
 		self.end_turn_button = DirectButton( text = ( "END TURN"), text_scale = 0.2, pos = Vec3(1.0, 0, -0.8), text_align=TextNode.ACenter, scale = 0.4, pressEffect = 1, textMayChange = 1, state = DGG.NORMAL , command = self.set_sonatu_end_turn, extraArgs = [True], relief = DGG.RIDGE, frameColor = (.6235, .4353, .2471, 1))
 
-		#Set up collision detection
-		#self.combat_collision_detection()
-
 		#Set up sequences
 		self.melee_monster_sequence = Sequence()
 		self.short_monster_sequence = Sequence()
@@ -280,12 +297,8 @@ class PIRATES(ShowBase):
 		self.water.setSy(600)
 		self.water.setPos(150, -150, -1)
 		ts = TextureStage('ts')
-		#self.waterTexture = loader.loadTexture("Textures\Water.jpg")
 		self.waterTexture = loader.loadTexture("Textures\Sea.mpg")
 		self.waterTexture.setLoop(True)
-		#self.waterTexture.setPlayRate(4)
-		#self.water.setTexture(ts, self.waterTexture)
-		#self.water.setTexScale(ts, 1.5)
 		self.water.setTexture(self.waterTexture)
 		self.water.reparentTo(self.render)
 
@@ -321,10 +334,19 @@ class PIRATES(ShowBase):
 		self.combat_sonatu.setPos(242.487, -90, 1)
 		self.combat_sonatu.lookAt(-1000, 0, 0)
 		self.combat_sonatu.reparentTo(self.render)
-		self.sonatu = Sonatu(107, 0)
-		self.gridspace_list[107].set_occupiable(False)
+		if self.screen == 4:
+			self.sonatu = Sonatu(self.previous_position, 0)
+			self.gridspace_list[self.previous_position].set_occupiable(False)
+			self.combat_sonatu.setPos(self.gridspace_list[self.previous_position].get_x_position(), self.gridspace_list[self.previous_position].get_y_position(), 1)
+			self.sonatu.setAP(self.previous_AP)
+			self.sonatu.setHP(self.previous_HP)
+
+		else:
+			self.sonatu = Sonatu(107, 0)
+			self.gridspace_list[107].set_occupiable(False)
 
 		if self.screen == 2:
+			self.monster_model_list = []
 			self.__number_enemies_alive = 3
 
 			#Monster - Melee
@@ -368,7 +390,9 @@ class PIRATES(ShowBase):
 	
 			taskMgr.add(self.lookAt_sonatu, "lookAt_sonatu")
 
-			#Set up obstacles
+			#set up obstacles
+			self.obstacle_list = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
+
 			for i in range(len(self.obstacle_list)):
 				position = random.randint(0, 201)
 				
@@ -387,6 +411,26 @@ class PIRATES(ShowBase):
 	
 				self.obstacle_list[i].setPos(self.gridspace_list[position].get_x_position(), self.gridspace_list[position].get_y_position(), 1)
 				self.obstacle_list[i].reparentTo(render)
+
+		if self.screen == 4:
+			#Load the queen's model and do it's bobbing motion
+			self.queen_position = random.randint(0, 201)
+			while self.queen_position == self.sonatu.get_gridspace():
+				self.queen_position = random.randint(0, 201)
+
+			self.queen = Queen(self.queen_position)
+			self.gridspace_list[self.queen_position].set_occupiable(False)
+			self.queen_model = self.loader.loadModel("Models\Monsters\Crab.egg")
+			self.queen_model.setPos(self.gridspace_list[self.queen_position].get_x_position(), self.gridspace_list[self.queen_position].get_y_position(),-10)
+			self.queen_model.lookAt(self.combat_sonatu)
+			self.queen_model.setScale(.8)
+			self.queen_model.reparentTo(self.render)
+
+			self.queen_interval1 = self.queen_model.posInterval(1, Point3(self.gridspace_list[self.queen_position].get_x_position(), self.gridspace_list[self.queen_position].get_y_position(), 0), Point3(self.gridspace_list[self.queen_position].get_x_position(), self.gridspace_list[self.queen_position].get_y_position(), -10), "queenIntro1")
+			self.queen_interval2 = self.queen_model.posInterval(0.75, Point3(self.gridspace_list[self.queen_position].get_x_position(), self.gridspace_list[self.queen_position].get_y_position(), -3), Point3(self.gridspace_list[self.queen_position].get_x_position(), self.gridspace_list[self.queen_position].get_y_position(), 1), "queenIntro1")
+			self.queen_interval3 = self.queen_model.posInterval(0.5, Point3(self.gridspace_list[self.queen_position].get_x_position(), self.gridspace_list[self.queen_position].get_y_position(), 2), Point3(self.gridspace_list[self.queen_position].get_x_position(), self.gridspace_list[self.queen_position].get_y_position(), 0-2), "queenIntro1")
+			self.queen_intro_sequence = Sequence( self.queen_interval1, self.queen_interval2, self.queen_interval3 )
+			self.queen_intro_sequence.start()			
 		
 		#Add a hex grid texture
 		self.map_grid = self.loader.loadModel("square.egg")
@@ -462,6 +506,7 @@ class PIRATES(ShowBase):
 				if self.monster_list[i].get_alive():
 					self.monster_model_list[i].hide()
 
+			
 			for i in range(len(self.obstacle_list)):
 				self.obstacle_list[i].hide()
 
@@ -494,15 +539,14 @@ class PIRATES(ShowBase):
 				self.update_text( self.__player_turn )
 				if self.__number_enemies_alive < 1 and self.screen == 3:
 					self.screen += 1
-                                        #self.combatHUD.hide()
-                                        #self.hide_text()
-                                        #self.end_turn_button.hide()
-                                        #self.dialogue_box.show()
-                                        #self.__in_dialogue = True
-                                        #self.current_dialogue = self.dialogue_mission_2
-                                        #self.dialogue_line_number = 0
-                                        #self.current_speaker = "Mission"
-                                        #self.display_line()
+
+				elif self.screen == 5:
+					self.previous_position = self.sonatu.get_gridspace()
+					self.previous_HP = self.sonatu.getHP()
+					self.previous_AP = self.sonatu.getAP()
+
+					if self.queen.get_alive():
+						self.screen += 1
 
 	def limbo_mouse_task(self):
 		if base.mouseWatcherNode.hasMouse() and not self.__in_dialogue:
@@ -511,7 +555,6 @@ class PIRATES(ShowBase):
 			self.traverser.traverse(render)
 			if self.handler.getNumEntries() > 0:
 				self.handler.sortEntries()
-				#self.current_speaker = self.handler.getEntry(0).getIntoNodePath().getTag("name")
 				self.begin_dialogue(self.handler.getEntry(0).getIntoNodePath().getTag("name"))
 				
 
@@ -529,8 +572,6 @@ class PIRATES(ShowBase):
 				if self.gridspace_list[ending_gridspace].get_occupiable() and starting_gridspace is not ending_gridspace:
 					path = self.combat_map.calculate_path(starting_gridspace, ending_gridspace)
 					if len(path) <= self.sonatu.getAP()+1:
-						#switch statement goes here
-						#must account for 1 hex away, 2 hexes away, 3 hexes away
 						self.sonatu_interval1 = self.combat_sonatu.posInterval(0.5, Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), Point3(self.gridspace_list[starting_gridspace].get_x_position(), self.gridspace_list[starting_gridspace].get_y_position(), 1), "sonatuMove1")
 						self.sonatu_sequence = Sequence( self.sonatu_interval1 )
 						if len(path) > 2:
@@ -539,9 +580,8 @@ class PIRATES(ShowBase):
 						if len(path) > 3:
 							self.sonatu_interval3 = self.combat_sonatu.posInterval(0.5, Point3(self.gridspace_list[path[3]].get_x_position(), self.gridspace_list[path[3]].get_y_position(), 1), Point3(self.gridspace_list[path[2]].get_x_position(), self.gridspace_list[path[2]].get_y_position(), 1), "sonatuMove1")
 							self.sonatu_sequence.append( self.sonatu_interval3 )
-						self.sonatu_sequence.start()
 
-						#self.combat_sonatu.setPos( self.gridspace_list[ending_gridspace].get_x_position(), self.gridspace_list[ending_gridspace].get_y_position(), 1)
+						self.sonatu_sequence.start()
 						self.sonatu.set_gridspace(ending_gridspace)
 						self.gridspace_list[ending_gridspace].set_occupiable(False)
 						self.gridspace_list[starting_gridspace].set_occupiable(True)
@@ -549,12 +589,10 @@ class PIRATES(ShowBase):
 						self.gridspace_list[ending_gridspace].set_occupying_unit(self.sonatu)
 						self.sonatu.setAP(self.sonatu.getAP()-len(path)+1)
 
-						print "Ending gridspace:" + str(ending_gridspace)
-						print "Starting gridspace:" + str(starting_gridspace)
-
 				#Check to see if enemy is clicked
 				elif self.gridspace_list[ending_gridspace].get_occupying_unit() is not None and starting_gridspace is not ending_gridspace:
 					distance = len(self.combat_map.calculate_crow_path(starting_gridspace, ending_gridspace))-1
+
 					if self.sonatu.getAP() > 1:
 						unit_attacked = self.gridspace_list[ending_gridspace].get_occupying_unit()
 
@@ -589,6 +627,9 @@ class PIRATES(ShowBase):
 								self.short_monster.removeNode()
 							elif unit_attacked.get_name() == "Long":
 								self.long_monster.removeNode()
+
+							elif self.screen == 5:
+								self.queen_model.removeNode()
 							
 							self.gridspace_list[ending_gridspace].set_occupying_unit(None)
 							self.gridspace_list[ending_gridspace].set_occupiable(True)
@@ -767,9 +808,6 @@ class PIRATES(ShowBase):
 
 			self.taskMgr.add(self.limbo_camera_task_michael, "Michael Camera")
 
-			#self.limbo_hide_all()
-			#self.setup_combat()
-
 	def display_dialogue(self, dialogue):
 		if self.current_speaker is not "Michael":
 			self.dialogue_personal_button2.destroy()
@@ -810,7 +848,6 @@ class PIRATES(ShowBase):
                                 self.show_text()
 			else:
 				self.dialogue_box.hide()
-				self.hide_text()
 				self.begin_dialogue(self.current_speaker)
 				self.current_dialogue = None
 				self.dialogue_line_number = 0
@@ -849,11 +886,13 @@ class PIRATES(ShowBase):
 			self.dialogue_situation_button.destroy()        
 
 	def enemy_turn(self, enemy):		
+		#Set up the attributes
 		starting_gridspace = enemy.get_gridspace()
 		sonatu_position = self.sonatu.get_gridspace()
 		path = self.combat_map.calculate_path(starting_gridspace, sonatu_position)
 		distance = len(path) - 1
 
+		#If enemy is within range, attack twice
 		if distance <= enemy.get_unit_range():
 			if random.randint(1, 100) <= enemy.get_accuracy():
 				self.sonatu.setHP(self.sonatu.getHP() - enemy.get_damage())
@@ -867,7 +906,8 @@ class PIRATES(ShowBase):
 
 			enemy.setAP(0)
 			return True
-
+		
+		#If enemy is 2 hexes away from being in range, move in to be 1 hex away, and then roll a die to see if enemy moves into range or stays put
 		elif distance == enemy.get_unit_range() + 2:
 			if enemy.get_name() == "Melee":
 				self.melee_interval1 = self.melee_monster.posInterval(0.7, Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), Point3(self.melee_monster.getX(), self.melee_monster.getY(), 1), "meleeMove1")
@@ -942,6 +982,7 @@ class PIRATES(ShowBase):
 				self.long_monster_sequence.start()
 				return True
 
+		#If enemy is 1 hex away, move in and then attack
 		elif distance == enemy.get_unit_range() + 1:
 			if enemy.get_name() == "Melee":
 				self.melee_interval1 = self.melee_monster.posInterval(0.7, Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), Point3(self.melee_monster.getX(), self.melee_monster.getY(), 1), "meleeMove1")
@@ -968,6 +1009,8 @@ class PIRATES(ShowBase):
 			enemy.set_gridspace(path[1])
 			enemy.setAP(0)
 			return True
+		
+		#If enemy is more than 2 hexes away, move in as much as possible.
 		else:
 			if enemy.get_name() == "Melee":
 				self.melee_interval1 = self.melee_monster.posInterval(0.7, Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), Point3(self.melee_monster.getX(), self.melee_monster.getY(), 1), "meleeMove1")
@@ -995,13 +1038,75 @@ class PIRATES(ShowBase):
 			enemy.set_gridspace(path[2])
 			return True
 
+	def queen_turn(self):
+		starting_gridspace = self.queen.get_gridspace()
+		sonatu_position = self.sonatu.get_gridspace()
+		path = self.combat_map.calculate_path(starting_gridspace, sonatu_position)
+		distance = len(path) - 1
+
+		if distance <= self.queen.get_unit_range():
+			print "Ridiculous"
+			#Everything that needs to be added to the queen should be done here
+
+		elif distance == self.queen.get_unit_range() + 1:
+			self.queen_interval1 = self.queen_model.posInterval(0.7, Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), Point3(self.queen.getX(), self.queen.getY(), 1), "queenMove1")
+			self.queen_sequence = Sequence(	self.melee_interval1 )
+			self.queen_sequence.start()
+
+			if random.randint(1, 100) <= self.queen.get_accuracy():
+				self.sonatu.setHP(self.sonatu.getHP() - queen.get_damage())
+				self.sonatu_health_text.setText( "HP: " + str(self.sonatu.getHP()))
+				self.sonatu_attacked = True
+
+			self.gridspace_list[starting_gridspace].set_occupiable(True)
+			self.gridspace_list[starting_gridspace].set_occupying_unit(None)
+			self.gridspace_list[path[1]].set_occupiable(False)
+			self.gridspace_list[path[1]].set_occupying_unit(enemy)
+			self.queen.set_gridspace(path[1])
+			self.queen.setAP(0)
+			return True
+
+		elif distance == self.queen.get_unit_range() + 2:
+			self.queen_interval1 = self.queen_model.posInterval(0.7, Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), Point3(self.queen.getX(), self.queen.getY(), 1), "queenMove1")
+			self.queen_sequence = Sequence(self.queen_interval1)
+			self.gridspace_list[starting_gridspace].set_occupiable(True)
+			self.gridspace_list[starting_gridspace].set_occupying_unit(None)
+			self.gridspace_list[path[1]].set_occupiable(False)
+			self.gridspace_list[path[1]].set_occupying_unit(enemy)
+			self.queen.set_gridspace(path[1])
+
+			if random.randint(1, 2) == 1:
+				self.queen_interval2 = self.queen_model.posInterval( 0.7, Point3(self.gridspace_list[path[2]].get_x_position(), self.gridspace_list[path[2]].get_y_position(), 1), Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), "queenMove2")
+				self.queen_sequence.append(self.queen_interval2)
+				self.gridspace_list[starting_gridspace].set_occupiable(True)
+				self.gridspace_list[starting_gridspace].set_occupying_unit(None)
+				self.gridspace_list[path[2]].set_occupiable(False)
+				self.gridspace_list[path[2]].set_occupying_unit(enemy)
+				self.gridspace_list[path[1]].set_occupiable(True)
+				self.gridspace_list[path[1]].set_occupying_unit(None)
+				self.queen.set_gridspace(path[2])
+			
+			self.queen.setAP(0)
+			self.queen_sequence.start()
+
+		else:
+			self.queen_interval1 = self.queen_model.posInterval(0.7, Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), Point3(self.queen_model.getX(), self.queen_model.getY(), 1), "queenMove1")
+			self.queen_interval2 = self.queen_model.posInterval( 0.7, Point3(self.gridspace_list[path[2]].get_x_position(), self.gridspace_list[path[2]].get_y_position(), 1), Point3(self.gridspace_list[path[1]].get_x_position(), self.gridspace_list[path[1]].get_y_position(), 1), "queenMove2")
+			self.queen_sequence = Sequence(self.queen_interval1, self.queen_interval2)
+			self.queen_sequence.start()
+
 	def begin_enemy_turn(self):
 		self.update_text( self.__player_turn )
+
+		if self.screen == 5:
+			self.queen_turn()
+			self.queen.end_turn()
 		
-		for monster in self.monster_list:
-			if monster.get_alive():
-				self.enemy_turn(monster)
-				monster.end_turn()
+		else:	
+			for monster in self.monster_list:
+				if monster.get_alive():
+					self.enemy_turn(monster)
+					monster.end_turn()
 
 		if self.sonatu.getHP() <= 0:
 			self.game_over_text.setText("GAME OVER! DEAL WITH IT!")
@@ -1159,6 +1264,7 @@ class PIRATES(ShowBase):
 			self.screen += 1
 
 		elif self.screen == 2:
+			#Check to see if sonatu is in hex
 			if self.sonatu.get_gridspace() > 154:
 				self.combat_hide_all()
 				self.setup_combat()
@@ -1174,26 +1280,11 @@ class PIRATES(ShowBase):
 				self.screen += 1
 
 		elif self.screen == 4:
-			self.queen_position = random.randint(0, 201)
-			while self.queen_position == self.sonatu.get_gridspace():
-				self.queen_position = random.randint(0, 201)
-
-			self.queen_model = self.loader.loadModel("Models\Monsters\Crab.egg")
-			self.queen_model.setPos(self.gridspace_list[self.queen_position].get_x_position(), self.gridspace_list[self.queen_position].get_y_position(),-10)
-			self.queen_model.lookAt(self.combat_sonatu)
-			self.queen_model.setScale(.8)
-			self.queen_interval1 = self.queen_model.posInterval(1, Point3(self.gridspace_list[self.queen_position].get_x_position(), self.gridspace_list[self.queen_position].get_y_position(), 0), Point3(self.gridspace_list[self.queen_position].get_x_position(), self.gridspace_list[self.queen_position].get_y_position(), -10), "queenIntro1")
-			self.queen_interval2 = self.queen_model.posInterval(0.75, Point3(self.gridspace_list[self.queen_position].get_x_position(), self.gridspace_list[self.queen_position].get_y_position(), -3), Point3(self.gridspace_list[self.queen_position].get_x_position(), self.gridspace_list[self.queen_position].get_y_position(), 1), "queenIntro1")
-			self.queen_interval3 = self.queen_model.posInterval(0.5, Point3(self.gridspace_list[self.queen_position].get_x_position(), self.gridspace_list[self.queen_position].get_y_position(), 2), Point3(self.gridspace_list[self.queen_position].get_x_position(), self.gridspace_list[self.queen_position].get_y_position(), 0-2), "queenIntro1")
-			self.queen_intro_sequence = Sequence( self.queen_interval1, self.queen_interval2, self.queen_interval3 )
-			self.queen_intro_sequence.start()
-
-			self.queen_model.reparentTo(self.render)
-			self.queen = Enemy( self.queen_position, 1 )
-			self.gridspace_list[self.queen_position].set_occupiable(False)
-                        self.enemy_list = [self.queen]
-                        self.__number_enemies_alive = 1
+                        #self.enemy_list = [self.queen]
+                        #self.__number_enemies_alive = 1
                         
+			self.combat_hide_all()
+			self.setup_combat()
                         self.combatHUD.hide()
                         self.hide_text()
                         self.end_turn_button.hide()
@@ -1206,7 +1297,8 @@ class PIRATES(ShowBase):
 
 			self.screen += 1
                         
-                elif self.screen == 5:
+		#QUEEN IS DEAD = 5
+                elif self.screen == 6:
                         if self.__number_enemies_alive < 1:
                                 self.combatHUD.hide()
                                 self.hide_text()
@@ -1234,6 +1326,21 @@ class PIRATES(ShowBase):
 	
 	def set_sonatu_end_turn(self, turn):
 		self.sonatu_end_turn = turn
+	
+	def begin_movie_task(self, task):
+		if self.opening_texture.getTime() == self.opening_texture_time:
+			print "Entered here!"
+			self.opening_texture.stop()
+			self.in_movie = False
+			opening_fadeOut = self.opening.colorScaleInterval(5, Vec4(1, 1, 1, 0))
+			opening_sequence = Sequence( opening_fadeOut )
+			opening_sequence.start()
+			
+			if not opening_sequence.isPlaying():
+				self.opening.remove()
+				self.taskMgr.remove("movie_task")
+
+		return Task.cont
 	
 	def end_turn_task(self, task):
 		if self.sonatu_end_turn:
