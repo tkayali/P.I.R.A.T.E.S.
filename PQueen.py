@@ -4,41 +4,44 @@ class Queen(Unit):
 	"""
 	This class will function as the sea monster queen's class.
 	"""
+	__damage = 0
+	__accuracy = 0
 
 	def __init__(self, _model = None):
-		Unit.__init__(self, 30, 3, 0, 0, 0, True, _model, False, 4)
-	
-	def move(self):
-		#HOLDER METHODS
-		self._pos_x += 1
-		self._pos_y += 1
-		self._pos_z += 1
-		self._AP -= 1
+		Unit.__init__(self, 30, 2, None, True, False, 4)
 
 	def attack(self, range):
 		if range == 1:
-			damage = 10
-			accuracy = .9
+			self.__damage = 10
+			self.__accuracy = 90
 
 		elif range == 2:
-			damage = 6
-			accuracy = .85
+			self.__damage = 6
+			self.__accuracy = 85
 
 		elif range < 5:
-			damage = 4
-			accuracy = .8
+			self.__damage = 4
+			self.__accuracy = 80
 
 		else:
-			#Do absolutely nothing
-			return 1
+			print "What are you doing!?!?!?!\nYou should not see this!!!"
 
-		self._AP -= 2
+		Unit.setAP(self, Unit.getAp()-1)
 
 		print "Damage: " + str(damage) + " Accuracy: " + str(accuracy)
-		return 0
 
 	def end_turn():
-		self.AP = 3
+		Unit.setAP(self, 2)
 
+	def get_damage(self):
+		return self.__damage
 	
+	def set_damage(self, damage):
+		self.__damage = damage
+	
+	def get_accuracy(self):
+		return self.__accuracy
+	
+	def set_accuracy(self, accuracy):
+		self.__accuracy = accuracy
 
