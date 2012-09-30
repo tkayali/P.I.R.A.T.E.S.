@@ -1,1 +1,5 @@
-This is P.I.R.A.T.E.S. readme file -Sorry for the lack of documentation!
+This is the P.I.R.A.T.E.S. readme file
+
+P.I.R.A.T.E.S. is a small turn based strategy video game created by 4 University of Florida students as a school project for the class Theory and Practice of Multimedia Production, CAP 3020. P.I.R.A.T.E.S. holds a special place in all of our hearts and all of us list it as one of, if not, our best and most enlightening experience at the University of Florida.
+
+P.I.R.A.T.E.S. uses Panda3D and Python to make itself work. Feel free to read our code to brush up on Python or see how we did certain things in Panda3D.
